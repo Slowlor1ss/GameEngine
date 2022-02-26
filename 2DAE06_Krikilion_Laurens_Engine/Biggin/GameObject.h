@@ -1,9 +1,5 @@
 #pragma once
-
 #include "Transform.h"
-
-//TODO: maybe remove
-#define TO_STRING( x ) #x
 
 class Component;
 
@@ -13,7 +9,7 @@ namespace dae
 	{
 	public:
 		void Update();
-		void FixedUpdate(float fixedTimeStep);
+		void FixedUpdate();
 		void Render() const;
 
 		void AddComponent(std::shared_ptr<Component> component);
@@ -29,8 +25,8 @@ namespace dae
 		template<typename ComponentType>
 		int RemoveComponents();
 
-		void SetParent(std::shared_ptr<GameObject> parent) { m_Parent = parent; };
-		std::shared_ptr<GameObject> GetParent() const { return m_Parent; };
+		void SetParent(std::weak_ptr<GameObject> parent) { m_Parent = parent; };
+		std::weak_ptr<GameObject> GetParent() const { return m_Parent; };
 
 		size_t GetChildCount() const { return m_Childeren.size(); };
 		std::shared_ptr<GameObject> GetChildAt(unsigned int index) const;
@@ -40,16 +36,17 @@ namespace dae
 
 		void SetPosition(float x, float y);
 
-		GameObject(dae::GameObject* parent = nullptr) : m_Parent(parent) {};
-		virtual ~GameObject() { m_Parent = nullptr; };
+		GameObject(std::shared_ptr<GameObject> parent = nullptr) : m_Parent(parent) {};
+		GameObject(std::weak_ptr<GameObject> parent) : m_Parent(parent) {};
+		virtual ~GameObject() {};
 		GameObject(const GameObject& other) = delete;
-		GameObject(GameObject&& other) = delete;
+		GameObject(GameObject&& other) = delete; 
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 
 	private:
 		Transform m_Transform{};
-		std::shared_ptr<GameObject> m_Parent{nullptr};
+		std::weak_ptr<GameObject> m_Parent{};
 		std::vector<std::shared_ptr<Component>> m_Components;
 		std::vector<std::shared_ptr<GameObject>> m_Childeren;
 	};

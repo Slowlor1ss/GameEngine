@@ -10,11 +10,11 @@ void dae::GameObject::Update()
 	}
 }
 
-void dae::GameObject::FixedUpdate(const float fixedTimeStep)
+void dae::GameObject::FixedUpdate()
 {
 	for (auto &component : m_Components)
 	{
-		component->FixedUpdate(fixedTimeStep);
+		component->FixedUpdate();
 	}
 }
 

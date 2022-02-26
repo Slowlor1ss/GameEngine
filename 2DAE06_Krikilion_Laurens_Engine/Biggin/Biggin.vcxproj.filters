@@ -25,6 +25,9 @@
     <Filter Include="Render">
       <UniqueIdentifier>{456175ad-ab47-473b-b7b9-93558bee6b17}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DearImGui">
+      <UniqueIdentifier>{a28f695d-5212-46cd-aebd-08c0952e00c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigginPCH.h">
@@ -57,9 +60,6 @@
     <ClInclude Include="Scene.h">
       <Filter>SceneGraph</Filter>
     </ClInclude>
-    <ClInclude Include="SceneContext.h">
-      <Filter>SceneGraph</Filter>
-    </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>SceneGraph</Filter>
     </ClInclude>
@@ -87,11 +87,38 @@
     <ClInclude Include="Font.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="TextObject.h">
+    <ClInclude Include="TextComponent.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Component.h">
       <Filter>SceneGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl2.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_sdl.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>DearImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_plot.h">
+      <Filter>DearImGui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -114,9 +141,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SceneManager.cpp">
-      <Filter>SceneGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneContext.cpp">
       <Filter>SceneGraph</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
@@ -146,11 +170,35 @@
     <ClCompile Include="Texture2D.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="TextObject.cpp">
+    <ClCompile Include="TextComponent.cpp">
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Component.cpp">
       <Filter>SceneGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_opengl2.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_sdl.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_plot.cpp">
+      <Filter>DearImGui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

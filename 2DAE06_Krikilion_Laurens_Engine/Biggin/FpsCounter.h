@@ -4,13 +4,13 @@
 namespace dae
 {
 	class Scene;
-	class TextObject;
+	class TextComponent;
 }
 
 class FpsCounter final : public Component
 {
 public:
-	FpsCounter(dae::Scene& scene);
+	FpsCounter(dae::GameObject* go);
 	~FpsCounter() override;
 
 	FpsCounter(const FpsCounter& other) = delete;
@@ -19,11 +19,10 @@ public:
 	FpsCounter& operator=(FpsCounter&& other) = delete;
 
 	void Update() override;
-	void FixedUpdate(float) override {};
+	void FixedUpdate() override {};
 	void Render(dae::Transform sceneTransform) const override;
 
 private:
-	dae::TextObject* m_pFpsText;
-	dae::Scene& m_Scene;
+	std::shared_ptr<dae::TextComponent> m_pFpsText;
 };
 

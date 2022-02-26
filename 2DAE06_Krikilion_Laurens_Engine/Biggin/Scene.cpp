@@ -10,7 +10,7 @@ unsigned int Scene::m_IdCounter = 0;
 
 Scene::Scene(const std::string& name) : m_Name(name)
 {
-	m_SceneContext.GetGameTime()->Start();
+	//m_SceneContext.GetGameTime()->Start();
 }
 
 Scene::~Scene() = default;
@@ -22,7 +22,7 @@ void Scene::Add(const std::shared_ptr<GameObject>& object)
 
 void Scene::Update()
 {
-	m_SceneContext.GetGameTime()->Update();
+	//m_SceneContext.GetGameTime()->Update();
 
 	for(auto& object : m_Objects)
 	{
@@ -30,11 +30,11 @@ void Scene::Update()
 	}
 }
 
-void dae::Scene::FixedUpdate(float fixedTimeStep)
+void dae::Scene::FixedUpdate()
 {
 	for (auto& object : m_Objects)
 	{
-		object->FixedUpdate(fixedTimeStep);
+		object->FixedUpdate();
 	}
 }
 

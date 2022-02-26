@@ -1,22 +1,22 @@
 #pragma once
+#include "GameObject.h"
 
 namespace dae
 {
-	class GameObject;
 	class Transform;
 }
 
-//TODO:: rewrite this
 class Component
 {
-
 public:
-    virtual ~Component() = default;
-    Component() = default;
+    virtual ~Component() { /*SafeDelete(m_pGameObject);*/ };
+    Component(dae::GameObject* go) : m_pGameObject(go) {};
 
     virtual void Update() = 0;
-    virtual void FixedUpdate(float fixedTimeStep) = 0;
+    virtual void FixedUpdate() = 0;
     virtual void Render(dae::Transform sceneTransform) const = 0;
 
+protected:
+    dae::GameObject* m_pGameObject;
 };
 

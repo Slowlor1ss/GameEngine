@@ -1,5 +1,4 @@
 #pragma once
-#include "SceneContext.h"
 #include "SceneManager.h"
 
 namespace dae
@@ -13,10 +12,8 @@ namespace dae
 		void Add(const std::shared_ptr<GameObject>& object);
 
 		void Update();
-		void FixedUpdate(float fixedTimeStep);
+		void FixedUpdate();
 		void Render() const;
-
-		const SceneContext& GetSceneContext() const { return m_SceneContext; }
 
 		~Scene();
 		Scene(const Scene& other) = delete;
@@ -31,8 +28,6 @@ namespace dae
 		std::vector < std::shared_ptr<GameObject>> m_Objects{};
 
 		static unsigned int m_IdCounter;
-
-		SceneContext m_SceneContext{};
 	};
 
 }

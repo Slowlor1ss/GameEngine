@@ -1,13 +1,14 @@
 #pragma once
 #include <chrono>
 
+#include "Singleton.h"
+
 //Based on PhysXFramework
 
-class GameTime
+class GameTime final : public dae::Singleton<GameTime>
 {
 public:
-	GameTime() = default;
-	~GameTime() = default;
+	~GameTime() override = default;
 
 	GameTime(const GameTime& other) = delete;
 	GameTime(GameTime&& other) noexcept = delete;
@@ -17,29 +18,31 @@ public:
 	void Reset();
 	void Update();
 
-	float GetElapsed() const { return  m_ElapsedGameTime; }
+	float GetDeltaT() const { return  m_DeltaTime; }
 	float GetTotal() const { return m_TotalGameTime; }
 	int GetFPS() const { return m_FPS; }
-	void ForceElapsedUpperbound(bool force, float upperBound = 0.03f) { m_ForceElapsedUpperBound = force; m_ElapsedUpperBound = upperBound; }
+	static constexpr float GetFixedTimeStep() { return m_FixedTimeStep; }
 	bool IsRunning() const { return !m_IsPaused; }
 
 	void Start();
 	void Stop();
 
 private:
-	float m_TotalGameTime{};
-	float m_ElapsedGameTime{};
+	GameTime() = default;
+	friend Singleton<GameTime>;
 
-	bool m_ForceElapsedUpperBound{};
-	float m_ElapsedUpperBound{ 0.03f };
+	float m_TotalGameTime{};
+	float m_DeltaTime{};
+
+	static constexpr float m_FixedTimeStep{ 0.02f }; //20ms
 
 	std::chrono::high_resolution_clock::time_point m_BaseTime{};
 	std::chrono::high_resolution_clock::time_point m_StopTime{};
-	std::chrono::high_resolution_clock::time_point m_PrevTime{};
+	std::chrono::high_resolution_clock::time_point m_PrevTime{ std::chrono::steady_clock::now() };
 	std::chrono::high_resolution_clock::time_point m_CurrTime{};
 	std::chrono::high_resolution_clock::duration m_PausedDuration{};
 
-	bool m_IsPaused{ true };
+	bool m_IsPaused{ false };
 
 	int m_FPS{};
 	float m_FpsTimer{};

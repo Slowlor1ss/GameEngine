@@ -4,10 +4,16 @@
 #include "ResourceManager.h"
 #include "Texture2D.h"
 
-Sprite::Sprite(std::string path, dae::Transform transform) : Component()
+Sprite::Sprite(dae::GameObject* go, std::string path, dae::Transform transform) : Component(go)
                                                              , m_Transform(transform)
 {
 	m_Texture = dae::ResourceManager::GetInstance().LoadTexture(path);
+}
+
+Sprite::Sprite(dae::GameObject* go) : Component(go)
+	,m_Transform(dae::Transform())
+	,m_Texture(nullptr)
+{
 }
 
 void Sprite::Render(dae::Transform sceneTransform) const

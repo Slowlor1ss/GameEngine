@@ -7,7 +7,7 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
-#include "TextObject.h"
+#include "TextComponent.h"
 #include "GameObject.h"
 #include "GameTime.h"
 #include "Logger.h"
@@ -45,8 +45,8 @@ void dae::Biggin::Initialize()
 		"Programming 4 assignment",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		640,
-		480,
+		1100, //640
+		600, //480
 		SDL_WINDOW_OPENGL
 	);
 	if (m_Window == nullptr) 
@@ -65,42 +65,51 @@ void dae::Biggin::Initialize()
 void dae::Biggin::LoadGame() const
 {
 	auto& scene = SceneManager::GetInstance().CreateScene("Demo");
-	Logger::GetInstance().LogInfo("Created Demo scene");
 
-	auto TextureGO = std::make_shared<GameObject>();
+	auto Go = std::make_shared<GameObject>();
 
-	TextureGO->AddComponent(std::make_shared<Sprite>("background.jpg"));
-	scene.Add(TextureGO);
-	Logger::GetInstance().LogInfo("Added background to scene");
-
-	TextureGO = std::make_shared<GameObject>();
+	Go->AddComponent(std::make_shared<Sprite>(Go.get(), "background.jpg"));
+	scene.Add(Go);
 
 
 
-	TextureGO->AddComponent(std::make_shared<Sprite>("logo.png"));
-	TextureGO->SetPosition(216, 180);
-	scene.Add(TextureGO);
-	Logger::GetInstance().LogInfo("Added logo to scene");
+	Go = std::make_shared<GameObject>();
 
-	TextureGO = std::make_shared<GameObject>();
-
-
-
-	auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-	auto titleTo = std::make_shared<TextObject>("Programming 4 Assignment", font);
-	titleTo->SetPosition(80, 20);
-	TextureGO->AddComponent(titleTo);
-	scene.Add(TextureGO);
-	Logger::GetInstance().LogInfo("Added Title to scene");
-
-	TextureGO = std::make_shared<GameObject>();
+	Go->AddComponent(std::make_shared<Sprite>(Go.get(), "logo.png"));
+	Go->SetPosition(216, 180);
+	scene.Add(Go);
 
 
 
-	auto fpsTo = std::make_shared<FpsCounter>(scene);
-	TextureGO->AddComponent(fpsTo);
-	scene.Add(TextureGO);
-	Logger::GetInstance().LogInfo("Added FpsCounter to scene");
+	Go = std::make_shared<GameObject>();
+
+	{
+		Go->AddComponent(std::make_shared<Sprite>(Go.get()));
+		scene.Add(Go);
+
+		auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
+		auto titleText = std::make_shared<TextComponent>(Go.get(), "Programming 4 Assignment", font);
+		titleText->SetPosition(80, 20);
+		Go->AddComponent(titleText);
+		scene.Add(Go);
+	}
+
+
+
+	Go = std::make_shared<GameObject>();
+
+	Go->AddComponent(std::make_shared<Sprite>(Go.get()));
+	scene.Add(Go);
+
+	auto fpsText = std::make_shared<TextComponent>(Go.get());
+	fpsText->SetPosition(10, 10);
+	fpsText->SetColor({ 0, 255, 0, 1 });
+	Go->AddComponent(fpsText);
+	scene.Add(Go);
+
+	auto fpsTo = std::make_shared<FpsCounter>(Go.get());
+	Go->AddComponent(fpsTo);
+	scene.Add(Go);
 }
 
 void dae::Biggin::Cleanup()
@@ -124,33 +133,24 @@ void dae::Biggin::Run()
 		auto& renderer = Renderer::GetInstance();
 		auto& sceneManager = SceneManager::GetInstance();
 		auto& input = InputManager::GetInstance();
-
-		// todo: this update loop could use some work.
-		//bool doContinue = true;
-		//while (doContinue)
-		//{
-		//	doContinue = input.ProcessInput();
-		//	sceneManager.Update();
-		//	renderer.Render();
-		//}
-
+		auto& gameTime = GameTime::GetInstance();
 
 		bool doContinue = true;
-		auto lastTime = chrono::high_resolution_clock::now();
+		
 		float lag = 0.0f;
 		while (doContinue)
 		{
-			
-			const auto currentTime = chrono::high_resolution_clock::now();
-			float deltaTime = chrono::duration<float>(currentTime - lastTime).count();
-			lastTime = currentTime;
+			gameTime.Update();
+			const float deltaTime = gameTime.GetDeltaT();
+
 			lag += deltaTime;
 			doContinue = input.ProcessInput();
 			sceneManager.Update();
-			while (lag >= MsPerFrame)
+
+			while (lag >= gameTime.GetFixedTimeStep())
 			{
-				sceneManager.FixedUpdate(m_FixedTimeStep);
-				lag -= m_FixedTimeStep;
+				sceneManager.FixedUpdate();
+				lag -= gameTime.GetFixedTimeStep();
 			}
 			renderer.Render();
 		}

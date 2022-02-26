@@ -55,7 +55,6 @@ private:
 
 	HANDLE m_ConsoleHandle{ nullptr };
 
-	friend class Game;
 	friend Singleton<Logger>;
 };
 
