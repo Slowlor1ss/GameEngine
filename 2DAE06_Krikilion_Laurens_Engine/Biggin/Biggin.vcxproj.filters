@@ -200,5 +200,8 @@
     <ClCompile Include="imgui_plot.cpp">
       <Filter>DearImGui</Filter>
     </ClCompile>
+    <ClCompile Include="ImGuiExercise.hpp">
+      <Filter>DearImGui</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

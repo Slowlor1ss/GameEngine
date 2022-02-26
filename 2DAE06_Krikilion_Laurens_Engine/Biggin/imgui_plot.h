@@ -3,6 +3,10 @@
 //#include <imgui.h>
 #include "imgui.h"
 
+#pragma warning( push )                   
+#pragma warning( disable : 26495 )
+#pragma warning( disable : 26812 )
+
 namespace ImGui {
 // Use this structure to pass the plot data and settings into the Plot function
 struct PlotConfig {
@@ -74,3 +78,5 @@ enum class PlotStatus {
 
 IMGUI_API PlotStatus Plot(const char* label, const PlotConfig& conf);
 }
+
+#pragma warning( pop )  
