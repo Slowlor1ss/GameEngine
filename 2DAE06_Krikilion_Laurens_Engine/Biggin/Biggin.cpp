@@ -140,6 +140,8 @@ void dae::Biggin::Run()
 		float lag = 0.0f;
 		while (doContinue)
 		{
+			//updates things like delta-time fps counter etc
+			//(maybe a bit of a questionable way of doing things but i found it clean to have all of this is one class)
 			gameTime.Update();
 			const float deltaTime = gameTime.GetDeltaT();
 

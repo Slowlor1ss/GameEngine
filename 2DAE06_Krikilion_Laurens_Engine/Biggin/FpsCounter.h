@@ -11,7 +11,7 @@ class FpsCounter final : public Component
 {
 public:
 	FpsCounter(dae::GameObject* go);
-	~FpsCounter() override;
+	~FpsCounter() override = default;
 
 	FpsCounter(const FpsCounter& other) = delete;
 	FpsCounter(FpsCounter&& other) = delete;

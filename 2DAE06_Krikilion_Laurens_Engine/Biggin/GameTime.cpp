@@ -14,49 +14,6 @@ void GameTime::Reset()
 
 void GameTime::Update()
 {
-	//if (m_IsPaused)
-	//{
-	//	m_FPS = 0;
-	//	m_DeltaTime = 0.0f;
-
-	//	//calc time game is running - paused time
-	//	std::chrono::high_resolution_clock::duration baseTillNow{ m_CurrTime - m_BaseTime };
-	//	std::chrono::high_resolution_clock::duration totalGameTime{ baseTillNow - m_PausedDuration };
-	//	m_TotalGameTime = std::chrono::duration<float>(totalGameTime).count();
-
-	//	return;
-	//}
-
-	//m_CurrTime = std::chrono::steady_clock::now();
-
-	//m_DeltaTime = std::chrono::duration<float>(m_CurrTime - m_PrevTime).count();
-
-	//m_PrevTime = m_CurrTime;
-
-	//// avoid neg time
-	//if (m_DeltaTime < 0.0f)
-	//	m_DeltaTime = 0.0f;
-
-	////calc time game is running - paused time
-	//std::chrono::high_resolution_clock::duration baseTillNow{ m_CurrTime - m_BaseTime };
-	//std::chrono::high_resolution_clock::duration totalGameTime{ baseTillNow - m_PausedDuration };
-	//m_TotalGameTime = std::chrono::duration<float>(totalGameTime).count();
-
-	////FPS LOGIC
-	////m_FpsTimer += m_DeltaTime;
-	////++m_FpsCount;
-	////if (m_FpsTimer >= 1.0f)
-	////{
-	////	m_FPS = m_FpsCount;
-	////	m_FpsCount = 0;
-	////	m_FpsTimer -= 1.0f;
-	////}
-
-	//m_FPS = int(1.f / m_DeltaTime);
-	//std::cout << m_FPS << '\n';
-
-
-
 	if (m_IsPaused)
 	{
 		m_FPS = 0;
@@ -80,7 +37,7 @@ void GameTime::Update()
 	if (m_DeltaTime < 0.0f)
 		m_DeltaTime = 0.0f;
 
-	//calc time game is running - pauzed time
+	//calc time game is running - paused time
 	std::chrono::high_resolution_clock::duration baseTillNow{ m_CurrTime - m_BaseTime };
 	std::chrono::high_resolution_clock::duration totalGameTime{ baseTillNow - m_PausedDuration };
 	m_TotalGameTime = std::chrono::duration<float>(totalGameTime).count();
@@ -88,7 +45,8 @@ void GameTime::Update()
 	//FPS LOGIC
 	m_FpsTimer += m_DeltaTime;
 	++m_FpsCount;
-	//Update every second
+
+	//Update every second (looks a bit cleaner)
 	if (m_FpsTimer >= 1.0f)
 	{
 		m_FPS = m_FpsCount;

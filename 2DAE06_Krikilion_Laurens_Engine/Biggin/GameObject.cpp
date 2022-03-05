@@ -37,10 +37,17 @@ bool dae::GameObject::RemoveChild(unsigned int index)
 {
 	if (index > m_Childeren.size())
 	{
+		m_Childeren[index]->SetParent(std::weak_ptr<GameObject>()); //remove parent
 		m_Childeren.erase(m_Childeren.begin() + index);
 		return true;
 	}
 	return false;
+}
+
+void dae::GameObject::AddChild(const std::shared_ptr<GameObject> go)
+{
+	m_Childeren.push_back(go);
+	go->SetParent(shared_from_this());
 }
 
 void dae::GameObject::SetPosition(float x, float y)

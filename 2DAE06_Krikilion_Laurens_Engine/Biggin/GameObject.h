@@ -5,52 +5,62 @@ class Component;
 
 namespace dae
 {
-	class GameObject
+	class GameObject final : public std::enable_shared_from_this<GameObject>
 	{
 	public:
-		void Update();
-		void FixedUpdate();
-		void Render() const;
-
-		void AddComponent(std::shared_ptr<Component> component);
-
-		//partly based on https://stackoverflow.com/questions/44105058/implementing-component-system-from-unity-in-c
-		template<typename ComponentType>
-		std::shared_ptr<ComponentType> GetComponent();
-		template<typename ComponentType>
-		std::vector<std::shared_ptr<ComponentType>> GetComponents();
-
-		template<typename ComponentType>
-		bool RemoveComponent();
-		template<typename ComponentType>
-		int RemoveComponents();
-
-		void SetParent(std::weak_ptr<GameObject> parent) { m_Parent = parent; };
-		std::weak_ptr<GameObject> GetParent() const { return m_Parent; };
-
-		size_t GetChildCount() const { return m_Childeren.size(); };
-		std::shared_ptr<GameObject> GetChildAt(unsigned int index) const;
-		std::vector<std::shared_ptr<GameObject>> GetAllChilderen() const { return m_Childeren; };
-		bool RemoveChild(unsigned int index);
-		void AddChild(const std::shared_ptr<GameObject> go) { m_Childeren.push_back(go); };
-
-		void SetPosition(float x, float y);
-
-		GameObject(std::shared_ptr<GameObject> parent = nullptr) : m_Parent(parent) {};
+		GameObject() : m_Parent(std::weak_ptr<GameObject>()) {};
 		GameObject(std::weak_ptr<GameObject> parent) : m_Parent(parent) {};
-		virtual ~GameObject() {};
+		~GameObject() = default;
+
 		GameObject(const GameObject& other) = delete;
 		GameObject(GameObject&& other) = delete; 
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 
+		void Update();
+		void FixedUpdate();
+		void Render() const;
+
+
+		void										AddComponent(std::shared_ptr<Component> component);
+
+		//partly based on https://stackoverflow.com/questions/44105058/implementing-component-system-from-unity-in-c
+		template<typename ComponentType>
+		std::shared_ptr<ComponentType>				GetComponent();
+		template<typename ComponentType>
+		std::vector<std::shared_ptr<ComponentType>>	GetComponents();
+
+
+		template<typename ComponentType>
+		bool										RemoveComponent();
+		template<typename ComponentType>
+		int											RemoveComponents();
+
+
+		void										SetParent(std::weak_ptr<GameObject> parent) { m_Parent = parent; };
+		std::weak_ptr<GameObject>					GetParent() const { return m_Parent; };
+
+		size_t										GetChildCount() const { return m_Childeren.size(); };
+		std::shared_ptr<GameObject>					GetChildAt(unsigned int index) const;
+		std::vector<std::shared_ptr<GameObject>>	GetAllChilderen() const { return m_Childeren; };
+		bool										RemoveChild(unsigned int index);
+		void										AddChild(const std::shared_ptr<GameObject> go);
+
+		void										SetPosition(float x, float y);
+
+
 	private:
 		Transform m_Transform{};
-		std::weak_ptr<GameObject> m_Parent{};
+		std::weak_ptr<GameObject> m_Parent{ std::weak_ptr<GameObject>() };
 		std::vector<std::shared_ptr<Component>> m_Components;
 		std::vector<std::shared_ptr<GameObject>> m_Childeren;
 	};
 
+	/**
+	 * \brief Gets first added component of type <ComponentType>
+	 * \tparam ComponentType The type of which it will get the component
+	 * \return shared pointer to the found component of type <ComponentType>
+	 */
 	template<typename ComponentType>
 	std::shared_ptr<ComponentType> GameObject::GetComponent()
 	{
@@ -65,6 +75,11 @@ namespace dae
 		return nullptr;
 	}
 
+	/**
+	 * \brief Gets all components of type <ComponentType>
+	 * \tparam ComponentType The type of which it will get all components
+	 * \return A vector with shared pointers to all found components of type <ComponentType>
+	 */
 	template<typename ComponentType>
 	std::vector<std::shared_ptr<ComponentType>> GameObject::GetComponents()
 	{
@@ -79,6 +94,11 @@ namespace dae
 		return componentsOfType;
 	}
 
+	/**
+	 * \brief deletes the first component of <ComponentType>
+	 * \tparam ComponentType The type of which this function will delete the first components of
+	 * \return Whether or not the operation succeeded
+	 */
 	template<typename ComponentType>
 	bool GameObject::RemoveComponent()
 	{
@@ -100,6 +120,11 @@ namespace dae
 		return success;
 	}
 
+	/**
+	 * \brief Deletes all components of type <ComponentType>
+	 * \tparam ComponentType The type of which this function will delete all components of
+	 * \return Amount of deleted items
+	 */
 	template<typename ComponentType>
 	int GameObject::RemoveComponents()
 	{
