@@ -18,11 +18,19 @@ void dae::SceneManager::FixedUpdate()
 	}
 }
 
-void dae::SceneManager::Render()
+void dae::SceneManager::Render() const
 {
 	for (const auto& scene : m_Scenes)
 	{
 		scene->Render();
+	}
+}
+
+void dae::SceneManager::RenderUi()
+{
+	for (const auto& scene : m_Scenes)
+	{
+		scene->RenderUi();
 	}
 }
 

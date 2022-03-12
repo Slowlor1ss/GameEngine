@@ -15,6 +15,7 @@
 #include "GameObject.h"
 #include "Sprite.h"
 #include "Texture2D.h"
+#include "TrashTheCache.h"
 #include "Utils.hpp"
 
 using namespace std;
@@ -68,14 +69,14 @@ void dae::Biggin::LoadGame() const
 
 	auto Go = std::make_shared<GameObject>();
 
-	Go->AddComponent(std::make_shared<Sprite>(Go.get(), "background.jpg"));
+	Go->AddComponent(std::make_shared<RenderComponent>(Go.get(), "background.jpg"));
 	scene.Add(Go);
 
 
 
 	Go = std::make_shared<GameObject>();
 
-	Go->AddComponent(std::make_shared<Sprite>(Go.get(), "logo.png"));
+	Go->AddComponent(std::make_shared<RenderComponent>(Go.get(), "logo.png"));
 	Go->SetPosition(216, 180);
 	scene.Add(Go);
 
@@ -84,12 +85,12 @@ void dae::Biggin::LoadGame() const
 	Go = std::make_shared<GameObject>();
 
 	{
-		Go->AddComponent(std::make_shared<Sprite>(Go.get()));
+		Go->AddComponent(std::make_shared<RenderComponent>(Go.get()));
 		scene.Add(Go);
 
 		auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 		auto titleText = std::make_shared<TextComponent>(Go.get(), "Programming 4 Assignment", font);
-		titleText->SetPosition(80, 20);
+		Go->SetPosition(80, 20);
 		Go->AddComponent(titleText);
 		scene.Add(Go);
 	}
@@ -98,11 +99,11 @@ void dae::Biggin::LoadGame() const
 
 	Go = std::make_shared<GameObject>();
 
-	Go->AddComponent(std::make_shared<Sprite>(Go.get()));
+	Go->AddComponent(std::make_shared<RenderComponent>(Go.get()));
 	scene.Add(Go);
 
 	auto fpsText = std::make_shared<TextComponent>(Go.get());
-	fpsText->SetPosition(10, 10);
+	Go->SetPosition(10, 10);
 	fpsText->SetColor({ 0, 255, 0, 1 });
 	Go->AddComponent(fpsText);
 	scene.Add(Go);
@@ -110,6 +111,13 @@ void dae::Biggin::LoadGame() const
 	auto fpsTo = std::make_shared<FpsCounter>(Go.get());
 	Go->AddComponent(fpsTo);
 	scene.Add(Go);
+
+	//Add trash the cache
+	Go = std::make_shared<GameObject>();
+
+	Go->AddComponent(std::make_shared<TrashTheCache>(Go.get()));
+	scene.Add(Go);
+
 }
 
 void dae::Biggin::Cleanup()

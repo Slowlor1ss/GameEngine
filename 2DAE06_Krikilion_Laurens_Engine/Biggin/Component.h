@@ -1,14 +1,15 @@
 #pragma once
-#include "GameObject.h"
 
 namespace dae
 {
+	class GameObject;
 	class Transform;
 }
 
 class Component
 {
 public:
+    //TODO: maybe not public
     Component(dae::GameObject* go) : m_pGameObject(go) {};
     virtual ~Component() = default;
 
@@ -17,11 +18,14 @@ public:
     Component& operator=(const Component& other) = delete;
     Component& operator=(Component&& other) noexcept = delete;
 
+    virtual void Start() = 0;
     virtual void Update() = 0;
     virtual void FixedUpdate() = 0;
-    virtual void Render(dae::Transform sceneTransform) const = 0;
+    virtual void Render() const = 0;
+    virtual void RenderUi() = 0;
 
 protected:
+    //TODO: make it private and make a protected getter function!
     dae::GameObject* m_pGameObject;
 };
 

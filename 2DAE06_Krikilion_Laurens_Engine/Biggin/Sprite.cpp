@@ -1,22 +1,24 @@
 #include "BigginPCH.h"
 #include "Sprite.h"
-
+#include "GameObject.h"
 #include "ResourceManager.h"
 #include "Texture2D.h"
 
-Sprite::Sprite(dae::GameObject* go, std::string path, dae::Transform transform) : Component(go)
-                                                             , m_Transform(transform)
+using namespace dae;
+
+RenderComponent::RenderComponent(dae::GameObject* go, std::string path) : Component(go)
+	, m_Transform(go->GetTransform())
 {
-	m_Texture = dae::ResourceManager::GetInstance().LoadTexture(path);
+	m_Texture = ResourceManager::GetInstance().LoadTexture(path);
 }
 
-Sprite::Sprite(dae::GameObject* go) : Component(go)
-	,m_Transform(dae::Transform())
+RenderComponent::RenderComponent(dae::GameObject* go) : Component(go)
+	,m_Transform(go->GetTransform())
 	,m_Texture(nullptr)
 {
 }
 
-void Sprite::Render(dae::Transform sceneTransform) const
+void RenderComponent::Render() const
 {
-	m_Texture.get()->Render(sceneTransform, m_Transform);
+	m_Texture.get()->Render(m_Transform);
 }

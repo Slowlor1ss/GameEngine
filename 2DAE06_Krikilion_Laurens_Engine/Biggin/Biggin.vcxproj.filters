@@ -28,6 +28,9 @@
     <Filter Include="DearImGui">
       <UniqueIdentifier>{a28f695d-5212-46cd-aebd-08c0952e00c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ui">
+      <UniqueIdentifier>{a5222281-87e7-4b4c-b0bc-75186e13b445}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigginPCH.h">
@@ -120,6 +123,9 @@
     <ClInclude Include="imgui_plot.h">
       <Filter>DearImGui</Filter>
     </ClInclude>
+    <ClInclude Include="TrashTheCache.h">
+      <Filter>Ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -200,8 +206,8 @@
     <ClCompile Include="imgui_plot.cpp">
       <Filter>DearImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiExercise.hpp">
-      <Filter>DearImGui</Filter>
+    <ClCompile Include="TrashTheCache.cpp">
+      <Filter>Ui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

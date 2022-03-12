@@ -6,7 +6,6 @@
 #include "imgui_impl_sdl.h"
 #include "SceneManager.h"
 #include "Texture2D.h"
-#include "ImGuiExercise.hpp"
 
 int GetOpenGLDriverIndex()
 {
@@ -48,8 +47,7 @@ void dae::Renderer::Render() const
 	ImGui_ImplSDL2_NewFrame(m_Window);
 	ImGui::NewFrame();
 	//ImGui::ShowDemoWindow();
-	Exercise1();
-	Exercise2();
+	SceneManager::GetInstance().RenderUi();
 	ImGui::Render();
 	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 

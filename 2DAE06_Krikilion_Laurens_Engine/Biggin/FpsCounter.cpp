@@ -1,6 +1,6 @@
 #include "BigginPCH.h"
 #include "FpsCounter.h"
-
+#include "GameObject.h"
 #include "GameTime.h"
 #include "Scene.h"
 #include "TextComponent.h"
@@ -15,7 +15,6 @@ void FpsCounter::Update()
     m_pFpsText->SetText(std::to_string(GameTime::GetInstance().GetFPS()));
 }
 
-void FpsCounter::Render(dae::Transform ) const
+void FpsCounter::Render() const
 {
-    //m_pFpsText->Render(sceneTransform);
 }

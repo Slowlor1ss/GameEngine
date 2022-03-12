@@ -22,8 +22,6 @@ void Scene::Add(const std::shared_ptr<GameObject>& object)
 
 void Scene::Update()
 {
-	//m_SceneContext.GetGameTime()->Update();
-
 	for(auto& object : m_Objects)
 	{
 		object->Update();
@@ -43,6 +41,14 @@ void Scene::Render() const
 	for (const auto& object : m_Objects)
 	{
 		object->Render();
+	}
+}
+
+void Scene::RenderUi()
+{
+	for (const auto& object : m_Objects)
+	{
+		object->RenderUi();
 	}
 }
 

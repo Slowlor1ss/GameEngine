@@ -19,7 +19,7 @@ namespace dae
 		Texture2D & operator= (const Texture2D &) = delete;
 		Texture2D & operator= (const Texture2D &&) = delete;
 
-		void Render(Transform sceneTransform, Transform transform) const;
+		void Render(const Transform* transform) const;
 
 	private:
 		SDL_Texture* m_Texture;

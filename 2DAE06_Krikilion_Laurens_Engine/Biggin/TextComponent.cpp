@@ -24,7 +24,7 @@ dae::TextComponent::TextComponent(dae::GameObject* go, const std::string& text, 
 	}
 	SDL_FreeSurface(surf);
 
-	m_TextTexture = go->GetComponent<Sprite>();
+	m_TextTexture = go->GetComponent<RenderComponent>();
 	if (m_TextTexture == nullptr)
 	{
 		Logger::GetInstance().LogWarning("Could't find a Sprite did you forget to add a spritecomponent");
@@ -63,14 +63,8 @@ void dae::TextComponent::FixedUpdate()
 {
 }
 
-void dae::TextComponent::Render(Transform ) const
+void dae::TextComponent::Render() const
 {
-	//if (m_TextTexture != nullptr)
-	//{
-	//	const auto& pos = m_Transform.GetPosition();
-	//	const auto& scenePos = sceneTransform.GetPosition();
-	//	Renderer::GetInstance().RenderTexture(*m_TextTexture, pos.x + scenePos.x, pos.y + scenePos.y);
-	//}
 }
 
 // This implementation uses the "dirty flag" pattern
@@ -83,11 +77,6 @@ void dae::TextComponent::SetText(const std::string& text)
 void dae::TextComponent::SetColor(const SDL_Color& color)
 {
 	m_Color = color;
-}
-
-void dae::TextComponent::SetPosition(const float x, const float y)
-{
-	m_TextTexture->SetPos(x, y, 0.0f);
 }
 
 

@@ -18,9 +18,11 @@ public:
 	FpsCounter& operator=(const FpsCounter& other) = delete;
 	FpsCounter& operator=(FpsCounter&& other) = delete;
 
+	void Start() override {};
 	void Update() override;
 	void FixedUpdate() override {};
-	void Render(dae::Transform sceneTransform) const override;
+	void Render() const override;
+	void RenderUi() override {};
 
 private:
 	std::shared_ptr<dae::TextComponent> m_pFpsText;

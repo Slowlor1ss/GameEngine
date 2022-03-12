@@ -1,15 +1,16 @@
 #pragma once
-#include "Transform.h"
 
 class Component;
 
 namespace dae
 {
+	class Transform;
+
 	class GameObject final : public std::enable_shared_from_this<GameObject>
 	{
 	public:
-		GameObject() : m_Parent(std::weak_ptr<GameObject>()) {};
-		GameObject(std::weak_ptr<GameObject> parent) : m_Parent(parent) {};
+		GameObject();
+		GameObject(std::weak_ptr<GameObject> parent) { SetParent(parent); };
 		~GameObject() = default;
 
 		GameObject(const GameObject& other) = delete;
@@ -20,6 +21,7 @@ namespace dae
 		void Update();
 		void FixedUpdate();
 		void Render() const;
+		void RenderUi();
 
 
 		void										AddComponent(std::shared_ptr<Component> component);
@@ -36,23 +38,30 @@ namespace dae
 		template<typename ComponentType>
 		int											RemoveComponents();
 
-
-		void										SetParent(std::weak_ptr<GameObject> parent) { m_Parent = parent; };
+		//TODO: for all children set transform relative to the transform of the parent
+		void										SetParent(std::weak_ptr<GameObject> parent); //TODO: all children should have this as parent one the new parent is set also check if parent is not itself
 		std::weak_ptr<GameObject>					GetParent() const { return m_Parent; };
 
 		size_t										GetChildCount() const { return m_Childeren.size(); };
 		std::shared_ptr<GameObject>					GetChildAt(unsigned int index) const;
-		std::vector<std::shared_ptr<GameObject>>	GetAllChilderen() const { return m_Childeren; };
-		bool										RemoveChild(unsigned int index);
-		void										AddChild(const std::shared_ptr<GameObject> go);
-
+		std::vector<std::shared_ptr<GameObject>>	GetAllChilderen() const { return m_Childeren; }; //TODO: keep it private
 		void										SetPosition(float x, float y);
+		void										SetTransform(Transform* transform) { m_Transform = transform; };
+		const Transform*							GetTransform() const { return m_Transform; };
 
 
 	private:
-		Transform m_Transform{};
+		//TODO: maybe make them private
+		//TODO: remove yourself as parent, remove form childeren list update transform etc
+		bool										RemoveChild(unsigned int index);
+		bool										RemoveChild(const std::shared_ptr<GameObject> go);
+		//TODO: set parent, update transform rot and scale, if already parented remove that parent and change it to this parent
+		void										AddChild(const std::shared_ptr<GameObject> go);//TODO: first check if the child already has a parent and if it does remove that parent from the child maybe also check if child is already in there
+
+		//Allows "caching" of the transform component to we don't have to find it in the components list every time
+		Transform* m_Transform{ nullptr };
 		std::weak_ptr<GameObject> m_Parent{ std::weak_ptr<GameObject>() };
-		std::vector<std::shared_ptr<Component>> m_Components;
+		std::vector<std::shared_ptr<Component>> m_Components; //TODO: maybe make these raw ptrs
 		std::vector<std::shared_ptr<GameObject>> m_Childeren;
 	};
 

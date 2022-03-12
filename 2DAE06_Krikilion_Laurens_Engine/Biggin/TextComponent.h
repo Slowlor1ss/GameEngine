@@ -1,15 +1,12 @@
 #pragma once
 #include "Component.h"
-#include "GameObject.h"
-#include "GameObject.h"
-#include "Transform.h"
-
-class Sprite;
 
 namespace dae
 {
+	class RenderComponent;
 	class Font;
 	class Texture2D;
+
 	class TextComponent final : public Component
 	{
 	public:
@@ -22,20 +19,20 @@ namespace dae
 		TextComponent& operator=(const TextComponent& other) = delete;
 		TextComponent& operator=(TextComponent&& other) = delete;
 
+		void Start() override {};
 		void Update() override;
 		void FixedUpdate() override;
-		void Render(Transform sceneTransform) const override;
+		void Render() const override;
+		void RenderUi() override {};
 
 		void SetText(const std::string& text);
 		void SetColor(const SDL_Color& color);
-		void SetPosition(float x, float y);
 
 	private:
 		bool m_NeedsUpdate;
 		std::string m_Text;
 		SDL_Color m_Color{255,255,255,1};
-		//Transform m_Transform;
 		std::shared_ptr<Font> m_Font{nullptr};
-		std::shared_ptr<Sprite> m_TextTexture{nullptr};
+		std::shared_ptr<RenderComponent> m_TextTexture{nullptr};
 	};
 }

@@ -73,7 +73,22 @@ namespace utils {
     // End Array Functions
     //
 
-    
+    //https://stackoverflow.com/questions/12301916/equality-compare-stdweak-ptr
+    //note that this is not consistent with shared_ptr::operator==
+    //because that compares the object pointers,
+    //and two shared pointers with the same control block can point to different objects
+    //TODO: more complex than i thought should give it a better look when i have more time
+    template <typename T, typename U>
+    inline bool equals(const std::weak_ptr<T>& t, const std::weak_ptr<U>& u)
+    {
+        return !t.owner_before(u) && !u.owner_before(t);
+    }
+
+    template <typename T, typename U>
+    inline bool equals(const std::weak_ptr<T>& t, const std::shared_ptr<U>& u)
+    {
+        return !t.owner_before(u) && !u.owner_before(t);
+    }
 
 
 
