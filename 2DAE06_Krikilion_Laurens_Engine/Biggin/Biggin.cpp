@@ -33,7 +33,7 @@ void PrintSDLVersion()
 		linked.major, linked.minor, linked.patch);
 }
 
-void dae::Biggin::Initialize()
+void biggin::Biggin::Initialize()
 {
 	PrintSDLVersion();
 	
@@ -63,7 +63,7 @@ void dae::Biggin::Initialize()
 /**
  * Code constructing the scene world starts here
  */
-void dae::Biggin::LoadGame() const
+void biggin::Biggin::LoadGame() const
 {
 	auto& scene = SceneManager::GetInstance().CreateScene("Demo");
 
@@ -77,7 +77,7 @@ void dae::Biggin::LoadGame() const
 	Go = std::make_shared<GameObject>();
 
 	Go->AddComponent(std::make_shared<RenderComponent>(Go.get(), "logo.png"));
-	Go->SetPosition(216, 180);
+	Go->SetLocalPosition(216, 180);
 	scene.Add(Go);
 
 
@@ -90,7 +90,7 @@ void dae::Biggin::LoadGame() const
 
 		auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 		auto titleText = std::make_shared<TextComponent>(Go.get(), "Programming 4 Assignment", font);
-		Go->SetPosition(80, 20);
+		Go->SetLocalPosition(80, 20);
 		Go->AddComponent(titleText);
 		scene.Add(Go);
 	}
@@ -103,7 +103,7 @@ void dae::Biggin::LoadGame() const
 	scene.Add(Go);
 
 	auto fpsText = std::make_shared<TextComponent>(Go.get());
-	Go->SetPosition(10, 10);
+	Go->SetLocalPosition(10, 10);
 	fpsText->SetColor({ 0, 255, 0, 1 });
 	Go->AddComponent(fpsText);
 	scene.Add(Go);
@@ -120,7 +120,7 @@ void dae::Biggin::LoadGame() const
 
 }
 
-void dae::Biggin::Cleanup()
+void biggin::Biggin::Cleanup()
 {
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(m_Window);
@@ -128,7 +128,7 @@ void dae::Biggin::Cleanup()
 	SDL_Quit();
 }
 
-void dae::Biggin::Run()
+void biggin::Biggin::Run()
 {
 	Initialize();
 

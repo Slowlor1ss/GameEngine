@@ -31,6 +31,9 @@
     <Filter Include="Ui">
       <UniqueIdentifier>{a5222281-87e7-4b4c-b0bc-75186e13b445}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Characters">
+      <UniqueIdentifier>{6073ca2f-2800-4bf2-be94-54874776c080}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigginPCH.h">
@@ -126,6 +129,24 @@
     <ClInclude Include="TrashTheCache.h">
       <Filter>Ui</Filter>
     </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PeterPepper.h">
+      <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Observer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthVisualizationComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Subject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -208,6 +229,24 @@
     </ClCompile>
     <ClCompile Include="TrashTheCache.cpp">
       <Filter>Ui</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PeterPepper.cpp">
+      <Filter>Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="HealthComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Observer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HealthVisualizationComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Subject.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,9 +1,8 @@
 #pragma once
 
-class Component;
-
-namespace dae
+namespace biggin
 {
+	class Component;
 	class Transform;
 
 	class GameObject final : public std::enable_shared_from_this<GameObject>
@@ -39,15 +38,24 @@ namespace dae
 		int											RemoveComponents();
 
 		//TODO: for all children set transform relative to the transform of the parent
-		void										SetParent(std::weak_ptr<GameObject> parent); //TODO: all children should have this as parent one the new parent is set also check if parent is not itself
+		void										SetParent(std::weak_ptr<GameObject> parent, bool keepWorldPos = true); //TODO: all children should have this as parent one the new parent is set also check if parent is not itself
 		std::weak_ptr<GameObject>					GetParent() const { return m_Parent; };
 
 		size_t										GetChildCount() const { return m_Childeren.size(); };
 		std::shared_ptr<GameObject>					GetChildAt(unsigned int index) const;
 		std::vector<std::shared_ptr<GameObject>>	GetAllChilderen() const { return m_Childeren; }; //TODO: keep it private
-		void										SetPosition(float x, float y);
+
+
 		void										SetTransform(Transform* transform) { m_Transform = transform; };
-		const Transform*							GetTransform() const { return m_Transform; };
+		const Transform*							GetTransform();
+
+		void										SetLocalPosition(float x, float y);
+		void										SetLocalPosition(const glm::vec3& pos);
+		const glm::vec3&							GetLocalPosition();
+
+		const glm::vec3&							GetWorldPosition();
+
+		void										SetPositionDirty() { m_PositionDirty = true; };
 
 
 	private:
@@ -58,11 +66,15 @@ namespace dae
 		//TODO: set parent, update transform rot and scale, if already parented remove that parent and change it to this parent
 		void										AddChild(const std::shared_ptr<GameObject> go);//TODO: first check if the child already has a parent and if it does remove that parent from the child maybe also check if child is already in there
 
+		void										UpdateWorldPosition();
+
 		//Allows "caching" of the transform component to we don't have to find it in the components list every time
 		Transform* m_Transform{ nullptr };
 		std::weak_ptr<GameObject> m_Parent{ std::weak_ptr<GameObject>() };
 		std::vector<std::shared_ptr<Component>> m_Components; //TODO: maybe make these raw ptrs
 		std::vector<std::shared_ptr<GameObject>> m_Childeren;
+
+		bool m_PositionDirty{false};
 	};
 
 	/**
@@ -124,7 +136,7 @@ namespace dae
 		bool success = index != m_Components.end();
 
 		if (success)
-			m_Components.erase(index);
+			m_Components.erase(index); //TODO: if we use raw pointers later we should also delete the object here
 
 		return success;
 	}
