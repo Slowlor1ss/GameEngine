@@ -12,12 +12,8 @@ namespace character
 	{
 	public:
 		PeterPepper(biggin::GameObject* go);
-		
-		void Start() override {};
+
 		void Update() override;
-		void FixedUpdate() override {};
-		void Render() const override {};
-		void RenderUi() override {};
 
 		void Damage();
 

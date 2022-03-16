@@ -17,11 +17,7 @@ public:
 	FpsCounter& operator=(const FpsCounter& other) = delete;
 	FpsCounter& operator=(FpsCounter&& other) = delete;
 
-	void Start() override {};
 	void Update() override;
-	void FixedUpdate() override {};
-	void Render() const override;
-	void RenderUi() override {};
 
 private:
 	std::shared_ptr<biggin::TextComponent> m_pFpsText;

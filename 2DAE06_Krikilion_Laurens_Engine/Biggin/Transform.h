@@ -25,12 +25,6 @@ namespace biggin
 		void SetWorldPosition(glm::vec3 pos);
 		void TranslateWorldPosition(glm::vec3 pos);
 
-		void Start() override {};
-		void Update() override {};
-		void FixedUpdate() override {};
-		void Render() const override {};
-		void RenderUi() override {};
-
 	private:
 		glm::vec3 m_WorldPosition{};
 		glm::vec3 m_LocalPosition{};

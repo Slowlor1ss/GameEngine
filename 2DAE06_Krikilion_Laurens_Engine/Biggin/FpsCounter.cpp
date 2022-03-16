@@ -16,7 +16,3 @@ void FpsCounter::Update()
 {
     m_pFpsText->SetText(std::to_string(GameTime::GetInstance().GetFPS()));
 }
-
-void FpsCounter::Render() const
-{
-}

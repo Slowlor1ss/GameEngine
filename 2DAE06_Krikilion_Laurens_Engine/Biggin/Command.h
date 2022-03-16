@@ -1,5 +1,11 @@
 #pragma once
 #include <iostream>
+#include "PeterPepper.h"
+
+namespace character
+{
+	class PeterPepper;
+}
 
 class Command
 {
@@ -32,3 +38,11 @@ public:
 	void execute() override { std::cout << "fart"; }
 };
 
+class DamagePlayer final : public Command
+{
+public:
+	DamagePlayer(std::shared_ptr<character::PeterPepper> player) : m_Player(player) {}
+	void execute() override { m_Player->Damage(); }
+private:
+	std::shared_ptr<character::PeterPepper> m_Player;
+};

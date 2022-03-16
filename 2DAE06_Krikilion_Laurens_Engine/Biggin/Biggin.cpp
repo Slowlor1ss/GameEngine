@@ -1,6 +1,7 @@
 #include "BigginPCH.h"
 #include "Biggin.h"
 #include <thread>
+#include "Command.h"
 
 #include "FpsCounter.h"
 #include "InputManager.h"
@@ -13,7 +14,11 @@
 #include "Logger.h"
 #include "Scene.h"
 #include "GameObject.h"
+#include "HealthComponent.h"
+#include "HealthVisualizationComponent.h"
+#include "PeterPepper.h"
 #include "Sprite.h"
+#include "Subject.h"
 #include "Texture2D.h"
 #include "TrashTheCache.h"
 #include "Utils.hpp"
@@ -35,6 +40,9 @@ void PrintSDLVersion()
 
 void biggin::Biggin::Initialize()
 {
+	//seeding rand
+	srand(static_cast<unsigned>(time(nullptr)));
+
 	PrintSDLVersion();
 	
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
@@ -66,58 +74,72 @@ void biggin::Biggin::Initialize()
 void biggin::Biggin::LoadGame() const
 {
 	auto& scene = SceneManager::GetInstance().CreateScene("Demo");
+	const auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 
-	auto Go = std::make_shared<GameObject>();
-
-	Go->AddComponent(std::make_shared<RenderComponent>(Go.get(), "background.jpg"));
-	scene.Add(Go);
-
-
-
-	Go = std::make_shared<GameObject>();
-
-	Go->AddComponent(std::make_shared<RenderComponent>(Go.get(), "logo.png"));
-	Go->SetLocalPosition(216, 180);
-	scene.Add(Go);
+	//auto go = std::make_shared<GameObject>();
+	//
+	//go->AddComponent(std::make_shared<RenderComponent>(go.get(), "background.jpg"));
+	//scene.Add(go);
 
 
+	//Add logo
+	auto logoObject = std::make_shared<GameObject>();
 
-	Go = std::make_shared<GameObject>();
-
-	{
-		Go->AddComponent(std::make_shared<RenderComponent>(Go.get()));
-		scene.Add(Go);
-
-		auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-		auto titleText = std::make_shared<TextComponent>(Go.get(), "Programming 4 Assignment", font);
-		Go->SetLocalPosition(80, 20);
-		Go->AddComponent(titleText);
-		scene.Add(Go);
-	}
+	logoObject->AddComponent(std::make_shared<RenderComponent>(logoObject.get(), "logo.png"));
+	logoObject->SetLocalPosition(216, 180);
+	scene.Add(logoObject);
 
 
+	//Add Title
+	auto titleObject = std::make_shared<GameObject>();
 
-	Go = std::make_shared<GameObject>();
+	titleObject->AddComponent(std::make_shared<RenderComponent>(titleObject.get()));
+	auto titleText = std::make_shared<TextComponent>(titleObject.get(), "Programming 4 Assignment", font);
+	titleObject->SetLocalPosition(80, 20);
+	titleObject->AddComponent(titleText);
+	scene.Add(titleObject);
 
-	Go->AddComponent(std::make_shared<RenderComponent>(Go.get()));
-	scene.Add(Go);
 
-	auto fpsText = std::make_shared<TextComponent>(Go.get());
-	Go->SetLocalPosition(10, 10);
+	//Add Fps
+	auto fpsObject = std::make_shared<GameObject>();
+
+	fpsObject->AddComponent(std::make_shared<RenderComponent>(fpsObject.get()));
+	auto fpsText = std::make_shared<TextComponent>(fpsObject.get());
 	fpsText->SetColor({ 0, 255, 0, 1 });
-	Go->AddComponent(fpsText);
-	scene.Add(Go);
+	fpsObject->AddComponent(fpsText);
+	fpsObject->AddComponent(std::make_shared<FpsCounter>(fpsObject.get()));
+	fpsObject->SetLocalPosition(10, 10);
+	scene.Add(fpsObject);
 
-	auto fpsTo = std::make_shared<FpsCounter>(Go.get());
-	Go->AddComponent(fpsTo);
-	scene.Add(Go);
 
-	//Add trash the cache
-	Go = std::make_shared<GameObject>();
 
-	Go->AddComponent(std::make_shared<TrashTheCache>(Go.get()));
-	scene.Add(Go);
+	////Add trash the cache
+	//go = std::make_shared<GameObject>();
+	//
+	//go->AddComponent(std::make_shared<TrashTheCache>(go.get()));
+	//scene.Add(go);
 
+
+	//Add Health
+	auto HealthVisualsObject = std::make_shared<GameObject>();
+
+	HealthVisualsObject->AddComponent(std::make_shared<RenderComponent>(fpsObject.get()));
+	HealthVisualsObject->AddComponent( std::make_shared<TextComponent>(fpsObject.get()));
+	HealthVisualsObject->AddComponent(std::make_shared<HealthVisualizationComponent>(fpsObject.get()));
+	HealthVisualsObject->SetLocalPosition(80, 20);
+	scene.Add(HealthVisualsObject);
+
+	//Add Player
+	auto playerObject = std::make_shared<GameObject>();
+
+	playerObject->AddComponent(std::make_shared<Subject>(fpsObject.get()));
+	playerObject->AddComponent(std::make_shared<HealthComponent>(fpsObject.get()));
+	auto peterPepper = std::make_shared<character::PeterPepper>(fpsObject.get());
+	playerObject->AddComponent(peterPepper);
+	scene.Add(playerObject);
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonA }, std::make_unique<DamagePlayer>(peterPepper));
+
+	HealthVisualsObject->SetParent(playerObject);
 }
 
 void biggin::Biggin::Cleanup()
@@ -155,6 +177,7 @@ void biggin::Biggin::Run()
 
 			lag += deltaTime;
 			doContinue = input.ProcessInput();
+			input.HandleInput();
 			sceneManager.Update();
 
 			while (lag >= gameTime.GetFixedTimeStep())

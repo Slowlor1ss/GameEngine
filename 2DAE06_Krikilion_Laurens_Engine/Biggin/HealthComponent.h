@@ -3,23 +3,20 @@
 
 namespace biggin
 {
+	class Subject;
+
 	class HealthComponent final : public biggin::Component
 	{
 	public:
 		HealthComponent(biggin::GameObject* go, int initialLives = 4);
 
-		void Start() override {};
-		void Update() override {};
-		void FixedUpdate() override {};
-		void Render() const override {};
-		void RenderUi() override {};
-
 		int GetLives() const;
+		void Damage();
 
 	private:
 		int m_LivesLeft;
 
-		SubjectComponent* m_pBroadcasterRef;
+		std::shared_ptr<Subject> m_pNotifier;
 	};
 }
 
