@@ -5,9 +5,11 @@
 #include "Scene.h"
 #include "TextComponent.h"
 
-FpsCounter::FpsCounter(dae::GameObject* go) : Component(go)
+using namespace biggin;
+
+FpsCounter::FpsCounter(biggin::GameObject* go) : Component(go)
 {
-    m_pFpsText = m_pGameObject->GetComponent<dae::TextComponent>();
+    m_pFpsText = go->GetComponent<biggin::TextComponent>();
 }
 
 void FpsCounter::Update()

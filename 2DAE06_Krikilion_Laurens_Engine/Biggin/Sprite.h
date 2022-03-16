@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 
-namespace dae
+namespace biggin
 {
 	class Texture2D;
 	class Transform;
@@ -9,8 +9,8 @@ namespace dae
 	class RenderComponent : public Component
 	{
 	public:
-		RenderComponent(dae::GameObject* go, std::string path);
-		RenderComponent(dae::GameObject* go);
+		RenderComponent(biggin::GameObject* go, std::string path, const glm::vec2& offset = { 0, 0 });
+		RenderComponent(biggin::GameObject* go);
 
 		void Start() override {};
 		void Update() override {};
@@ -18,11 +18,14 @@ namespace dae
 		void Render() const override;
 		void RenderUi() override {};
 
-		void SetTexture(std::shared_ptr<dae::Texture2D> texture) { m_Texture = texture; }
+		void RenderWithOffset(const glm::vec2& Offset) const;
+		void SetTexture(std::shared_ptr<biggin::Texture2D> texture) { m_pTexture = texture; }
 
 	private:
+		glm::vec2 m_Offset;
+		std::shared_ptr<Texture2D> m_pTexture{nullptr};
+
 		const Transform* m_Transform;
-		std::shared_ptr<dae::Texture2D> m_Texture{nullptr};
 	};
 
 }

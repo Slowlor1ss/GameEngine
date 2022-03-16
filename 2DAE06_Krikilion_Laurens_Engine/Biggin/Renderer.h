@@ -1,7 +1,7 @@
 #pragma once
 #include "Singleton.h"
 
-namespace dae
+namespace biggin
 {
 	class Transform;
 	class Texture2D;

@@ -1,16 +1,15 @@
 #pragma once
 #include "Component.h"
 
-namespace dae
+namespace biggin
 {
 	class Scene;
 	class TextComponent;
-}
 
 class FpsCounter final : public Component
 {
 public:
-	FpsCounter(dae::GameObject* go);
+	FpsCounter(biggin::GameObject* go);
 	~FpsCounter() override = default;
 
 	FpsCounter(const FpsCounter& other) = delete;
@@ -25,6 +24,7 @@ public:
 	void RenderUi() override {};
 
 private:
-	std::shared_ptr<dae::TextComponent> m_pFpsText;
+	std::shared_ptr<biggin::TextComponent> m_pFpsText;
 };
 
+}

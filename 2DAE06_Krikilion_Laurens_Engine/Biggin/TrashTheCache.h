@@ -2,7 +2,7 @@
 #include "Component.h"
 #include "Transform.h"
 
-namespace dae
+namespace biggin
 {
 	class TrashTheCache final : public Component
 	{

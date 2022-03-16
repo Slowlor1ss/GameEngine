@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 
-namespace dae
+namespace biggin
 {
 	class RenderComponent;
 	class Font;
@@ -10,8 +10,8 @@ namespace dae
 	class TextComponent final : public Component
 	{
 	public:
-		explicit TextComponent(dae::GameObject* go, const std::string& text, const std::shared_ptr<Font>& font);
-		explicit TextComponent(dae::GameObject* go);
+		explicit TextComponent(biggin::GameObject* go, const std::string& text, const std::shared_ptr<Font>& font);
+		explicit TextComponent(biggin::GameObject* go);
 		~TextComponent() override = default;
 
 		TextComponent(const TextComponent& other) = delete;

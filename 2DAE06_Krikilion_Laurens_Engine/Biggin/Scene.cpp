@@ -4,7 +4,7 @@
 #include "GameTime.h"
 #include "GameObject.h"
 
-using namespace dae;
+using namespace biggin;
 
 unsigned int Scene::m_IdCounter = 0;
 
@@ -28,7 +28,7 @@ void Scene::Update()
 	}
 }
 
-void dae::Scene::FixedUpdate()
+void biggin::Scene::FixedUpdate()
 {
 	for (auto& object : m_Objects)
 	{

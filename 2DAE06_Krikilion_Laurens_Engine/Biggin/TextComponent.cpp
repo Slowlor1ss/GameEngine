@@ -9,7 +9,7 @@
 #include "Sprite.h"
 #include "Texture2D.h"
 
-dae::TextComponent::TextComponent(dae::GameObject* go, const std::string& text, const std::shared_ptr<Font>& font) : Component(go)
+biggin::TextComponent::TextComponent(biggin::GameObject* go, const std::string& text, const std::shared_ptr<Font>& font) : Component(go)
 	, m_NeedsUpdate(true), m_Text(text), m_Font(font)
 {
 	const auto surf = TTF_RenderText_Blended(m_Font->GetFont(), m_Text.c_str(), m_Color);
@@ -36,10 +36,10 @@ dae::TextComponent::TextComponent(dae::GameObject* go, const std::string& text, 
 
 }
 
-dae::TextComponent::TextComponent(dae::GameObject* go) : TextComponent(go, "Default Text", ResourceManager::GetInstance().LoadFont("Lingua.otf", 36))
+biggin::TextComponent::TextComponent(biggin::GameObject* go) : TextComponent(go, "Default Text", ResourceManager::GetInstance().LoadFont("Lingua.otf", 36))
 {}
 
-void dae::TextComponent::Update()
+void biggin::TextComponent::Update()
 {
 	if (m_NeedsUpdate)
 	{
@@ -59,22 +59,22 @@ void dae::TextComponent::Update()
 	}
 }
 
-void dae::TextComponent::FixedUpdate()
+void biggin::TextComponent::FixedUpdate()
 {
 }
 
-void dae::TextComponent::Render() const
+void biggin::TextComponent::Render() const
 {
 }
 
 // This implementation uses the "dirty flag" pattern
-void dae::TextComponent::SetText(const std::string& text)
+void biggin::TextComponent::SetText(const std::string& text)
 {
 	m_Text = text;
 	m_NeedsUpdate = true;
 }
 
-void dae::TextComponent::SetColor(const SDL_Color& color)
+void biggin::TextComponent::SetColor(const SDL_Color& color)
 {
 	m_Color = color;
 }

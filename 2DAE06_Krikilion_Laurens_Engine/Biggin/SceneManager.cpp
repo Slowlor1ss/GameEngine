@@ -2,7 +2,7 @@
 #include "SceneManager.h"
 #include "Scene.h"
 
-void dae::SceneManager::Update()
+void biggin::SceneManager::Update()
 {
 	for(auto& scene : m_Scenes)
 	{
@@ -10,7 +10,7 @@ void dae::SceneManager::Update()
 	}
 }
 
-void dae::SceneManager::FixedUpdate()
+void biggin::SceneManager::FixedUpdate()
 {
 	for (auto& scene : m_Scenes)
 	{
@@ -18,7 +18,7 @@ void dae::SceneManager::FixedUpdate()
 	}
 }
 
-void dae::SceneManager::Render() const
+void biggin::SceneManager::Render() const
 {
 	for (const auto& scene : m_Scenes)
 	{
@@ -26,7 +26,7 @@ void dae::SceneManager::Render() const
 	}
 }
 
-void dae::SceneManager::RenderUi()
+void biggin::SceneManager::RenderUi()
 {
 	for (const auto& scene : m_Scenes)
 	{
@@ -34,7 +34,7 @@ void dae::SceneManager::RenderUi()
 	}
 }
 
-dae::Scene& dae::SceneManager::CreateScene(const std::string& name)
+biggin::Scene& biggin::SceneManager::CreateScene(const std::string& name)
 {
 	const auto& scene = std::shared_ptr<Scene>(new Scene(name));
 	m_Scenes.push_back(scene);

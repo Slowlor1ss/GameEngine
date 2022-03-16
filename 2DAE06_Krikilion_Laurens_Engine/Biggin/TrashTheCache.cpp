@@ -4,7 +4,7 @@
 #include <numeric>
 #include "imgui_plot.h"
 
-using namespace dae;
+using namespace biggin;
 
 void TrashTheCache::RenderUi()
 {

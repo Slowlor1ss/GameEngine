@@ -5,7 +5,7 @@
 
 //Based on PhysXFramework
 
-class GameTime final : public dae::Singleton<GameTime>
+class GameTime final : public biggin::Singleton<GameTime>
 {
 public:
 	~GameTime() override = default;

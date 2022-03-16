@@ -12,7 +12,7 @@ enum class LogLevel
 	ToDo = 0x16
 };
 
-class Logger final : public dae::Singleton<Logger>
+class Logger final : public biggin::Singleton<Logger>
 {
 
 public:
