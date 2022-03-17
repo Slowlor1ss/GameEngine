@@ -20,6 +20,6 @@ namespace character
 	private:
 		bool m_IsDead;
 
-		std::shared_ptr<biggin::HealthComponent> m_pHealth;
+		biggin::HealthComponent* m_pHealth;
 	};
 }

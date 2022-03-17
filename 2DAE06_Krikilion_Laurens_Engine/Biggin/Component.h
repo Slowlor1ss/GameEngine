@@ -13,6 +13,7 @@ namespace biggin
 	    Component& operator=(const Component& other) = delete;
 	    Component& operator=(Component&& other) noexcept = delete;
 
+		virtual void Initialize(GameObject*) {};
 	    virtual void Start() {};
 	    virtual void Update() {};
 	    virtual void FixedUpdate() {};

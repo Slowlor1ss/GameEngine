@@ -18,6 +18,15 @@ Scene::~Scene() = default;
 void Scene::Add(const std::shared_ptr<GameObject>& object)
 {
 	m_Objects.push_back(object);
+	object->Initialize(object.get());
+}
+
+void biggin::Scene::Start()
+{
+	for (auto& object : m_Objects)
+	{
+		object->Start();
+	}
 }
 
 void Scene::Update()

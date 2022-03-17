@@ -147,6 +147,12 @@
     <ClInclude Include="Subject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScoreComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreVisualizationComonent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -246,6 +252,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Subject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreVisualizationComonent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

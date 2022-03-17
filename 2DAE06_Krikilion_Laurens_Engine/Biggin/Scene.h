@@ -11,6 +11,7 @@ namespace biggin
 	public:
 		void Add(const std::shared_ptr<GameObject>& object);
 
+		void Start();
 		void Update();
 		void FixedUpdate();
 		void Render() const;

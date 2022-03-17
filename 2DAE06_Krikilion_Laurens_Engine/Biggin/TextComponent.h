@@ -33,6 +33,6 @@ namespace biggin
 		std::string m_Text;
 		SDL_Color m_Color{255,255,255,1};
 		std::shared_ptr<Font> m_Font{nullptr};
-		std::shared_ptr<RenderComponent> m_TextTexture{nullptr};
+		RenderComponent* m_TextTexture{nullptr};
 	};
 }

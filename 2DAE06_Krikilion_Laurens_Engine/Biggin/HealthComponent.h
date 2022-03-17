@@ -10,13 +10,15 @@ namespace biggin
 	public:
 		HealthComponent(biggin::GameObject* go, int initialLives = 4);
 
+		void Start() override;
+
 		int GetLives() const;
 		void Damage();
 
 	private:
 		int m_LivesLeft;
 
-		std::shared_ptr<Subject> m_pNotifier;
+		Subject* m_pNotifier;
 	};
 }
 

@@ -19,5 +19,6 @@ void character::PeterPepper::Update()
 
 void character::PeterPepper::Damage()
 {
+	m_pHealth->Damage();
 	m_IsDead = true;
 }

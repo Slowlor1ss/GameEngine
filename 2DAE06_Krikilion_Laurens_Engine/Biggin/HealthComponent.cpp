@@ -9,6 +9,10 @@ HealthComponent::HealthComponent(GameObject* go, int initialLives) : Component(g
 	,m_LivesLeft(initialLives)
 	,m_pNotifier(go->GetComponent<Subject>())
 {
+}
+
+void biggin::HealthComponent::Start()
+{
 	//Updating the initial health
 	m_pNotifier->notify(this, "HealthChanged");
 }

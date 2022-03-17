@@ -5,31 +5,33 @@ namespace biggin
 	class Component;
 	class Transform;
 
-	class GameObject final : public std::enable_shared_from_this<GameObject>
+	class GameObject final
 	{
 	public:
 		GameObject();
-		GameObject(std::weak_ptr<GameObject> parent) { SetParent(parent); };
-		~GameObject() = default;
+		GameObject(GameObject* parent) { SetParent(parent); };
+		~GameObject();
 
 		GameObject(const GameObject& other) = delete;
 		GameObject(GameObject&& other) = delete; 
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 
+		void Initialize(GameObject* go);
+		void Start();
 		void Update();
 		void FixedUpdate();
 		void Render() const;
 		void RenderUi();
 
 
-		void										AddComponent(std::shared_ptr<Component> component);
+		void										AddComponent(Component* component);
 
 		//partly based on https://stackoverflow.com/questions/44105058/implementing-component-system-from-unity-in-c
 		template<typename ComponentType>
-		std::shared_ptr<ComponentType>				GetComponent();
+		ComponentType*								GetComponent();
 		template<typename ComponentType>
-		std::vector<std::shared_ptr<ComponentType>>	GetComponents();
+		std::vector<ComponentType*>					GetComponents();
 
 
 		template<typename ComponentType>
@@ -38,19 +40,19 @@ namespace biggin
 		int											RemoveComponents();
 
 		//TODO: for all children set transform relative to the transform of the parent
-		void										SetParent(std::weak_ptr<GameObject> parent, bool keepWorldPos = true); //TODO: all children should have this as parent one the new parent is set also check if parent is not itself
-		std::weak_ptr<GameObject>					GetParent() const { return m_Parent; };
+		void										SetParent(GameObject* parent, bool keepWorldPos = true); //TODO: all children should have this as parent one the new parent is set also check if parent is not itself
+		GameObject*									GetParent() const { return m_Parent; };
 
 		size_t										GetChildCount() const { return m_Childeren.size(); };
-		std::shared_ptr<GameObject>					GetChildAt(unsigned int index) const;
-		std::vector<std::shared_ptr<GameObject>>	GetAllChilderen() const { return m_Childeren; }; //TODO: keep it private
+		GameObject*									GetChildAt(unsigned int index) const;
+		std::vector<GameObject*>					GetAllChilderen() const { return m_Childeren; }; //TODO: keep it private
 
 
-		void										SetTransform(Transform* transform) { m_Transform = transform; };
+		//void										SetTransform(Transform* transform) { m_Transform = transform; };
 		const Transform*							GetTransform();
 
 		void										SetLocalPosition(float x, float y);
-		void										SetLocalPosition(const glm::vec3& pos);
+		void										SetLocalPosition(const glm::vec2& pos);
 		const glm::vec3&							GetLocalPosition();
 
 		const glm::vec3&							GetWorldPosition();
@@ -62,17 +64,17 @@ namespace biggin
 		//TODO: maybe make them private
 		//TODO: remove yourself as parent, remove form childeren list update transform etc
 		bool										RemoveChild(unsigned int index);
-		bool										RemoveChild(const std::shared_ptr<GameObject> go);
+		bool										RemoveChild(GameObject* go);
 		//TODO: set parent, update transform rot and scale, if already parented remove that parent and change it to this parent
-		void										AddChild(const std::shared_ptr<GameObject> go);//TODO: first check if the child already has a parent and if it does remove that parent from the child maybe also check if child is already in there
+		void										AddChild(GameObject* go);//TODO: first check if the child already has a parent and if it does remove that parent from the child maybe also check if child is already in there
 
 		void										UpdateWorldPosition();
 
 		//Allows "caching" of the transform component to we don't have to find it in the components list every time
 		Transform* m_Transform{ nullptr };
-		std::weak_ptr<GameObject> m_Parent{ std::weak_ptr<GameObject>() };
-		std::vector<std::shared_ptr<Component>> m_Components; //TODO: maybe make these raw ptrs
-		std::vector<std::shared_ptr<GameObject>> m_Childeren;
+		GameObject* m_Parent{ nullptr };
+		std::vector<Component*> m_Components; //TODO: maybe make these raw ptrs
+		std::vector<GameObject*> m_Childeren;
 
 		bool m_PositionDirty{false};
 	};
@@ -83,12 +85,12 @@ namespace biggin
 	 * \return shared pointer to the found component of type <ComponentType>
 	 */
 	template<typename ComponentType>
-	std::shared_ptr<ComponentType> GameObject::GetComponent()
+	ComponentType* GameObject::GetComponent()
 	{
 		for (auto &component : m_Components) 
 		{
 			//if (component->IsClassType(ComponentType::Type))
-			if (auto c = std::dynamic_pointer_cast<ComponentType>(component))
+			if (auto c = dynamic_cast<ComponentType*>(component))
 				return c;
 				//return *dynamic_cast<ComponentType*>(component.get());
 		}
@@ -102,13 +104,13 @@ namespace biggin
 	 * \return A vector with shared pointers to all found components of type <ComponentType>
 	 */
 	template<typename ComponentType>
-	std::vector<std::shared_ptr<ComponentType>> GameObject::GetComponents()
+	std::vector<ComponentType*> GameObject::GetComponents()
 	{
-		std::vector<std::shared_ptr<ComponentType>> componentsOfType;
+		std::vector<ComponentType*> componentsOfType;
 
 		for (auto& component : m_Components) 
 		{
-			if (auto c = std::dynamic_pointer_cast<ComponentType>(component))
+			if (auto c = dynamic_cast<ComponentType*>(component))
 				componentsOfType.emplace_back(c);
 		}
 
@@ -130,7 +132,7 @@ namespace biggin
 			m_Components.end(),
 			[](auto& component) 
 			{
-				return std::dynamic_pointer_cast<ComponentType>(component);
+				return dynamic_cast<ComponentType*>(component);
 			});
 
 		bool success = index != m_Components.end();
@@ -161,7 +163,7 @@ namespace biggin
 				m_Components.end(),
 				[](auto& component)
 				{
-					return std::dynamic_pointer_cast<ComponentType>(component);
+					return dynamic_cast<ComponentType*>(component);
 				});
 
 			success = index != m_Components.end();

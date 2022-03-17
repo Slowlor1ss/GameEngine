@@ -85,7 +85,7 @@ void biggin::Biggin::LoadGame() const
 	//Add logo
 	auto logoObject = std::make_shared<GameObject>();
 
-	logoObject->AddComponent(std::make_shared<RenderComponent>(logoObject.get(), "logo.png"));
+	logoObject->AddComponent(new RenderComponent(logoObject.get(), "logo.png"));
 	logoObject->SetLocalPosition(216, 180);
 	scene.Add(logoObject);
 
@@ -93,8 +93,8 @@ void biggin::Biggin::LoadGame() const
 	//Add Title
 	auto titleObject = std::make_shared<GameObject>();
 
-	titleObject->AddComponent(std::make_shared<RenderComponent>(titleObject.get()));
-	auto titleText = std::make_shared<TextComponent>(titleObject.get(), "Programming 4 Assignment", font);
+	titleObject->AddComponent(new RenderComponent(titleObject.get()));
+	auto titleText = new TextComponent(titleObject.get(), "Programming 4 Assignment", font);
 	titleObject->SetLocalPosition(80, 20);
 	titleObject->AddComponent(titleText);
 	scene.Add(titleObject);
@@ -103,11 +103,11 @@ void biggin::Biggin::LoadGame() const
 	//Add Fps
 	auto fpsObject = std::make_shared<GameObject>();
 
-	fpsObject->AddComponent(std::make_shared<RenderComponent>(fpsObject.get()));
-	auto fpsText = std::make_shared<TextComponent>(fpsObject.get());
+	fpsObject->AddComponent(new RenderComponent(fpsObject.get()));
+	auto fpsText = new TextComponent(fpsObject.get());
 	fpsText->SetColor({ 0, 255, 0, 1 });
 	fpsObject->AddComponent(fpsText);
-	fpsObject->AddComponent(std::make_shared<FpsCounter>(fpsObject.get()));
+	fpsObject->AddComponent(new FpsCounter(fpsObject.get()));
 	fpsObject->SetLocalPosition(10, 10);
 	scene.Add(fpsObject);
 
@@ -123,23 +123,52 @@ void biggin::Biggin::LoadGame() const
 	//Add Health
 	auto HealthVisualsObject = std::make_shared<GameObject>();
 
-	HealthVisualsObject->AddComponent(std::make_shared<RenderComponent>(fpsObject.get()));
-	HealthVisualsObject->AddComponent( std::make_shared<TextComponent>(fpsObject.get()));
-	HealthVisualsObject->AddComponent(std::make_shared<HealthVisualizationComponent>(fpsObject.get()));
-	HealthVisualsObject->SetLocalPosition(80, 20);
+	HealthVisualsObject->AddComponent(new RenderComponent(HealthVisualsObject.get()));
+	const auto healthText = new TextComponent (HealthVisualsObject.get());
+	healthText->SetColor({ 0, 255, 0, 0 });
+	HealthVisualsObject->AddComponent(healthText);
+	HealthVisualsObject->AddComponent(new HealthVisualizationComponent(HealthVisualsObject.get()));
+	HealthVisualsObject->SetLocalPosition({10, 500});
 	scene.Add(HealthVisualsObject);
 
 	//Add Player
 	auto playerObject = std::make_shared<GameObject>();
 
-	playerObject->AddComponent(std::make_shared<Subject>(fpsObject.get()));
-	playerObject->AddComponent(std::make_shared<HealthComponent>(fpsObject.get()));
-	auto peterPepper = std::make_shared<character::PeterPepper>(fpsObject.get());
+	playerObject->AddComponent(new Subject(playerObject.get()));
+	playerObject->AddComponent(new HealthComponent(playerObject.get()));
+	auto peterPepper = new character::PeterPepper(playerObject.get());
 	playerObject->AddComponent(peterPepper);
 	scene.Add(playerObject);
 	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonA }, std::make_unique<DamagePlayer>(peterPepper));
 
-	HealthVisualsObject->SetParent(playerObject);
+	HealthVisualsObject->SetParent(playerObject.get());
+
+
+
+	////Add Health P2
+	//auto HealthVisualsObject2 = std::make_shared<GameObject>();
+
+	//HealthVisualsObject2->AddComponent(std::make_shared<RenderComponent>(HealthVisualsObject2.get()));
+	//const auto healthText2 = std::make_shared<TextComponent>(HealthVisualsObject2.get());
+	//healthText2->SetColor({255, 0, 0, 0});
+	//HealthVisualsObject2->AddComponent(healthText2);
+	//HealthVisualsObject2->AddComponent(std::make_shared<HealthVisualizationComponent>(HealthVisualsObject2.get()));
+	//HealthVisualsObject2->SetLocalPosition({ 990, 500 });
+	//scene.Add(HealthVisualsObject2);
+	//
+	////Add Player2
+	//auto playerObject2 = std::make_shared<GameObject>();
+
+	//playerObject2->AddComponent(std::make_shared<Subject>(playerObject2.get()));
+	//playerObject2->AddComponent(std::make_shared<HealthComponent>(playerObject2.get()));
+	//auto peterPepper2 = std::make_shared<character::PeterPepper>(playerObject2.get());
+	//playerObject2->AddComponent(peterPepper2);
+	//scene.Add(playerObject2);
+	//InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonB }, std::make_unique<DamagePlayer>(peterPepper2));
+
+	//HealthVisualsObject2->SetParent(playerObject2);
+
+	scene.Start();
 }
 
 void biggin::Biggin::Cleanup()

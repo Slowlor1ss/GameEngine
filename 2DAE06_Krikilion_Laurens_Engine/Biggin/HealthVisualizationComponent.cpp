@@ -2,13 +2,23 @@
 #include "HealthVisualizationComponent.h"
 #include "GameObject.h"
 #include "HealthComponent.h"
+#include "PeterPepper.h"
+#include "Subject.h"
 #include "TextComponent.h"
 
 using namespace biggin;
 
-HealthVisualizationComponent::HealthVisualizationComponent(biggin::GameObject* go) : Component(go)
+HealthVisualizationComponent::HealthVisualizationComponent(GameObject* go) : Component(go)
+	,m_pOwningGameObject(go)
 	,m_pLivesText(go->GetComponent<TextComponent>())
 {
+}
+
+void biggin::HealthVisualizationComponent::Start()
+{
+	//TODO: add safety checks
+	const auto subject = m_pOwningGameObject->GetParent()->GetComponent<Subject>();
+	subject->AddObserver(this);
 }
 
 void HealthVisualizationComponent::OnNotify(const Component* entity, const std::string& event)

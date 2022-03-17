@@ -10,12 +10,15 @@ namespace biggin
 	class HealthVisualizationComponent final : public Component, public Observer
 	{
 	public:
-		HealthVisualizationComponent(biggin::GameObject* go);
+		HealthVisualizationComponent(GameObject* go);
+
+		void Start() override;
 
 		void OnNotify(const Component* entity, const std::string& event) override;
 
 	private:
-		std::shared_ptr<TextComponent> m_pLivesText;
+		const GameObject* m_pOwningGameObject;
+		TextComponent* m_pLivesText;
 	};
 }
 

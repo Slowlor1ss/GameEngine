@@ -20,7 +20,7 @@ public:
 	void Update() override;
 
 private:
-	std::shared_ptr<biggin::TextComponent> m_pFpsText;
+	biggin::TextComponent* m_pFpsText;
 };
 
 }

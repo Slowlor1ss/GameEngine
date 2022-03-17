@@ -41,8 +41,8 @@ public:
 class DamagePlayer final : public Command
 {
 public:
-	DamagePlayer(std::shared_ptr<character::PeterPepper> player) : m_Player(player) {}
+	DamagePlayer(character::PeterPepper* player) : m_Player(player) {}
 	void execute() override { m_Player->Damage(); }
 private:
-	std::shared_ptr<character::PeterPepper> m_Player;
+	character::PeterPepper* m_Player;
 };
