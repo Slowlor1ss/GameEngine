@@ -1,5 +1,6 @@
 #include "BigginPCH.h"
 #include "Biggin.h"
+#include <steam_api_common.h>
 #include <thread>
 #include "Command.h"
 
@@ -15,8 +16,10 @@
 #include "Scene.h"
 #include "GameObject.h"
 #include "HealthComponent.h"
-#include "HealthVisualizationComponent.h"
+#include "HealthUI.h"
 #include "PeterPepper.h"
+#include "ScoreComponent.h"
+#include "ScoreUI.h"
 #include "Sprite.h"
 #include "Subject.h"
 #include "Texture2D.h"
@@ -66,6 +69,8 @@ void biggin::Biggin::Initialize()
 	Renderer::GetInstance().Init(m_Window);
 
 	Logger::GetInstance().Initialize();
+
+	SteamAPI_RunCallbacks();
 }
 
 /**
@@ -73,6 +78,17 @@ void biggin::Biggin::Initialize()
  */
 void biggin::Biggin::LoadGame() const
 {
+	std::cout << "\n\nPeter Piper picked a peck of pickled peppers.\n"
+			<<"Did Peter Piper pick a peck of pickled peppers?\n"
+			<<"If Peter Piper picked a peck of pickled peppers,\n"
+			<<"where's the peck of pickled peppers Peter Piper picked? \n\n";
+
+	std::cout << "Controlls:\n"
+				<< "\tDamage player one:\t\t[Controller button A]\n"
+				<< "\tIncrease score player one:\t[Controller button X]\n"
+				<< "\tDamage player two:\t\t[Controller button B]\n"
+				<< "\tIncrease score player two:\t[Controller button Y]\n\n";
+
 	auto& scene = SceneManager::GetInstance().CreateScene("Demo");
 	const auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 
@@ -120,53 +136,91 @@ void biggin::Biggin::LoadGame() const
 	//scene.Add(go);
 
 
-	//Add Health
+	//Add HealthUI
 	auto HealthVisualsObject = std::make_shared<GameObject>();
 
 	HealthVisualsObject->AddComponent(new RenderComponent(HealthVisualsObject.get()));
 	const auto healthText = new TextComponent (HealthVisualsObject.get());
-	healthText->SetColor({ 0, 255, 0, 0 });
+	healthText->SetColor({ 0, 255, 0, 1});
 	HealthVisualsObject->AddComponent(healthText);
-	HealthVisualsObject->AddComponent(new HealthVisualizationComponent(HealthVisualsObject.get()));
+	HealthVisualsObject->AddComponent(new HealthUI(HealthVisualsObject.get()));
 	HealthVisualsObject->SetLocalPosition({10, 500});
 	scene.Add(HealthVisualsObject);
+
+	//Add ScoreUI
+	auto ScoreVisualsObject = std::make_shared<GameObject>();
+
+	ScoreVisualsObject->AddComponent(new RenderComponent(ScoreVisualsObject.get()));
+	const auto ScoreText = new TextComponent(ScoreVisualsObject.get());
+	ScoreText->SetColor({ 0, 255, 0, 1 });
+	ScoreVisualsObject->AddComponent(ScoreText);
+	ScoreVisualsObject->AddComponent(new ScoreUI(ScoreVisualsObject.get()));
+	ScoreVisualsObject->SetLocalPosition({ 10, 550 });
+	scene.Add(ScoreVisualsObject);
 
 	//Add Player
 	auto playerObject = std::make_shared<GameObject>();
 
 	playerObject->AddComponent(new Subject(playerObject.get()));
 	playerObject->AddComponent(new HealthComponent(playerObject.get()));
+	playerObject->AddComponent(new ScoreComponent(playerObject.get()));
 	auto peterPepper = new character::PeterPepper(playerObject.get());
 	playerObject->AddComponent(peterPepper);
 	scene.Add(playerObject);
-	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonA }, std::make_unique<DamagePlayer>(peterPepper));
+
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonA },
+		std::make_unique<DamagePlayer>(peterPepper));
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonX },
+		std::make_unique<IncreaseScore>(playerObject.get()));
 
 	HealthVisualsObject->SetParent(playerObject.get());
+	ScoreVisualsObject->SetParent(playerObject.get());
 
 
 
-	////Add Health P2
-	//auto HealthVisualsObject2 = std::make_shared<GameObject>();
+	//Add HealthUI P2
+	auto HealthVisualsObject2 = std::make_shared<GameObject>();
 
-	//HealthVisualsObject2->AddComponent(std::make_shared<RenderComponent>(HealthVisualsObject2.get()));
-	//const auto healthText2 = std::make_shared<TextComponent>(HealthVisualsObject2.get());
-	//healthText2->SetColor({255, 0, 0, 0});
-	//HealthVisualsObject2->AddComponent(healthText2);
-	//HealthVisualsObject2->AddComponent(std::make_shared<HealthVisualizationComponent>(HealthVisualsObject2.get()));
-	//HealthVisualsObject2->SetLocalPosition({ 990, 500 });
-	//scene.Add(HealthVisualsObject2);
-	//
-	////Add Player2
-	//auto playerObject2 = std::make_shared<GameObject>();
+	HealthVisualsObject2->AddComponent(new RenderComponent(HealthVisualsObject2.get()));
+	const auto healthText2 = new TextComponent(HealthVisualsObject2.get());
+	healthText2->SetColor({255, 255, 0, 1});
+	HealthVisualsObject2->AddComponent(healthText2);
+	HealthVisualsObject2->AddComponent(new HealthUI(HealthVisualsObject2.get()));
+	HealthVisualsObject2->SetLocalPosition({ 990, 500 });
+	scene.Add(HealthVisualsObject2);
 
-	//playerObject2->AddComponent(std::make_shared<Subject>(playerObject2.get()));
-	//playerObject2->AddComponent(std::make_shared<HealthComponent>(playerObject2.get()));
-	//auto peterPepper2 = std::make_shared<character::PeterPepper>(playerObject2.get());
-	//playerObject2->AddComponent(peterPepper2);
-	//scene.Add(playerObject2);
-	//InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonB }, std::make_unique<DamagePlayer>(peterPepper2));
+	//Add ScoreUI P2
+	auto ScoreVisualsObject2 = std::make_shared<GameObject>();
 
-	//HealthVisualsObject2->SetParent(playerObject2);
+	ScoreVisualsObject2->AddComponent(new RenderComponent(ScoreVisualsObject2.get()));
+	const auto ScoreText2 = new TextComponent(ScoreVisualsObject2.get());
+	ScoreText2->SetColor({ 255, 255, 0, 1});
+	ScoreVisualsObject2->AddComponent(ScoreText2);
+	ScoreVisualsObject2->AddComponent(new ScoreUI(ScoreVisualsObject2.get()));
+	ScoreVisualsObject2->SetLocalPosition({ 890, 550 });
+	scene.Add(ScoreVisualsObject2);
+	
+	//Add Player2
+	auto playerObject2 = std::make_shared<GameObject>();
+
+	playerObject2->AddComponent(new Subject(playerObject2.get()));
+	playerObject2->AddComponent(new HealthComponent(playerObject2.get()));
+	playerObject2->AddComponent(new ScoreComponent(playerObject2.get()));
+	auto peterPepper2 = new character::PeterPepper(playerObject2.get());
+	playerObject2->AddComponent(peterPepper2);
+	scene.Add(playerObject2);
+
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonB }, 
+		std::make_unique<DamagePlayer>(peterPepper2));
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonY },
+		std::make_unique<IncreaseScore>(playerObject2.get()));
+
+	//TODO: rethink about how were going to communicate between player gameObject and ui elements because currently they are children of the player
+	//TODO: this might not be the best way to do it
+	HealthVisualsObject2->SetParent(playerObject2.get());
+	ScoreVisualsObject2->SetParent(playerObject2.get());
+
+
 
 	scene.Start();
 }
@@ -199,6 +253,8 @@ void biggin::Biggin::Run()
 		float lag = 0.0f;
 		while (doContinue)
 		{
+			SteamAPI_RunCallbacks();
+
 			//updates things like delta-time fps counter etc
 			//(maybe a bit of a questionable way of doing things but i found it clean to have all of this is one class)
 			gameTime.Update();

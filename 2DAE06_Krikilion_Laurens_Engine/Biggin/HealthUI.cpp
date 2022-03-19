@@ -1,5 +1,5 @@
 #include "BigginPCH.h"
-#include "HealthVisualizationComponent.h"
+#include "HealthUI.h"
 #include "GameObject.h"
 #include "HealthComponent.h"
 #include "PeterPepper.h"
@@ -8,20 +8,19 @@
 
 using namespace biggin;
 
-HealthVisualizationComponent::HealthVisualizationComponent(GameObject* go) : Component(go)
-	,m_pOwningGameObject(go)
+HealthUI::HealthUI(GameObject* go) : Component(go)
 	,m_pLivesText(go->GetComponent<TextComponent>())
 {
 }
 
-void biggin::HealthVisualizationComponent::Start()
+void biggin::HealthUI::Start()
 {
 	//TODO: add safety checks
-	const auto subject = m_pOwningGameObject->GetParent()->GetComponent<Subject>();
+	const auto subject = GetGameObject()->GetParent()->GetComponent<Subject>();
 	subject->AddObserver(this);
 }
 
-void HealthVisualizationComponent::OnNotify(const Component* entity, const std::string& event)
+void HealthUI::OnNotify(const Component* entity, const std::string& event)
 {
 	if (event != "HealthChanged")
 		return;
