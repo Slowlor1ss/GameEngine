@@ -85,7 +85,7 @@ void CSteamAchievements::AddObserver(biggin::Subject* subject)
 
 void CSteamAchievements::OnNotify(const biggin::Component* entity, const std::string& event)
 {
-	if (event != "ScoreChanged")
+	if (event != "ScoreChanged") //early out as there's only one achievement at the moment
 		return;
 
 	const int& score = static_cast<const biggin::ScoreComponent*>(entity)->GetScore();
