@@ -22,3 +22,15 @@ void character::PeterPepper::Damage()
 	m_pHealth->Damage();
 	m_IsDead = true;
 }
+
+void character::PeterPepper::OnNotify(const Component* /*entity*/, const std::string& event)
+{
+	if (event == "BeginContact")
+	{
+		
+	}
+	else if (event == "EndContact")
+	{
+		
+	}
+}

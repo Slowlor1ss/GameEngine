@@ -2,7 +2,7 @@
 #include "SceneManager.h"
 #include "Scene.h"
 
-void biggin::SceneManager::Update()
+void biggin::SceneManager::Update() const
 {
 	for(auto& scene : m_Scenes)
 	{
@@ -10,7 +10,7 @@ void biggin::SceneManager::Update()
 	}
 }
 
-void biggin::SceneManager::FixedUpdate()
+void biggin::SceneManager::FixedUpdate() const
 {
 	for (auto& scene : m_Scenes)
 	{

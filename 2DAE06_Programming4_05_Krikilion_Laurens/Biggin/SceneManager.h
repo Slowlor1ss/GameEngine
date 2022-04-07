@@ -10,8 +10,8 @@ namespace biggin
 	public:
 		Scene& CreateScene(const std::string& name);
 
-		void Update();
-		void FixedUpdate();
+		void Update() const;
+		void FixedUpdate() const;
 		void Render() const;
 		void RenderUi();
 

@@ -21,6 +21,9 @@ namespace biggin
 		void RenderTexture(const Texture2D& texture, float x, float y) const;
 		void RenderTexture(const Texture2D& texture, float x, float y, float width, float height) const;
 
+		void RenderPolygon(std::vector<glm::vec2> points, const SDL_Color& color) const;
+		void RenderPolygon(glm::vec2* points, int vertexCount, const SDL_Color& color) const;
+
 		SDL_Renderer* GetSDLRenderer() const { return m_Renderer; }
 
 		const SDL_Color& GetBackgroundColor() const { return m_clearColor; }

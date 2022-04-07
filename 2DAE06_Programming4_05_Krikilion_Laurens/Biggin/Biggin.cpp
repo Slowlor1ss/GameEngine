@@ -2,6 +2,9 @@
 #include "Biggin.h"
 #include <steam_api_common.h>
 #include <thread>
+#include <Box2D/Collision/Shapes/b2CircleShape.h>
+#include "Box2dManager.h"
+#include "BoxCollider2d.h"
 #include "Command.h"
 
 #include "FpsCounter.h"
@@ -26,6 +29,7 @@
 #include "Texture2D.h"
 #include "TrashTheCache.h"
 #include "Utils.hpp"
+
 
 using namespace std;
 
@@ -169,17 +173,13 @@ void biggin::Biggin::LoadGame() const
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 	auto peterPepper = new character::PeterPepper(playerObject.get());
 	playerObject->AddComponent(peterPepper);
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {10, 20}, true, {peterPepper}));
 	scene.Add(playerObject);
 
-	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonA },
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonA, 0, SDLK_e },
 		std::make_unique<DamagePlayer>(peterPepper));
 	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonX },
 		std::make_unique<IncreaseScore>(playerObject.get()));
-
-	//HealthVisualsObject->SetParent(playerObject.get());
-	//ScoreVisualsObject->SetParent(playerObject.get());
-
-
 
 	//Add HealthUI P2
 	auto HealthVisualsObject2 = std::make_shared<GameObject>();
@@ -215,17 +215,10 @@ void biggin::Biggin::LoadGame() const
 	playerObject2->AddComponent(peterPepper2);
 	scene.Add(playerObject2);
 
-	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonB }, 
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonB, 1 }, 
 		std::make_unique<DamagePlayer>(peterPepper2));
-	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonY },
+	InputManager::GetInstance().MapActionKey({ ButtonState::Up, ControllerButton::ButtonY, 1 },
 		std::make_unique<IncreaseScore>(playerObject2.get()));
-
-	//TODO: rethink about how were going to communicate between player gameObject and ui elements because currently they are children of the player
-	//TODO: this might not be the best way to do it
-	//HealthVisualsObject2->SetParent(playerObject2.get());
-	//ScoreVisualsObject2->SetParent(playerObject2.get());
-
-
 
 	scene.Start();
 }
@@ -244,14 +237,16 @@ void biggin::Biggin::Run()
 
 	// tell the resource manager where he can find the game data
 	ResourceManager::GetInstance().Init("../Data/");
+	Box2dManager::GetInstance().Init();
 
 	LoadGame();
 
 	{
-		auto& renderer = Renderer::GetInstance();
-		auto& sceneManager = SceneManager::GetInstance();
-		auto& input = InputManager::GetInstance();
+		const auto& renderer = Renderer::GetInstance();
+		const auto& sceneManager = SceneManager::GetInstance();
+		const auto& input = InputManager::GetInstance();
 		auto& gameTime = GameTime::GetInstance();
+		auto& box2dManager = Box2dManager::GetInstance();
 
 		bool doContinue = true;
 		
@@ -267,11 +262,12 @@ void biggin::Biggin::Run()
 
 			lag += deltaTime;
 			doContinue = input.ProcessInput();
-			input.HandleInput();
 			sceneManager.Update();
 
 			while (lag >= gameTime.GetFixedTimeStep())
 			{
+				box2dManager.Simulate();
+
 				sceneManager.FixedUpdate();
 				lag -= gameTime.GetFixedTimeStep();
 			}

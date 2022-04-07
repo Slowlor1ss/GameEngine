@@ -27,12 +27,25 @@ namespace biggin
 		ButtonY = 0x8000,
 	};
 
-	enum class ButtonState
+	enum class ButtonState : WORD
 	{
 		Up,
 		Down,
 		Hold
 	};
+
+	struct ActionKey
+	{
+		ButtonState state{};
+		ControllerButton button{};
+		int controllerIdx = 0;
+		SDL_Keycode key = SDLK_UNKNOWN;
+		auto operator<=>(const ActionKey&) const = default;
+	};
+	//inline bool operator==(const ActionKey& x, const ActionKey& y)
+	//{
+	//	return std::tie(x.state, x.Button, x.ControllerIdx, x.Key) == std::tie(y.state, y.Button, y.ControllerIdx, y.Key);
+	//}
 
 	//TODO: add keyboard
 	class InputManager final : public Singleton<InputManager>
@@ -40,8 +53,8 @@ namespace biggin
 		class InputManagerImpl;
 		InputManagerImpl* m_pImpl;
 
-		using ControllerKey = std::pair<ButtonState, ControllerButton>;
-		using ControllerCommandMap = std::unordered_map<const ControllerKey, std::unique_ptr<Command>, std::function<size_t(const ControllerKey&)>>;
+		//using ControllerKey = std::pair<ButtonState, ControllerButton>;
+		using ControllerCommandMap = std::unordered_map<const ActionKey, std::unique_ptr<Command>, std::function<size_t(const ActionKey&)>>;
 
 	public:
 		InputManager();
@@ -53,17 +66,20 @@ namespace biggin
 		InputManager& operator=(InputManager&& other) noexcept = delete;
 
 		bool ProcessInput() const;
-		void HandleInput() const;
-		bool IsHeld(ControllerButton button) const;
-		bool IsPressed(ControllerButton button) const;
-		bool IsReleased(ControllerButton button) const;
+		bool IsHeld(ControllerButton button, int idx) const;
+		bool IsPressed(ControllerButton button, int idx) const;
+		bool IsReleased(ControllerButton button, int idx) const;
+		glm::vec2 GetLThumb(int idx) const;
+		glm::vec2 GetRThumb(int idx) const;
 
-		void MapActionKey(ControllerKey key, std::unique_ptr<Command> action);
+		void MapActionKey(ActionKey key, std::unique_ptr<Command> action);
 
 	private:
+		void HandleInput(int i) const;
+
 		const ControllerCommandMap& GetConsoleMap() const { return m_ConsoleCommands; }
 		//Function for the unordered map
-		static size_t ControllerButtonHash(const ControllerKey& button);
+		static size_t ControllerButtonHash(const ActionKey& button);
 
 		ControllerCommandMap m_ConsoleCommands;
 

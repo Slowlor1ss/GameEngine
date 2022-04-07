@@ -3,7 +3,7 @@
 #include "Observer.h"
 
 biggin::Subject::Subject(GameObject* go) : Component(go)
-	,m_BusyNotifying(false)
+	, m_BusyNotifying(false)
 {
 }
 

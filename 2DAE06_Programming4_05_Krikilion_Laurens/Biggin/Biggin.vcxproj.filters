@@ -69,9 +69,6 @@
     <ClInclude Include="SceneManager.h">
       <Filter>SceneGraph</Filter>
     </ClInclude>
-    <ClInclude Include="GameTime.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Singleton.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -156,6 +153,21 @@
     <ClInclude Include="StatsAndAchievements.h">
       <Filter>Managers</Filter>
     </ClInclude>
+    <ClInclude Include="BoxCollider2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Box2dManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTime.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ContactListener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Box2dRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -184,9 +196,6 @@
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>SceneGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="GameTime.cpp">
-      <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>Managers</Filter>
@@ -265,6 +274,21 @@
     </ClCompile>
     <ClCompile Include="StatsAndAchievements.cpp">
       <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxCollider2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Box2dManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTime.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="ContactListener.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Box2dRenderer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
