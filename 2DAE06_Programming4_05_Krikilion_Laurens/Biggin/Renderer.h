@@ -1,6 +1,8 @@
 #pragma once
 #include "Singleton.h"
 
+struct b2Vec2;
+
 namespace biggin
 {
 	class Transform;
@@ -19,10 +21,12 @@ namespace biggin
 		void Destroy();
 
 		void RenderTexture(const Texture2D& texture, float x, float y) const;
-		void RenderTexture(const Texture2D& texture, float x, float y, float width, float height) const;
+		void RenderTexture(const Texture2D& texture, float x, float y, float width, float height, SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+		void RenderTexture(const Texture2D& texture, const glm::vec2& pos, const glm::vec2& sizeCell, SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+		void RenderTexture(const Texture2D& texture, const SDL_Rect* dst, const SDL_Rect* src, SDL_RendererFlip flip) const;
 
-		void RenderPolygon(std::vector<glm::vec2> points, const SDL_Color& color) const;
-		void RenderPolygon(glm::vec2* points, int vertexCount, const SDL_Color& color) const;
+		void RenderPolygon(std::vector<glm::vec2> points, SDL_Color color, bool closed = true) const;
+		void RenderPolygon(const glm::vec2* points, int vertexCount, SDL_Color color, bool closed = true) const;
 
 		SDL_Renderer* GetSDLRenderer() const { return m_Renderer; }
 

@@ -2,6 +2,7 @@
 #include "HealthUI.h"
 #include "GameObject.h"
 #include "HealthComponent.h"
+#include "Logger.h"
 #include "PeterPepper.h"
 #include "Subject.h"
 #include "TextComponent.h"
@@ -13,11 +14,11 @@ HealthUI::HealthUI(GameObject* go) : Component(go)
 {
 }
 
-void biggin::HealthUI::Start()
+void biggin::HealthUI::Initialize(GameObject* go)
 {
-	//TODO: add safety checks
-	//const auto subject = GetGameObject()->GetParent()->GetComponent<Subject>();
-	//subject->AddObserver(this);
+	m_pLivesText = go->GetComponent<TextComponent>();
+	if (m_pLivesText == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing TextComponent");
 }
 
 void HealthUI::OnNotify(const Component* entity, const std::string& event)

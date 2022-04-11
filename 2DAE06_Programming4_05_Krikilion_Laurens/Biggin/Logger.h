@@ -24,12 +24,12 @@ public:
 
 	void Initialize();
 
-	void Log(LogLevel level, const std::string& msg, const std::source_location location = std::source_location::current());
-	void LogDebug(const std::string& msg, const std::source_location location = std::source_location::current());
-	void LogInfo(const std::string& msg, const std::source_location location = std::source_location::current());
-	void LogWarning(const std::string& msg, const std::source_location location = std::source_location::current());
-	void LogError(const std::string& msg, const std::source_location location = std::source_location::current());
-	void LogToDo(const std::string& source, const std::source_location location = std::source_location::current());
+	void Log(LogLevel level, const std::string& msg, const std::source_location location = std::source_location::current()) const;
+	void LogDebug(const std::string& msg, const std::source_location location = std::source_location::current()) const;
+	void LogInfo(const std::string& msg, const std::source_location location = std::source_location::current()) const;
+	void LogWarning(const std::string& msg, const std::source_location location = std::source_location::current()) const;
+	void LogErrorAndBreak(const std::string& msg, const std::source_location location = std::source_location::current()) const;
+	void LogToDo(const std::string& source, const std::source_location location = std::source_location::current()) const;
 
 	static void ClearConsole();
 

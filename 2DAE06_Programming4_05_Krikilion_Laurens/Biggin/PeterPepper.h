@@ -4,24 +4,44 @@
 
 namespace biggin
 {
+	class SpriteRenderComponent;
 	class HealthComponent;
 }
 
 namespace character
 {
+	enum class AnimationState { Idle, RunHorizontal, RunVertical, PepperHorizontal, PepperVertical, Die };
 	class PeterPepper final : public biggin::Component, public biggin::Observer
 	{
+		enum class MoveDirection { Left, Right, Up, Down, None};
+
 	public:
-		PeterPepper(biggin::GameObject* go);
+		PeterPepper(biggin::GameObject* go, float movementSpeed = 1);
 
+		void Initialize(biggin::GameObject* go) override;
 		void Update() override;
+		void FixedUpdate() override;
 
+		void AddVelocity(const glm::vec2& velocity) { m_Velocity += velocity; }
+		void SetVelocity(const glm::vec2& velocity) { m_Velocity = velocity; }
 		void Damage();
+		bool IsDead() const { return m_IsDead; }
+		float GetSpeed() const { return m_Speed; }
+
 		void OnNotify(const Component* entity, const std::string& event) override;
 
 	private:
+		void UpdateAnimationState();
+		void UpdateMovementDirection();
 		bool m_IsDead;
+		float m_Speed;
+		glm::vec2 m_Velocity{};
+		inline static int m_AmntPlayers{0};
+		int m_PlayerIndex;
+		MoveDirection m_CurrMovementDir{MoveDirection::None};
+		AnimationState m_CurrAnimState{AnimationState::Idle};
 
-		biggin::HealthComponent* m_pHealth;
+		biggin::HealthComponent* m_pHealthComp;
+		biggin::SpriteRenderComponent* m_pSpriteComp;
 	};
 }

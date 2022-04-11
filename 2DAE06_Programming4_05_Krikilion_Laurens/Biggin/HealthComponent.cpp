@@ -1,6 +1,7 @@
 #include "BigginPCH.h"
 #include "HealthComponent.h"
 #include "GameObject.h"
+#include "Logger.h"
 #include "Subject.h"
 
 using namespace biggin;
@@ -9,6 +10,9 @@ HealthComponent::HealthComponent(GameObject* go, int initialLives, const std::ve
 	,m_LivesLeft(initialLives)
 	,m_pNotifier(go->GetComponent<Subject>())
 {
+	if (m_pNotifier == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
+
 	for (const auto observer : observers)
 		m_pNotifier->AddObserver(observer);
 }

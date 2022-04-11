@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include "Singleton.h"
 
 class Command;
@@ -25,31 +26,53 @@ namespace biggin
 		ButtonB = 0x2000,
 		ButtonX = 0x4000,
 		ButtonY = 0x8000,
+		None = 0
 	};
 
-	enum class ButtonState : WORD
+	enum class ActionState : WORD
 	{
 		Up,
 		Down,
-		Hold
+		Hold,
+		ThumbL,
+		ThumbR,
+		TriggerL,
+		TriggerR
 	};
 
 	struct ActionKey
 	{
-		ButtonState state{};
+		ActionState state{};
 		ControllerButton button{};
-		int controllerIdx = 0;
-		SDL_Keycode key = SDLK_UNKNOWN;
+		int controllerIdx{0};
+		SDL_Keycode key{ SDLK_UNKNOWN };
 		auto operator<=>(const ActionKey&) const = default;
 	};
 	//inline bool operator==(const ActionKey& x, const ActionKey& y)
 	//{
-	//	return std::tie(x.state, x.Button, x.ControllerIdx, x.Key) == std::tie(y.state, y.Button, y.ControllerIdx, y.Key);
+	//	return std::tie(x.state, x.button, x.controllerIdx, x.key) == std::tie(y.state, y.button, y.controllerIdx, y.key);
 	//}
 
-	//TODO: add keyboard
 	class InputManager final : public Singleton<InputManager>
 	{
+		struct InputContext
+		{
+			std::variant<float, glm::vec2> value{};
+			ActionState state{};
+			int controllerIdx{};
+
+			template<typename T>
+			T GetValue(){
+				try{
+					return std::get<T>(value);
+				}
+				catch (const std::bad_variant_access& ex){
+					std::cerr << ex.what() << '\n';
+				}
+				return {};
+			}
+		};
+
 		class InputManagerImpl;
 		InputManagerImpl* m_pImpl;
 
@@ -71,6 +94,10 @@ namespace biggin
 		bool IsReleased(ControllerButton button, int idx) const;
 		glm::vec2 GetLThumb(int idx) const;
 		glm::vec2 GetRThumb(int idx) const;
+		float GetLTrigger(int idx) const;
+		float GetRTrigger(int idx) const;
+
+		InputContext GetInputContext() const;
 
 		void MapActionKey(ActionKey key, std::unique_ptr<Command> action);
 

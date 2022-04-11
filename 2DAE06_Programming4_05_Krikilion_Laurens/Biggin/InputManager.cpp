@@ -1,6 +1,7 @@
 #include "BigginPCH.h"
 #include "InputManager.h"
 #define WIN32_LEAN_AND_MEAN
+#include <variant>
 #include <Windows.h>
 #include <Xinput.h>
 #include "Command.h"
@@ -15,7 +16,7 @@ public:
 	InputManagerImpl() = default;
 
 	bool DoProcessInput();
-	void DoHandleInput(int idx) const;
+	void DoHandleInput(int idx);
 	bool DoIsPressed(ControllerButton button, int idx) const;
 	bool DoIsReleased(ControllerButton button, int idx) const;
 	bool DoIsHeld(ControllerButton button, int idx) const;
@@ -24,9 +25,13 @@ public:
 	bool DoIsHeld(SDL_Keycode key) const;
 	glm::vec2 DoGetLThumb(int idx) const;
 	glm::vec2 DoGetRThumb(int idx) const;
+	float DoGetLTrigger(int idx) const;
+	float DoGetRTrigger(int idx) const;
+	InputContext DoGetInputContext() const { return m_Context; }
 
 private:
 	glm::vec2 ShortToVec2RangeSigned1(short s1, short s2) const;
+	float ByteToUnsignedFloat(short s) const;
 
 	XINPUT_STATE m_CurrentState[XUSER_MAX_COUNT]{};
 	XINPUT_STATE m_PreviousState[XUSER_MAX_COUNT]{};
@@ -39,12 +44,14 @@ private:
 	//const Uint8* m_PreviouskeyState{ };
 	//https://stackoverflow.com/questions/3741055/inputs-in-sdl-on-key-pressed
 	//I can't seem to find a better way of doing this
-	bool m_PreviouskeyState[322]{};
+	bool m_PreviousKeyState[322]{}; //TODO: put this on the heap and try uint8* again
+
+	InputContext m_Context{};
 };
 
 InputManager::InputManager()
-	: m_pImpl(new InputManagerImpl)
-	, m_ConsoleCommands(14, ControllerButtonHash) //bucketSize -> 14 controller keys, as our hash function works with the controller keys we only need 14 
+	: m_pImpl(new InputManagerImpl) //TODO: check again for the unordered map
+	, m_ConsoleCommands(15, ControllerButtonHash) //bucketSize -> 14 controller keys (+1 for none), as our hash function works with the controller keys we only need 14 
 {}
 
 size_t InputManager::ControllerButtonHash(const ActionKey& button)
@@ -94,9 +101,24 @@ glm::vec2 InputManager::GetRThumb(int idx) const
 	return m_pImpl->DoGetRThumb(idx);
 }
 
+float InputManager::GetLTrigger(int idx) const
+{
+	return m_pImpl->DoGetLTrigger(idx);
+}
+
+float InputManager::GetRTrigger(int idx) const
+{
+	return m_pImpl->DoGetRTrigger(idx);
+}
+
+InputManager::InputContext InputManager::GetInputContext() const
+{
+	return m_pImpl->DoGetInputContext();
+}
+
 bool InputManager::InputManagerImpl::DoProcessInput()
 {
-	CopyMemory(m_PreviouskeyState, m_CurrentkeyState, sizeof(Uint8)*322);
+	CopyMemory(m_PreviousKeyState, m_CurrentkeyState, sizeof(Uint8)*322);
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
@@ -149,32 +171,61 @@ bool InputManager::InputManagerImpl::DoProcessInput()
 	return true;
 }
 
-void InputManager::InputManagerImpl::DoHandleInput(int idx) const
+void InputManager::InputManagerImpl::DoHandleInput(int idx)
 {
 	for (const auto& [controllerKey, action] : InputManager::GetInstance().GetConsoleMap())
 	{
 		if (controllerKey.controllerIdx != idx)
 			continue;
 
-		const ButtonState& keyState = controllerKey.state;
+		const ActionState& State = controllerKey.state;
 		const ControllerButton& button = controllerKey.button;
 		const SDL_Keycode& key = controllerKey.key;
 
-		switch (keyState)
+		switch (State)
 		{
-		case ButtonState::Up:
+		case ActionState::Up:
 			if (DoIsReleased(button, idx) || DoIsReleased(key))
 				action->execute();
 			break;
-		case ButtonState::Down:
+		case ActionState::Down:
 			if (DoIsPressed(button, idx) || DoIsPressed(key))
 				action->execute();
 			break;
-		case ButtonState::Hold:
+		case ActionState::Hold:
 			if (DoIsHeld(button, idx) || DoIsHeld(key))
+				action->execute(); //TODO: add context here aswell for sake of completeness
+			break;
+		case ActionState::ThumbL:
+			if (glm::vec2 v{ DoGetLThumb(idx) }; v != glm::vec2{0,0})
+			{
+				m_Context = {v, ActionState::ThumbL, idx};
 				action->execute();
+			}
+			break;
+		case ActionState::ThumbR:
+			if (glm::vec2 v{ DoGetRThumb(idx) }; v != glm::vec2{ 0,0 })
+			{
+				m_Context = { v, ActionState::ThumbL, idx };
+				action->execute();
+			}
+			break;
+		case ActionState::TriggerL:
+			if (const float v{ DoGetLTrigger(idx) }; v != 0)
+			{
+				m_Context = { v, ActionState::TriggerL, idx };
+				action->execute();
+			}
+			break;
+		case ActionState::TriggerR:
+			if (const float v{ DoGetLTrigger(idx) }; v != 0)
+			{
+				m_Context = { v, ActionState::TriggerR, idx };
+				action->execute();
+			}
 			break;
 		}
+		m_Context = {};
 	}
 }
 
@@ -195,14 +246,12 @@ bool InputManager::InputManagerImpl::DoIsHeld(ControllerButton button, int idx) 
 
 bool InputManager::InputManagerImpl::DoIsPressed(SDL_Keycode key) const
 {
-	return m_CurrentkeyState[SDL_GetScancodeFromKey(key)] && !m_PreviouskeyState[SDL_GetScancodeFromKey(key)];
+	return m_CurrentkeyState[SDL_GetScancodeFromKey(key)] && !m_PreviousKeyState[SDL_GetScancodeFromKey(key)];
 }
 
 bool InputManager::InputManagerImpl::DoIsReleased(SDL_Keycode key) const
 {
-	//if (m_PreviouskeyState == nullptr)
-	//	return false;
-	return m_PreviouskeyState[SDL_GetScancodeFromKey(key)] && !m_CurrentkeyState[SDL_GetScancodeFromKey(key)];
+	return m_PreviousKeyState[SDL_GetScancodeFromKey(key)] && !m_CurrentkeyState[SDL_GetScancodeFromKey(key)];
 }
 
 bool InputManager::InputManagerImpl::DoIsHeld(SDL_Keycode key) const
@@ -217,10 +266,17 @@ void InputManager::MapActionKey(const ActionKey key, std::unique_ptr<Command> ac
 
 glm::vec2 InputManager::InputManagerImpl::ShortToVec2RangeSigned1(short s1, short s2) const
 {
-	//32767 == max value of a short
+	//32767 == max value of a signed short
 	constexpr float toFloatRangeSigned1 = 1 / 32767.f;
 	//doing a multiplication instead of dividing everytime
 	return glm::vec2{ s1 * toFloatRangeSigned1, s2 * toFloatRangeSigned1 };
+}
+
+float InputManager::InputManagerImpl::ByteToUnsignedFloat(short s) const
+{
+	//255 == max value of a byte
+	constexpr float toFloatRange1 = 1 / 255.f;
+	return s * toFloatRange1;
 }
 
 glm::vec2 InputManager::InputManagerImpl::DoGetLThumb(int idx) const
@@ -231,4 +287,14 @@ glm::vec2 InputManager::InputManagerImpl::DoGetLThumb(int idx) const
 glm::vec2 InputManager::InputManagerImpl::DoGetRThumb(int idx) const
 {
 	return ShortToVec2RangeSigned1(m_CurrentState[idx].Gamepad.sThumbRX, m_CurrentState[idx].Gamepad.sThumbRY);
+}
+
+float InputManager::InputManagerImpl::DoGetLTrigger(int idx) const
+{
+	return ByteToUnsignedFloat(m_CurrentState[idx].Gamepad.bLeftTrigger);
+}
+
+float InputManager::InputManagerImpl::DoGetRTrigger(int idx) const
+{
+	return ByteToUnsignedFloat(m_CurrentState[idx].Gamepad.bRightTrigger);
 }

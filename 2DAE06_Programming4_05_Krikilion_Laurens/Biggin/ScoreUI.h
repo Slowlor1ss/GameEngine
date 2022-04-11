@@ -11,8 +11,7 @@ namespace biggin
 	{
 	public:
 		ScoreUI(GameObject* go);
-
-		void Start() override;
+		void Initialize(GameObject*) override;
 
 		void OnNotify(const Component* entity, const std::string& event) override;
 

@@ -44,6 +44,9 @@ void biggin::Renderer::Render() const
 	SDL_RenderClear(m_Renderer);
 
 	SceneManager::GetInstance().Render();
+	//TODO: remove
+	//SDL_SetRenderDrawColor(m_Renderer, 255, 0, 0, 1);
+	//SDL_RenderDrawPoint(m_Renderer, 100, 100);
 	Box2dManager::GetInstance().RenderDebug();
 
 	ImGui_ImplOpenGL2_NewFrame();
@@ -79,32 +82,49 @@ void biggin::Renderer::RenderTexture(const Texture2D& texture, const float x, co
 	SDL_RenderCopy(m_Renderer, texture.GetSDLTexture(), nullptr, &dst);
 }
 
-void biggin::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height) const
+void biggin::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height, SDL_RendererFlip flip) const
 {
 	SDL_Rect dst{};
 	dst.x = static_cast<int>(x);
 	dst.y = static_cast<int>(y);
 	dst.w = static_cast<int>(width);
 	dst.h = static_cast<int>(height);
-	SDL_RenderCopy(m_Renderer, texture.GetSDLTexture(), nullptr, &dst);
+	SDL_RenderCopyEx(m_Renderer, texture.GetSDLTexture(), nullptr, &dst, 0, nullptr, flip);
 }
 
-void biggin::Renderer::RenderPolygon(glm::vec2* points, int vertexCount, const SDL_Color& color) const
+void biggin::Renderer::RenderTexture(const Texture2D& texture, const glm::vec2& pos, const glm::vec2& sizeCell, SDL_RendererFlip flip) const
+{
+	RenderTexture(texture, pos.x, pos.y, sizeCell.x, sizeCell.y, flip);
+}
+
+void biggin::Renderer::RenderTexture(const Texture2D& texture, const SDL_Rect* dst, const SDL_Rect* src, SDL_RendererFlip flip) const
+{
+	SDL_RenderCopyEx(m_Renderer, texture.GetSDLTexture(), src, dst, 0, nullptr, flip);
+}
+
+void biggin::Renderer::RenderPolygon(const glm::vec2* points, int vertexCount, SDL_Color color, bool closed) const
 {
 	SDL_SetRenderDrawColor(m_Renderer, color.r, color.g, color.b, color.a);
 
-	glm::vec2& point1{ points[vertexCount - 1] };
-	for (size_t i{ 0 }; i < vertexCount; i += 2)
+	//close polygon
+	if (closed)
 	{
+		const glm::vec2& firstPoint{ points[0] };
+		const glm::vec2& lastPoint{ points[vertexCount - 1] };
+		SDL_RenderDrawLineF(m_Renderer, firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y);
+	}
+
+	for (int i{ 0 }; i < vertexCount - 1; i += 1)
+	{
+		const glm::vec2& point1{ points[i] };
 		const glm::vec2& point2{ points[i + 1] };
-		//SDL_RenderDrawLine(m_Renderer, point1.x, point1.y, point2.x, point2.y);
 		SDL_RenderDrawLineF(m_Renderer, point1.x, point1.y, point2.x, point2.y);
-		point1 = point2;
+		//point1 = point2;
 	}
 }
 
-void biggin::Renderer::RenderPolygon(std::vector<glm::vec2> points, const SDL_Color& color) const
+void biggin::Renderer::RenderPolygon(std::vector<glm::vec2> points, SDL_Color color, bool closed) const
 {
-	RenderPolygon(points.data(), static_cast<int>(points.size()), color);
+	RenderPolygon(points.data(), static_cast<int>(points.size()), color, closed);
 }
 

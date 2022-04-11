@@ -81,7 +81,7 @@
     <ClInclude Include="Texture2D.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
+    <ClInclude Include="RenderComponent.h">
       <Filter>Render</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
@@ -156,17 +156,20 @@
     <ClInclude Include="BoxCollider2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Box2dManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameTime.h">
       <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="ContactListener.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SpriteRenderComponent.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Box2dManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
     <ClInclude Include="Box2dRenderer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -209,7 +212,7 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp">
+    <ClCompile Include="RenderComponent.cpp">
       <Filter>Render</Filter>
     </ClCompile>
     <ClCompile Include="Texture2D.cpp">
@@ -278,17 +281,20 @@
     <ClCompile Include="BoxCollider2d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Box2dManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GameTime.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
     <ClCompile Include="ContactListener.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Box2dManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteRenderComponent.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
     <ClCompile Include="Box2dRenderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

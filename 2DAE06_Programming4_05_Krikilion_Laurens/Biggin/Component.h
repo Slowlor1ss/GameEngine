@@ -13,7 +13,9 @@ namespace biggin
 	    Component& operator=(const Component& other) = delete;
 	    Component& operator=(Component&& other) noexcept = delete;
 
+		//gets called when game-object gets added to the scene
 		virtual void Initialize(GameObject*) {};
+		//gets called when all game objects have been added to the scene and game is loaded
 	    virtual void Start() {};
 	    virtual void Update() {};
 	    virtual void FixedUpdate() {};

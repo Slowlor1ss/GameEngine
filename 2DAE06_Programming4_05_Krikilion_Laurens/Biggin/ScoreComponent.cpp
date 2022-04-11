@@ -19,7 +19,7 @@ void biggin::ScoreComponent::Start()
 
 int biggin::ScoreComponent::GetScore() const
 {
-	return m_Score;
+	return m_Score; //TODO: change this
 }
 
 void biggin::ScoreComponent::IncreaseScore(int amount)

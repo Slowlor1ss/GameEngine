@@ -1,20 +1,21 @@
 #include "BigginPCH.h"
 #include "ScoreUI.h"
 #include "GameObject.h"
+#include "Logger.h"
 #include "ScoreComponent.h"
 #include "Subject.h"
 #include "TextComponent.h"
 
 biggin::ScoreUI::ScoreUI(GameObject* go) : Component(go)
-	, m_pScoreText(go->GetComponent<TextComponent>())
+	, m_pScoreText(nullptr)
 {
 }
 
-void biggin::ScoreUI::Start()
+void biggin::ScoreUI::Initialize(GameObject* go)
 {
-	//TODO: add safety checks
-	//const auto subject = GetGameObject()->GetParent()->GetComponent<Subject>();
-	//subject->AddObserver(this);
+	m_pScoreText = go->GetComponent<TextComponent>();
+	if (m_pScoreText == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing TextComponent");
 }
 
 void biggin::ScoreUI::OnNotify(const Component* entity, const std::string& event)

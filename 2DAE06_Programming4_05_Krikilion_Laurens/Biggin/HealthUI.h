@@ -11,8 +11,7 @@ namespace biggin
 	{
 	public:
 		HealthUI(GameObject* go);
-
-		void Start() override;
+		void Initialize(GameObject* go) override;
 
 		void OnNotify(const Component* entity, const std::string& event) override;
 

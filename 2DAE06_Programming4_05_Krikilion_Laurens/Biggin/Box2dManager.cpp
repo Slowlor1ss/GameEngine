@@ -1,7 +1,5 @@
 #include "BigginPCH.h"
 #include "Box2dManager.h"
-#include <Box2D/Common/b2Draw.h>
-#include <Box2D/Common/b2Math.h>
 #include <Box2D/Dynamics/b2World.h>
 #include "ContactListener.h"
 #include "Box2dRenderer.h"
@@ -23,12 +21,12 @@ void Box2dManager::Init(const b2Vec2& gravity, int velocityIteration, int positi
 	m_pBox2dWorld->SetSubStepping(false);
 
 	m_pDebugRenderer = new Box2dRenderer();
-	m_pDebugRenderer->SetFlags(b2Draw::e_shapeBit);
+	m_pDebugRenderer->SetFlags(b2Draw::e_aabbBit);
 	m_pBox2dWorld->SetDebugDraw(m_pDebugRenderer);
 
 
 	//create contact listener to allow overlap events
-	m_ContactListener = new ContactListener(m_pBox2dWorld);
+	m_pContactListener = new ContactListener(m_pBox2dWorld);
 }
 
 void Box2dManager::Simulate() const
@@ -41,6 +39,18 @@ void Box2dManager::Simulate() const
 
 void Box2dManager::RenderDebug() const
 {
+#ifdef _DEBUG
 	if (m_pDebugRenderer != nullptr)
 		m_pBox2dWorld->DrawDebugData();
+#endif
+}
+
+Box2dManager::~Box2dManager()
+{
+	delete m_pBox2dWorld;
+	m_pBox2dWorld = nullptr;
+	delete m_pDebugRenderer;
+	m_pDebugRenderer = nullptr;
+	delete m_pContactListener;
+	m_pContactListener = nullptr;
 }

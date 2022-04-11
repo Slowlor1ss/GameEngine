@@ -158,6 +158,12 @@ void GameObject::SetLocalPosition(const glm::vec2& pos)
 	m_PositionDirty = true;
 }
 
+void biggin::GameObject::TranslateLocalPosition(const glm::vec2& pos)
+{
+	m_Transform->TranslateLocalPosition({ pos.x, pos.y, 0 });
+	m_PositionDirty = true;
+}
+
 const glm::vec3& GameObject::GetLocalPosition()
 {
 	return m_Transform->GetLocalPosition();

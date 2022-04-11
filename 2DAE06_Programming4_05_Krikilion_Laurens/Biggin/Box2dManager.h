@@ -23,11 +23,12 @@ namespace biggin
 	private:
 		friend class Singleton<Box2dManager>;
 		Box2dManager() = default;
+		~Box2dManager() override;
 
 		b2World* m_pBox2dWorld = nullptr;
-		Box2dRenderer* m_pDebugRenderer = nullptr; //TODO: fix memoryleaks
+		Box2dRenderer* m_pDebugRenderer = nullptr;
 
-		ContactListener* m_ContactListener{nullptr};
+		ContactListener* m_pContactListener{nullptr};
 
 		//settings
 		int m_VelocityIterations{};

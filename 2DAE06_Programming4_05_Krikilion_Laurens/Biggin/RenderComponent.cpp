@@ -1,6 +1,7 @@
 #include "BigginPCH.h"
-#include "Sprite.h"
+#include "RenderComponent.h"
 #include "GameObject.h"
+#include "Logger.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "Transform.h"
@@ -23,7 +24,14 @@ RenderComponent::RenderComponent(GameObject* go) : Component(go)
 
 void RenderComponent::Render() const
 {
-	const auto& pos = m_Transform->GetLocalPosition();
-	Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x + m_Offset.x, pos.y + m_Offset.y);
+	if (!SDL_RectEmpty(&m_SrcRect) && !SDL_RectEmpty(&m_DstRect))
+	{
+		Renderer::GetInstance().RenderTexture(*m_pTexture, &m_DstRect, &m_SrcRect, m_Flip);
+	}
+	else
+	{
+		const auto& pos = m_Transform->GetLocalPosition();
+		Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x + m_Offset.x, pos.y + m_Offset.y);
+	}
 }
 

@@ -7,11 +7,12 @@
 #include "ConsoleColors.h"
 #include "StringUtils.hpp"
 
+//Initialize function partly taken from the graphics framework
 void Logger::Initialize()
 {
 	m_os = &std::cout;
 
-	//#if defined(DEBUG) | defined(_DEBUG)
+	#if defined(DEBUG) | defined(_DEBUG) | !defined(ADD_CONSOLE_IN_RELEASE)
 	if (AllocConsole()) //if no console add one
 	{
 		// Redirect the CRT standard input, output, and error handles to the console
@@ -57,30 +58,30 @@ void Logger::Initialize()
 			if (hMenu != NULL) DeleteMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
 		}
 	}
-	//#endif
+	#endif
 }
 
-void Logger::LogDebug(const std::string& msg, const std::source_location location)
+void Logger::LogDebug(const std::string& msg, const std::source_location location) const
 {
 	Log(LogLevel::Debug, msg, location);
 }
 
-void Logger::LogInfo(const std::string& msg, const std::source_location location)
+void Logger::LogInfo(const std::string& msg, const std::source_location location) const
 {
 	Log(LogLevel::Info, msg, location);
 }
 
-void Logger::LogWarning(const std::string& msg, const std::source_location location)
+void Logger::LogWarning(const std::string& msg, const std::source_location location) const
 {
 	Log(LogLevel::Warning, msg, location);
 }
 
-void Logger::LogError(const std::string& msg, const std::source_location location)
+void Logger::LogErrorAndBreak(const std::string& msg, const std::source_location location) const
 {
 	Log(LogLevel::Error, msg, location);
 }
 
-void Logger::LogToDo(const std::string& source, const std::source_location location)
+void Logger::LogToDo(const std::string& source, const std::source_location location) const
 {
 	Log(LogLevel::ToDo, source, location);
 }
@@ -90,7 +91,7 @@ void Logger::ClearConsole()
 	std::system("cls");
 }
 
-void Logger::Log(LogLevel level, const std::string& msg, const std::source_location location)
+void Logger::Log(LogLevel level, const std::string& msg, const std::source_location location) const
 {
 #ifdef NDEBUG
 	if (level == LogLevel::Debug || level == LogLevel::ToDo)
@@ -146,6 +147,7 @@ void Logger::Log(LogLevel level, const std::string& msg, const std::source_locat
 		MessageBox(0, msg.c_str(), "ERROR", MB_OK | MB_ICONERROR);
 	}
 
+	//Checks if we should break for this level (can be changed with the BreakOnLog function)
 	if ((m_BreakBitField & static_cast<int>(level)) == static_cast<int>(level))
 	{
 #if _DEBUG
@@ -157,6 +159,7 @@ void Logger::Log(LogLevel level, const std::string& msg, const std::source_locat
 
 }
 
+//https://www.geeksforgeeks.org/simplify-directory-path-unix-like/
 //dirSize dedicates the size of the path
 std::string Logger::SimplifyPath(const std::string& str, size_t dirSize)
 {
