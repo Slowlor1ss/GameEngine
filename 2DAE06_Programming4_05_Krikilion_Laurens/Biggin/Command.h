@@ -127,7 +127,7 @@ public:
 			//negate y pos because (0,0) is at the top left
 			auto velocity = biggin::InputManager::GetInstance().GetInputContext().GetValue<glm::vec2>()
 													* glm::vec2{1,-1};
-			velocity = velocity.x > velocity.y ? glm::vec2{ velocity.x, 0 } : glm::vec2{ 0, velocity.y };
+			velocity = abs(velocity.x) > abs(velocity.y) ? glm::vec2{ velocity.x, 0 } : glm::vec2{ 0, velocity.y };
 
 			m_Player->SetVelocity(velocity*maxSpeed);
 			break;
