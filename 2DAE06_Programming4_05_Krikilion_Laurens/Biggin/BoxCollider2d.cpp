@@ -12,9 +12,12 @@
 
 using namespace biggin;
 
-BoxCollider2d::BoxCollider2d(biggin::GameObject* go, const glm::vec2& size, bool isTrigger, const std::vector<Observer*>& observers, b2BodyType CollisionType) : Component(go)
+BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigger, b2BodyType CollisionType, const std::vector<Observer*>& observers,
+							std::string tag, const glm::vec2& localOffset, bool centered) : Component(go)
 	, m_pNotifier(go->GetComponent<Subject>())
-	, m_GameObjectRef(GetGameObject())
+	, m_GameObjectRef(go)
+	, m_LocalOffset(localOffset.x, localOffset.y)
+	, m_Tag(tag)
 {
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
@@ -37,66 +40,61 @@ BoxCollider2d::BoxCollider2d(biggin::GameObject* go, const glm::vec2& size, bool
 		m_pBody = box2dManager.GetWorld()->CreateBody(&bd);
 
 	//creating the shape
-	b2PolygonShape* b2Box = new b2PolygonShape;
-	b2Box->SetAsBox(size.x / 2.0f, size.y / 2.0f, b2Vec2(0.0f, 0.0f), 0);
+	b2PolygonShape b2Box;
+	if (centered)
+		//aligns center left with given pos
+		b2Box.SetAsBox(size.x / 2.0f, size.y / 2.0f, b2Vec2(0.0f, 0.0f), 0);
+	else
+		//aligns bottom left with given pos
+		b2Box.SetAsBox(size.x / 2.0f, size.y / 2.0f, b2Vec2(size.x / 2.0f, -size.y / 2.0f), 0);
 
 	//creating the fixture
 	b2FixtureDef fd;
-	fd.shape = b2Box;
+	fd.shape = &b2Box;
 	fd.isSensor = isTrigger;
 	fd.userData = this;
 	fd.density = 0.f;
 	fd.friction = 0.f;
-	m_Fixture = m_pBody->CreateFixture(&fd);
-	m_Fixture->SetUserData(this);
-
-	//b2BodyDef groundBodyDef{};
-	//groundBodyDef.position = {10,10};
-
-	//b2 = box2dManager.GetWorld()->CreateBody(&bd);
-	//b2->CreateFixture(&fd);
-
-	//b2MouseJointDef mjd{};
-	//mjd.bodyA = m_pBody;
-	//mjd.bodyB = b2;
-	////mjd.userData = this;
-	////mjd.dampingRatio = 1.f;
-	////mjd.frequencyHz = 60;
-	//mjd.maxForce = 99999999.f;
-	//mjd.collideConnected = true;
-	//joint = box2dManager.GetWorld()->CreateJoint(&mjd);
+	auto fixture = m_pBody->CreateFixture(&fd);
+	fixture->SetUserData(this);
 }
 
-biggin::BoxCollider2d::~BoxCollider2d()
+BoxCollider2d::~BoxCollider2d()
 {
-	//delete m_Fixture;
-	//m_Fixture = nullptr;
+	const auto& b2World = Box2dManager::GetInstance().GetWorld();
+	if (b2World != nullptr && m_pBody != nullptr)
+	{
+		m_pBody->SetUserData(nullptr);
+		b2World->DestroyBody(m_pBody);
+		m_pBody = nullptr;
+	}
+}
+
+void biggin::BoxCollider2d::Start()
+{
+	const glm::vec2 pos{ m_GameObjectRef->GetLocalPosition() };
+	m_pBody->SetTransform({ pos.x + m_LocalOffset.x ,pos.y + m_LocalOffset.y }, 0);
 }
 
 void BoxCollider2d::FixedUpdate()
 {
-	//if (!m_IsColliding)
-	//{
-		const glm::vec2 pos{ m_GameObjectRef->GetLocalPosition() };
-		auto transform = b2Vec2{pos.x, pos.y} - m_pBody->GetPosition();
-		//m_pBody->SetTransform({pos.x, pos.y}, 0);
-		m_pBody->ApplyLinearImpulseToCenter(10.f * transform, true);
-		//b2Box->m_centroid = { pos.x, pos.y };
-		//m_pBody->SetLinearVelocity({ 0, 10 });
-		//static_cast<b2MouseJoint*>(joint)->SetTarget({ pos.x,pos.y });
-	//}
-	//else
-	//{
-		auto posb = m_pBody->GetPosition();
-		m_GameObjectRef->SetLocalPosition(posb.x, posb.y);
-	//}
+	//TODO: maybe only update this if the object actually moved
+	//ugly way of doing things but I couldn't find a better way to move the character and keep using collisions for now
+	const glm::vec2 pos{ m_GameObjectRef->GetLocalPosition() };
+	auto transform = b2Vec2{pos.x, pos.y} - m_pBody->GetPosition() + m_LocalOffset;
+
+	if (transform == b2Vec2_zero)
+		return;
+
+	m_pBody->ApplyLinearImpulseToCenter(10.f * transform, true);
+
+	auto posb = m_pBody->GetPosition();
+	m_GameObjectRef->SetLocalPosition(posb.x, posb.y);
 }
 
-void BoxCollider2d::BeginContact(const BoxCollider2d* other, b2Contact* /*contact*/)
+void BoxCollider2d::BeginContact(const BoxCollider2d* other)
 {
 	m_pNotifier->notify(other, "BeginContact");
-	auto pos = m_pBody->GetPosition();
-	m_GameObjectRef->SetLocalPosition(pos.x, pos.y);
 	m_IsColliding = true;
 }
 

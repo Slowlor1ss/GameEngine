@@ -1,5 +1,6 @@
 #include "BigginPCH.h"
 #include "PeterPepper.h"
+#include "BoxCollider2d.h"
 #include "GameObject.h"
 #include "GameTime.h"
 #include "HealthComponent.h"
@@ -82,6 +83,11 @@ void character::PeterPepper::FixedUpdate()
 		return;
 	}
 
+	if (m_VerticalMovDisabled)
+		m_Velocity *= glm::vec2{1, 0};
+	else if(m_HorizontalMovDisabled)
+		m_Velocity *= glm::vec2{ 0, 1 };
+
 	UpdateMovementDirection();
 
 	UpdateAnimationState();
@@ -102,6 +108,11 @@ void character::PeterPepper::FixedUpdate()
 	m_Velocity = {0,0};
 }
 
+void character::PeterPepper::SetPosition(const glm::vec2& pos) const
+{
+	GetGameObject()->SetLocalPosition(pos);
+}
+
 void character::PeterPepper::Damage()
 {
 	m_pHealthComp->Damage();
@@ -113,9 +124,18 @@ void character::PeterPepper::OnNotify(const Component* /*entity*/, const std::st
 	if (event == "BeginContact")
 	{
 		std::cout << "ovelap started\n";
+		//if (static_cast<const biggin::BoxCollider2d*>(entity)->GetTag() == "DisableUp")
+		//{
+		//	m_VerticalMovDisabled = true;
+		//}
 	}
 	else if (event == "EndContact")
 	{
 		std::cout << "ovelap ended\n";
+		//TODO: properly remove this also the variables connected to it
+		//if (static_cast<const biggin::BoxCollider2d*>(entity)->GetTag() == "DisableUp")
+		//{
+		//	m_VerticalMovDisabled = false;
+		//}
 	}
 }

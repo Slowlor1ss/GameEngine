@@ -17,6 +17,7 @@
 #include "Scene.h"
 #include "HealthComponent.h"
 #include "HealthUI.h"
+#include "MapLoader.h"
 #include "PeterPepper.h"
 #include "RenderComponent.h"
 #include "ScoreComponent.h"
@@ -54,7 +55,7 @@ void biggin::Biggin::Initialize()
 		"BurgerTime",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		925, //640
+		912, //640
 		700, //480
 		SDL_WINDOW_OPENGL
 	);
@@ -126,16 +127,16 @@ void biggin::Biggin::LoadGame() const
 
 	//Add Player
 	auto playerObject = std::make_shared<GameObject>();
-	playerObject->SetLocalPosition(100, 100);
+	playerObject->SetLocalPosition(0, 0);
 
 	playerObject->AddComponent(new Subject(playerObject.get()));
 	playerObject->AddComponent(new HealthComponent(playerObject.get(), 4, {healthUI}));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 	auto peterPepper = new character::PeterPepper(playerObject.get(), 50);
 	playerObject->AddComponent(peterPepper);
-	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {48, 48}, false, {peterPepper}));
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {30, 30}, false, b2_dynamicBody, {peterPepper}, "Player"));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
-	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{48,48} });
+	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });
@@ -188,60 +189,70 @@ void biggin::Biggin::LoadGame() const
 	ScoreVisualsObject2->AddComponent(scoreUI2);
 	ScoreVisualsObject2->SetLocalPosition({ 890, 550 });
 	scene.Add(ScoreVisualsObject2);
-	
+
+	//Load map
+	auto map = std::make_shared<GameObject>();
+	map->SetLocalPosition(9 * 16, 0 * 16);
+	map->AddComponent(new Subject(map.get()));
+	map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
+	map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39*16, 1000 }, false));
+	map->AddComponent(new MapLoader(map.get(), "../Data/Level1.txt", peterPepper));
+	scene.Add(map);
+
+
 	//Add Player2
-	auto playerObject2 = std::make_shared<GameObject>();
-	playerObject2->SetLocalPosition(300, 100);
+	//auto playerObject2 = std::make_shared<GameObject>();
+	//playerObject2->SetLocalPosition(300, 100);
 
-	playerObject2->AddComponent(new Subject(playerObject2.get()));
-	playerObject2->AddComponent(new HealthComponent(playerObject2.get(), 4, {healthUI2}));
-	playerObject2->AddComponent(new ScoreComponent(playerObject2.get(), {scoreUI2, &CSteamAchievements::GetInstance()}));
-	auto peterPepper2 = new character::PeterPepper(playerObject2.get());
-	playerObject2->AddComponent(peterPepper2);
-	playerObject2->AddComponent(new BoxCollider2d(playerObject2.get(), { 50, 100 }, false, { peterPepper2 }));
-	playerObject2->AddComponent(new RenderComponent(playerObject2.get(), "BurgerTimeSpriteSheet.png"));
-	auto playerSprite2 = new SpriteRenderComponent(playerObject2.get(), { 9,{0,0},{48,48} });
-	playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
-	playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
-	playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });
-	playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::PepperHorizontal), { 1, 10 });
-	playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::PepperVertical), { 1, 11 });
-	playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::Die), { 6, 12 });
-	playerSprite2->SetCurrentSprite(1);
-	playerObject2->AddComponent(playerSprite2);
-	scene.Add(playerObject2);
+	//playerObject2->AddComponent(new Subject(playerObject2.get()));
+	//playerObject2->AddComponent(new HealthComponent(playerObject2.get(), 4, {healthUI2}));
+	//playerObject2->AddComponent(new ScoreComponent(playerObject2.get(), {scoreUI2, &CSteamAchievements::GetInstance()}));
+	//auto peterPepper2 = new character::PeterPepper(playerObject2.get());
+	//playerObject2->AddComponent(peterPepper2);
+	//playerObject2->AddComponent(new BoxCollider2d(playerObject2.get(), { 50, 100 }, false, { peterPepper2 }));
+	//playerObject2->AddComponent(new RenderComponent(playerObject2.get(), "BurgerTimeSpriteSheet.png"));
+	//auto playerSprite2 = new SpriteRenderComponent(playerObject2.get(), { 9,{0,0},{48,48} });
+	//playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
+	//playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
+	//playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });
+	//playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::PepperHorizontal), { 1, 10 });
+	//playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::PepperVertical), { 1, 11 });
+	//playerSprite2->AddAnimation(static_cast<int>(character::AnimationState::Die), { 6, 12 });
+	//playerSprite2->SetCurrentSprite(1);
+	//playerObject2->AddComponent(playerSprite2);
+	//scene.Add(playerObject2);
 
-	InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonB, 1 }, 
-		std::make_unique<DamagePlayer>(peterPepper2));
-	InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonY, 1 },
-		std::make_unique<IncreaseScore>(playerObject2.get()));
+	//InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonB, 1 }, 
+	//	std::make_unique<DamagePlayer>(peterPepper2));
+	//InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonY, 1 },
+	//	std::make_unique<IncreaseScore>(playerObject2.get()));
 
-	//Movement bindings
-	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_i },
-		std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Up));	
-	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_j },
-		std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Left));
-	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_k },
-		std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Down));
-	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_l },
-		std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Right));
+	////Movement bindings
+	//InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_i },
+	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Up));	
+	//InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_j },
+	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Left));
+	//InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_k },
+	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Down));
+	//InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_l },
+	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Right));
 
-	InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 1 },
-		std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::All));
+	//InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 1 },
+	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::All));
 
 	//testing walls
-	auto wall = std::make_shared<GameObject>();
-	wall->SetLocalPosition(300, 300);
-	wall->AddComponent(new Subject(wall.get()));
-	wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody));
-	scene.Add(wall);
+	//auto wall = std::make_shared<GameObject>();
+
+	//wall->AddComponent(new Subject(wall.get()));
+	//wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody));
+	//wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody, { 0, 48 }));
+	//wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody, { 0, 48 * 2 }));
+	//wall->SetLocalPosition(150, 100);
+	//scene.Add(wall);
 
 	//Debug
-	InputManager::GetInstance().MapActionKey({ ActionState::TriggerL, ControllerButton::None, 0 },
-		std::make_unique<DebugFloatCTXCommand>());
-
-	//InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
-	//	std::make_unique<DebugVec2CTXCommand>());
+	//InputManager::GetInstance().MapActionKey({ ActionState::TriggerL, ControllerButton::None, 0 },
+	//	std::make_unique<DebugFloatCTXCommand>());
 
 	InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::Start, 0, SDLK_c },
 		std::make_unique<PrintControls>());
@@ -302,4 +313,8 @@ void biggin::Biggin::Run()
 	}
 
 	Cleanup();
+}
+
+void biggin::Biggin::BurgerPrefab(BurgerIngredients ingredient)
+{
 }

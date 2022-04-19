@@ -219,6 +219,7 @@ xcopy $(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll $(Output
     <ClInclude Include="Box2dManager.h" />
     <ClInclude Include="Box2dRenderer.h" />
     <ClInclude Include="BoxCollider2d.h" />
+    <ClInclude Include="Burger.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ConsoleColors.h" />
@@ -242,6 +243,7 @@ xcopy $(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll $(Output
     <ClInclude Include="Biggin.h" />
     <ClInclude Include="BigginPCH.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="MapLoader.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="PeterPepper.h" />
     <ClInclude Include="Renderer.h" />
@@ -272,6 +274,7 @@ xcopy $(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll $(Output
     <ClCompile Include="Box2dManager.cpp" />
     <ClCompile Include="Box2dRenderer.cpp" />
     <ClCompile Include="BoxCollider2d.cpp" />
+    <ClCompile Include="Burger.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ContactListener.cpp" />
@@ -332,6 +335,7 @@ xcopy $(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll $(Output
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Biggin.cpp" />
+    <ClCompile Include="MapLoader.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="PeterPepper.cpp" />
     <ClCompile Include="Renderer.cpp" />

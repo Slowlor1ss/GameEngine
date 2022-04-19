@@ -24,6 +24,7 @@ namespace character
 
 		void AddVelocity(const glm::vec2& velocity) { m_Velocity += velocity; }
 		void SetVelocity(const glm::vec2& velocity) { m_Velocity = velocity; }
+		void SetPosition(const glm::vec2& pos) const;
 		void Damage();
 		bool IsDead() const { return m_IsDead; }
 		float GetSpeed() const { return m_Speed; }
@@ -40,6 +41,8 @@ namespace character
 		int m_PlayerIndex;
 		MoveDirection m_CurrMovementDir{MoveDirection::None};
 		AnimationState m_CurrAnimState{AnimationState::Idle};
+		bool m_VerticalMovDisabled{ false };
+		bool m_HorizontalMovDisabled{ false };
 
 		biggin::HealthComponent* m_pHealthComp;
 		biggin::SpriteRenderComponent* m_pSpriteComp;

@@ -59,6 +59,7 @@ void biggin::SpriteRenderComponent::UpdateRenderVariables()
 	const auto& gameObjectPos = GetGameObject()->GetLocalPosition();//TODO: turn get game object in to a variable
 	const auto& [widthCell, heightCell] = m_AtlasPart.sizeCell;
 
+	//center rect
 	m_DstRect.x = static_cast<int>(gameObjectPos.x - widthCell * 0.5f);
 	m_DstRect.y = static_cast<int>(gameObjectPos.y - heightCell * 0.5f);
 	m_RenderComponent->SetDstRect(m_DstRect);

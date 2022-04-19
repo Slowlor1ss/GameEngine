@@ -47,10 +47,10 @@ void Box2dManager::RenderDebug() const
 
 Box2dManager::~Box2dManager()
 {
-	delete m_pBox2dWorld;
-	m_pBox2dWorld = nullptr;
-	delete m_pDebugRenderer;
-	m_pDebugRenderer = nullptr;
 	delete m_pContactListener;
 	m_pContactListener = nullptr;
+	delete m_pDebugRenderer;
+	m_pDebugRenderer = nullptr;
+	delete m_pBox2dWorld;
+	m_pBox2dWorld = nullptr;
 }
