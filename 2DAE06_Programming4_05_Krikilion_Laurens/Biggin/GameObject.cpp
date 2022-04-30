@@ -164,12 +164,12 @@ void biggin::GameObject::TranslateLocalPosition(const glm::vec2& pos)
 	m_PositionDirty = true;
 }
 
-const glm::vec3& GameObject::GetLocalPosition()
+const glm::vec2 GameObject::GetLocalPosition()
 {
 	return m_Transform->GetLocalPosition();
 }
 
-const glm::vec3& GameObject::GetWorldPosition()
+const glm::vec2 GameObject::GetWorldPosition()
 {
 	if (m_PositionDirty)
 		UpdateWorldPosition();

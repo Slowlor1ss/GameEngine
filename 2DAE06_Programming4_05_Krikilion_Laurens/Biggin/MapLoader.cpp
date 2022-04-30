@@ -9,6 +9,10 @@
 #include "Logger.h"
 #include "PeterPepper.h"
 
+//NOTE:
+//Very much still in working on this and its far from finished
+//Map loader works by reading a text file generated from a image with a small badly coded python script :D
+
 MapLoader::MapLoader(biggin::GameObject* go, const std::string& file, character::PeterPepper* player)
 	: Component(go)
 	, m_File(file)
@@ -29,7 +33,7 @@ void MapLoader::LoadMap(const std::string& file)
 	const std::string rawName = file.substr(0, file.find_last_of("."));
 
     ReadLevelFile(rawName + ".txt");
-    ReadItemsFile(rawName + "items.txt");
+    //ReadItemsFile(rawName + "items.txt");
 }
 
 void MapLoader::ReadLevelFile(const std::string& file)
@@ -129,10 +133,9 @@ void MapLoader::ProcessLineItemsFile(const std::string& line) const
 		{
 		case MapValues::BurgerTop:
 			{
-				const glm::vec2 pos = { m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f};
+				const glm::vec2 pos = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f} + m_GameObjectRef->GetLocalPosition();
 				//spawn burger top
-				biggin::Biggin::BurgerPrefab(BurgerIngredients::BurgerTop);
-				m_GameObjectRef->AddComponent(new Burger(m_GameObjectRef, pos, m_GridCellSize, BurgerIngredients::BurgerTop));
+				biggin::Biggin::BurgerPrefab(BurgerIngredients::BurgerTop, pos);
 				//move to last letter of the burger
 				i += Burger::GetBurgerSize()-1;
 			}

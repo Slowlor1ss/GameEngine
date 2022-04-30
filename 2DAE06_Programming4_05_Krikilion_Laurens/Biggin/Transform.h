@@ -15,15 +15,19 @@ namespace biggin
 		Transform& operator=(const Transform& other) = delete;
 		Transform& operator=(Transform&& other) noexcept = delete;
 
-		const glm::vec3& GetLocalPosition() const { return m_LocalPosition; }
-		void SetLocalPosition(float x, float y, float z);
+		const glm::vec2 GetLocalPosition() const { return {m_LocalPosition.x, m_LocalPosition.y}; }
+		void SetLocalPosition(float x, float y, float z = 0);
 		void SetLocalPosition(glm::vec3 pos);
+		void SetLocalPosition(glm::vec2 pos);
 		void TranslateLocalPosition(glm::vec3 pos);
+		void TranslateLocalPosition(glm::vec2 pos);
 
-		const glm::vec3& GetWorldPosition() const { return m_WorldPosition; }
-		void SetWorldPosition(float x, float y, float z);
+		const glm::vec2 GetWorldPosition() const { return {m_WorldPosition.x, m_WorldPosition.y}; }
+		void SetWorldPosition(float x, float y, float z = 0);
 		void SetWorldPosition(glm::vec3 pos);
+		void SetWorldPosition(glm::vec2 pos);
 		void TranslateWorldPosition(glm::vec3 pos);
+		void TranslateWorldPosition(glm::vec2 pos);
 
 	private:
 		glm::vec3 m_WorldPosition{};

@@ -4,6 +4,7 @@
 #include <thread>
 #include "Box2dManager.h"
 #include "BoxCollider2d.h"
+#include "Burger.h"
 #include "Command.h"
 #include "FpsCounter.h"
 #include "InputManager.h"
@@ -192,10 +193,10 @@ void biggin::Biggin::LoadGame() const
 
 	//Load map
 	auto map = std::make_shared<GameObject>();
-	map->SetLocalPosition(9 * 16, 0 * 16);
+	map->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
 	map->AddComponent(new Subject(map.get()));
-	map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
-	map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39*16, 1000 }, false));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39 * MapLoader::GetGridSize(), 1000 }, false));
 	map->AddComponent(new MapLoader(map.get(), "../Data/Level1.txt", peterPepper));
 	scene.Add(map);
 
@@ -315,6 +316,14 @@ void biggin::Biggin::Run()
 	Cleanup();
 }
 
-void biggin::Biggin::BurgerPrefab(BurgerIngredients ingredient)
+void biggin::Biggin::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos)
 {
+	auto burger = std::make_shared<GameObject>();
+	//burger->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
+	burger->AddComponent(new Subject(burger.get()));
+	//TODO: find fix for local pos part
+	burger->AddComponent(new Burger(burger.get(), pos, MapLoader::GetGridSize(), ingredient));
+	auto& scene = SceneManager::GetInstance().GetActiveScene();
+	scene.Add(burger);
+
 }

@@ -30,7 +30,7 @@ BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigg
 
 	//define the body
 	b2BodyDef bd;
-	bd.position.Set(pos.x, pos.y);
+	bd.position.Set(pos.x + localOffset.x, pos.y + localOffset.y);
 	bd.allowSleep =  false;
 	bd.type = CollisionType;
 	bd.linearDamping = 7.f;

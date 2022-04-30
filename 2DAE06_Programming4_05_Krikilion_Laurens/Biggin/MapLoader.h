@@ -44,6 +44,8 @@ public:
 
 	void Start() override;
 
+	static constexpr float GetGridSize() { return m_GridCellSize; }
+
 private:
 	void LoadMap(const std::string& file);
 	void ReadLevelFile(const std::string& file);

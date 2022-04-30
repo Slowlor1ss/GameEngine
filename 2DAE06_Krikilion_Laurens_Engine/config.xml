@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="us-ascii"?>
-<Config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <SubmissionRegex>[1,2,3]DAE[0,1,2]\d_Programming4_[0,1]\d_\S+_\S+\.zip</SubmissionRegex>
-  <DevenvPath>C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe</DevenvPath>
-  <BuildAfterReport>false</BuildAfterReport>
-  <OpenVSAfterReport>false</OpenVSAfterReport>
-  <SolutionMajorVersionNumber>17</SolutionMajorVersionNumber>
-  <PlatformToolsetVersion>v143</PlatformToolsetVersion>
-</Config>

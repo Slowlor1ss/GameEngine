@@ -61,3 +61,8 @@ void Scene::RenderUi()
 	}
 }
 
+const std::string& biggin::Scene::GetName() const
+{
+	return m_Name;
+}
+

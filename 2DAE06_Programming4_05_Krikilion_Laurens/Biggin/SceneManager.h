@@ -13,11 +13,16 @@ namespace biggin
 		void Update() const;
 		void FixedUpdate() const;
 		void Render() const;
-		void RenderUi();
+		void RenderUi() const;
+
+		bool ChangeActiveScene(const std::string& name);
+		biggin::Scene& GetActiveScene() const;
 
 	private:
 		friend class Singleton<SceneManager>;
 		SceneManager() = default;
+		std::shared_ptr<Scene> m_ActiveScene;
 		std::vector<std::shared_ptr<Scene>> m_Scenes;
+		bool m_HasActiveScene{ false };
 	};
 }

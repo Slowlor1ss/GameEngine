@@ -54,9 +54,9 @@ namespace biggin
 		void										SetLocalPosition(float x, float y);
 		void										SetLocalPosition(const glm::vec2& pos);
 		void										TranslateLocalPosition(const glm::vec2& pos);
-		const glm::vec3&							GetLocalPosition();
+		const glm::vec2								GetLocalPosition();
 
-		const glm::vec3&							GetWorldPosition();
+		const glm::vec2								GetWorldPosition();
 
 		void										SetPositionDirty() { m_PositionDirty = true; };
 

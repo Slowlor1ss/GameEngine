@@ -30,6 +30,7 @@ Burger::Burger(biggin::GameObject* go, glm::vec2 pos, float tileSize, BurgerIngr
 
 void Burger::OnNotify(const Component* entity, const std::string& event)
 {
+	//TODO: doesn't get called
 	if (event == "BeginContact")
 	{
 		std::cout << "ovelap started with burger\n";
@@ -51,10 +52,6 @@ void Burger::OnNotify(const Component* entity, const std::string& event)
 	else if (event == "EndContact")
 	{
 		std::cout << "ovelap ended\n";
-		//if (static_cast<const biggin::BoxCollider2d*>(entity)->GetTag() == "DisableUp")
-		//{
-		//	m_VerticalMovDisabled = false;
-		//}
 	}
 }
 
