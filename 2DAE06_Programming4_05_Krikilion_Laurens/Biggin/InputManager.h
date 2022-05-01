@@ -77,6 +77,7 @@ namespace biggin
 		InputManagerImpl* m_pImpl;
 
 		//using ControllerKey = std::pair<ButtonState, ControllerButton>;
+		//https://stackoverflow.com/questions/2196995/is-there-any-advantage-of-using-map-over-unordered-map-in-case-of-trivial-keys
 		using ControllerCommandMap = std::unordered_map<const ActionKey, std::unique_ptr<Command>, std::function<size_t(const ActionKey&)>>;
 
 	public:

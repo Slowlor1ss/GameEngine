@@ -10,9 +10,11 @@ namespace biggin
 
 namespace character
 {
+	//TODO: use state pattern
 	enum class AnimationState { Idle, RunHorizontal, RunVertical, PepperHorizontal, PepperVertical, Die };
 	class PeterPepper final : public biggin::Component, public biggin::Observer
 	{
+		//TODO: use state pattern
 		enum class MoveDirection { Left, Right, Up, Down, None};
 
 	public:

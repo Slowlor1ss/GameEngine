@@ -34,6 +34,12 @@
     <Filter Include="Characters">
       <UniqueIdentifier>{6073ca2f-2800-4bf2-be94-54874776c080}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Service Locators">
+      <UniqueIdentifier>{9aa66b45-8a18-4010-a41c-4c3162e886ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Service Locators\Audio">
+      <UniqueIdentifier>{7044144e-917c-4d50-89f1-ba899bd3399b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigginPCH.h">
@@ -177,6 +183,24 @@
     <ClInclude Include="Burger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SoundSystem.h">
+      <Filter>Service Locators\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundServiceLocator.h">
+      <Filter>Service Locators\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="NullSoundSystem.hpp">
+      <Filter>Service Locators\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleSDL2SoundSystem.h">
+      <Filter>Service Locators\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="LogSoundSystem.h">
+      <Filter>Service Locators\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="audio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -306,6 +330,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Burger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundSystem.cpp">
+      <Filter>Service Locators\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundServiceLocator.cpp">
+      <Filter>Service Locators\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleSDL2SoundSystem.cpp">
+      <Filter>Service Locators\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="LogSoundSystem.cpp">
+      <Filter>Service Locators\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

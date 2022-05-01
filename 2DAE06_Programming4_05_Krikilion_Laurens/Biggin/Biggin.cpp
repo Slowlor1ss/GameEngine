@@ -2,6 +2,7 @@
 #include "Biggin.h"
 #include <steam_api_common.h>
 #include <thread>
+#include "audio.h"
 #include "Box2dManager.h"
 #include "BoxCollider2d.h"
 #include "Burger.h"
@@ -23,6 +24,7 @@
 #include "RenderComponent.h"
 #include "ScoreComponent.h"
 #include "ScoreUI.h"
+#include "SoundServiceLocator.h"
 #include "SpriteRenderComponent.h"
 #include "StatsAndAchievements.h"
 #include "Subject.h"
@@ -266,6 +268,7 @@ void biggin::Biggin::Cleanup()
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(m_Window);
 	m_Window = nullptr;
+	SoundServiceLocator::Cleanup();
 	SDL_Quit();
 }
 
