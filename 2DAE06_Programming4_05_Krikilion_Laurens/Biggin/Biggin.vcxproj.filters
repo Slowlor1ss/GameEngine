@@ -31,9 +31,6 @@
     <Filter Include="Ui">
       <UniqueIdentifier>{a5222281-87e7-4b4c-b0bc-75186e13b445}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Characters">
-      <UniqueIdentifier>{6073ca2f-2800-4bf2-be94-54874776c080}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Service Locators">
       <UniqueIdentifier>{9aa66b45-8a18-4010-a41c-4c3162e886ea}</UniqueIdentifier>
     </Filter>
@@ -129,14 +126,8 @@
     <ClInclude Include="imgui_plot.h">
       <Filter>DearImGui</Filter>
     </ClInclude>
-    <ClInclude Include="TrashTheCache.h">
-      <Filter>Ui</Filter>
-    </ClInclude>
     <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PeterPepper.h">
-      <Filter>Characters</Filter>
     </ClInclude>
     <ClInclude Include="HealthComponent.h">
       <Filter>Header Files</Filter>
@@ -156,9 +147,6 @@
     <ClInclude Include="ScoreUI.h">
       <Filter>Ui</Filter>
     </ClInclude>
-    <ClInclude Include="StatsAndAchievements.h">
-      <Filter>Managers</Filter>
-    </ClInclude>
     <ClInclude Include="BoxCollider2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -176,12 +164,6 @@
     </ClInclude>
     <ClInclude Include="Box2dRenderer.h">
       <Filter>Render</Filter>
-    </ClInclude>
-    <ClInclude Include="MapLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Burger.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SoundSystem.h">
       <Filter>Service Locators\Audio</Filter>
@@ -201,15 +183,15 @@
     <ClInclude Include="audio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DebugCommands.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Biggin.cpp">
@@ -278,14 +260,8 @@
     <ClCompile Include="imgui_plot.cpp">
       <Filter>DearImGui</Filter>
     </ClCompile>
-    <ClCompile Include="TrashTheCache.cpp">
-      <Filter>Ui</Filter>
-    </ClCompile>
     <ClCompile Include="Command.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PeterPepper.cpp">
-      <Filter>Characters</Filter>
     </ClCompile>
     <ClCompile Include="HealthComponent.cpp">
       <Filter>Source Files</Filter>
@@ -305,9 +281,6 @@
     <ClCompile Include="HealthUI.cpp">
       <Filter>Ui</Filter>
     </ClCompile>
-    <ClCompile Include="StatsAndAchievements.cpp">
-      <Filter>Managers</Filter>
-    </ClCompile>
     <ClCompile Include="BoxCollider2d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -325,12 +298,6 @@
     </ClCompile>
     <ClCompile Include="Box2dRenderer.cpp">
       <Filter>Render</Filter>
-    </ClCompile>
-    <ClCompile Include="MapLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Burger.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SoundSystem.cpp">
       <Filter>Service Locators\Audio</Filter>

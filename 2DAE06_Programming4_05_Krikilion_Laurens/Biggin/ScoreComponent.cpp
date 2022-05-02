@@ -1,7 +1,6 @@
 #include "BigginPCH.h"
 #include "ScoreComponent.h"
 #include "GameObject.h"
-#include "StatsAndAchievements.h"
 #include "Subject.h"
 
 biggin::ScoreComponent::ScoreComponent(GameObject* go, const std::vector<Observer*>& observers ) : Component(go)

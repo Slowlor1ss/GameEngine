@@ -3,8 +3,6 @@
 #include "GameObject.h"
 #include "HealthComponent.h"
 #include "Logger.h"
-#include "PeterPepper.h"
-#include "Subject.h"
 #include "TextComponent.h"
 
 using namespace biggin;

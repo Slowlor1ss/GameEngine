@@ -5,6 +5,7 @@
 #include "Biggin.h"
 #include "BoxCollider2d.h"
 #include "Burger.h"
+#include "GameLoader.h"
 #include "GameObject.h"
 #include "Logger.h"
 #include "PeterPepper.h"
@@ -84,7 +85,7 @@ void MapLoader::ProcessLineMapFile(const std::string& line) const
 {
     int colliderBeginPos{ 0 };
     int colliderEndPos{ 0 };
-	for (int i{0}; i < line.length(); ++i)
+	for (int i{0}; i < static_cast<int>(line.length()); ++i)
 	{
 		switch (static_cast<MapValues>(line[i]))
 		{
@@ -127,7 +128,7 @@ void MapLoader::ProcessLineMapFile(const std::string& line) const
 
 void MapLoader::ProcessLineItemsFile(const std::string& line) const
 {
-	for (int i{ 0 }; i < line.length(); ++i)
+	for (int i{ 0 }; i < static_cast<int>(line.length()); ++i)
 	{
 		switch (static_cast<MapValues>(line[i]))
 		{
@@ -135,7 +136,7 @@ void MapLoader::ProcessLineItemsFile(const std::string& line) const
 			{
 				const glm::vec2 pos = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f} + m_GameObjectRef->GetLocalPosition();
 				//spawn burger top
-				biggin::Biggin::BurgerPrefab(BurgerIngredients::BurgerTop, pos);
+				GameLoader::BurgerPrefab(BurgerIngredients::BurgerTop, pos);
 				//move to last letter of the burger
 				i += Burger::GetBurgerSize()-1;
 			}

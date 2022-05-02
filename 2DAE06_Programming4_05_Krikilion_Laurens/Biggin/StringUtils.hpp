@@ -10,26 +10,26 @@
 #include <codecvt>
 #include <string>
 
-std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+inline std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 //Example
 //std::string narrow = converter.to_bytes(wide_utf16_source_string);
 //std::wstring wide = converter.from_bytes(narrow_utf8_source_string);
 
-std::string TrimLeft(const std::string& str, const std::string& token = " ")
+inline std::string TrimLeft(const std::string& str, const std::string& token = " ")
 {
     std::string t = str;
     t.erase(0, t.find_first_not_of(token));
     return t;
 }
 
-std::string TrimRight(const std::string& str, const std::string& token = " ")
+inline std::string TrimRight(const std::string& str, const std::string& token = " ")
 {
     std::string t = str;
     t.erase(t.find_last_not_of(token) + 1);
     return t;
 }
 
-std::string Trim(const std::string& str, const std::string& token = " ")
+inline std::string Trim(const std::string& str, const std::string& token = " ")
 {
     std::string t = str;
     t.erase(0, t.find_first_not_of(token));
@@ -38,7 +38,7 @@ std::string Trim(const std::string& str, const std::string& token = " ")
 }
 
 
-std::string ToLower(const std::string& str)
+inline std::string ToLower(const std::string& str)
 {
     std::string t = str;
     std::transform(t.begin(), t.end(), t.begin(),
@@ -46,7 +46,7 @@ std::string ToLower(const std::string& str)
     return t;
 }
 
-std::string ToUpper(const std::string& str)
+inline std::string ToUpper(const std::string& str)
 {
     std::string t = str;
     std::transform(t.begin(), t.end(), t.begin(),
@@ -54,23 +54,23 @@ std::string ToUpper(const std::string& str)
     return t;
 }
 
-bool StartsWith(const std::string& str, const std::string& substr)
+inline bool StartsWith(const std::string& str, const std::string& substr)
 {
     return str.find(substr) == 0;
 }
 
-bool EndsWith(const std::string& str, const std::string& substr)
+inline bool EndsWith(const std::string& str, const std::string& substr)
 {
     return str.rfind(substr) == (str.length() - substr.length());
 }
 
 //checks if 2 strings are equal without casing about uppercase letters
-bool EqualsIgnoreCase(const std::string& str1, const std::string& str2)
+inline bool EqualsIgnoreCase(const std::string& str1, const std::string& str2)
 {
     return ToLower(str1) == ToLower(str2);
 }
 
-std::vector<std::string> Split(const std::string& str, const std::string& delim, const bool trim_empty = false)
+inline std::vector<std::string> Split(const std::string& str, const std::string& delim, const bool trim_empty = false)
 {
     size_t pos, last_pos = 0, len;
     std::vector<std::string> tokens;
@@ -97,12 +97,12 @@ std::vector<std::string> Split(const std::string& str, const std::string& delim,
     return tokens;
 }
 
-bool Contains(const std::string& str, const std::string& token)
+inline bool Contains(const std::string& str, const std::string& token)
 {
     return str.find(token) == std::string::npos ? false : true;
 }
 
-std::string Repeat(const std::string& str, unsigned int times)
+inline std::string Repeat(const std::string& str, unsigned int times)
 {
     std::stringstream ss;
     for (unsigned int i = 0; i < times; ++i) {
@@ -111,7 +111,7 @@ std::string Repeat(const std::string& str, unsigned int times)
     return ss.str();
 }
 
-std::vector<std::string> Compact(const std::vector<std::string>& tokens)
+inline std::vector<std::string> Compact(const std::vector<std::string>& tokens)
 {
     std::vector<std::string> compacted;
 
@@ -124,7 +124,7 @@ std::vector<std::string> Compact(const std::vector<std::string>& tokens)
     return compacted;
 }
 
-std::string Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty = false)
+inline std::string Join(const std::vector<std::string>& tokens, const std::string& delim, const bool trim_empty = false)
 {
     if (trim_empty) {
         return Join(Compact(tokens), delim, false);
@@ -140,12 +140,12 @@ std::string Join(const std::vector<std::string>& tokens, const std::string& deli
     }
 }
 
-std::string ReplacePart(const std::string& source, const std::string& target, const std::string& replacement)
+inline std::string ReplacePart(const std::string& source, const std::string& target, const std::string& replacement)
 {
     return Join(Split(source, target), replacement, false);
 }
 
-std::string Replace(const std::string& source, const char* key, const char* with)
+inline std::string Replace(const std::string& source, const char* key, const char* with)
 {
     std::string new_string;
     size_t search_from = 0;

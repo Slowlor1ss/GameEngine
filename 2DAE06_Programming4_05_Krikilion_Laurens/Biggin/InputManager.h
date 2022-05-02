@@ -1,16 +1,20 @@
 #pragma once
 #include <functional>
-#include <memory>
 #include <unordered_map>
-#include <utility>
 #include <variant>
 #include "Singleton.h"
+#include "iostream"
+
+#pragma warning(push)
+#pragma warning (disable:4201)
+#include <glm/glm.hpp>
+#pragma warning(pop)
 
 class Command;
 
 namespace biggin
 {
-	enum class ControllerButton : WORD
+	enum class ControllerButton
 	{
 		DpadUp = 0x0001,
 		DpadDown = 0x0002,
@@ -29,7 +33,7 @@ namespace biggin
 		None = 0
 	};
 
-	enum class ActionState : WORD
+	enum class ActionState
 	{
 		Up,
 		Down,

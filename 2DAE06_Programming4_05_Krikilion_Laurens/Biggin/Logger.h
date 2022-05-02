@@ -53,7 +53,7 @@ private:
 	int m_BreakBitField{ static_cast<int>(LogLevel::Error) };
 	bool m_AppendTimestamp{ false };
 
-	HANDLE m_ConsoleHandle{ nullptr };
+	void* m_ConsoleHandle{ nullptr };
 
 	friend Singleton<Logger>;
 };

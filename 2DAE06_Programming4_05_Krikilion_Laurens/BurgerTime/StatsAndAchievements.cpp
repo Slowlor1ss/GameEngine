@@ -6,6 +6,7 @@
 #include "ScoreComponent.h"
 #include "Subject.h"
 #include "steam_api.h"
+#include "StringUtils.hpp"
 
 // Defining our achievements
 enum EAchievements
@@ -95,7 +96,7 @@ void CSteamAchievements::OnUserStatsReceived(UserStatsReceived_t* pCallback)
 	{
 		if (k_EResultOK == pCallback->m_eResult)
 		{
-			OutputDebugString("Received stats and achievements from Steam\n");
+			OutputDebugString(L"Received stats and achievements from Steam\n");
 			m_bInitialized = true;
 
 			// load achievements
@@ -116,7 +117,8 @@ void CSteamAchievements::OnUserStatsReceived(UserStatsReceived_t* pCallback)
 		{
 			char buffer[128];
 			_snprintf(buffer, 128, "RequestStats - failed, %d\n", pCallback->m_eResult);
-			OutputDebugString(buffer);
+			std::wstring result = converter.from_bytes(buffer);
+			OutputDebugString(result.c_str());
 		}
 	}
 }
@@ -128,13 +130,14 @@ void CSteamAchievements::OnUserStatsStored(UserStatsStored_t* pCallback)
 	{
 		if (k_EResultOK == pCallback->m_eResult)
 		{
-			OutputDebugString("Stored stats for Steam\n");
+			OutputDebugString(L"Stored stats for Steam\n");
 		}
 		else
 		{
 			char buffer[128];
 			_snprintf(buffer, 128, "StatsStored - failed, %d\n", pCallback->m_eResult);
-			OutputDebugString(buffer);
+			std::wstring result = converter.from_bytes(buffer);
+			OutputDebugString(result.c_str());
 		}
 	}
 }
@@ -144,6 +147,6 @@ void CSteamAchievements::OnAchievementStored(UserAchievementStored_t* pCallback)
 	// we may get callbacks for other games' stats arriving, ignore them
 	if (m_iAppID == static_cast<int64>(pCallback->m_nGameID))
 	{
-		OutputDebugString("Stored Achievement for Steam\n");
+		OutputDebugString(L"Stored Achievement for Steam\n");
 	}
 }

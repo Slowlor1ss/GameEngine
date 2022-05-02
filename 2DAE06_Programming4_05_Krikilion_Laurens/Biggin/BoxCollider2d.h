@@ -1,6 +1,10 @@
 #pragma once
 #include <Box2D/Dynamics/b2Body.h>
 #include "Component.h"
+#pragma warning(push)
+#pragma warning (disable:4201)
+#include <glm/glm.hpp>
+#pragma warning(pop)
 
 namespace biggin
 {

@@ -9,7 +9,10 @@ void biggin::SceneManager::Update() const
 	//	scene->Update();
 	//}
 
-	m_ActiveScene->Update();
+	if (m_ActiveScene != nullptr)
+	{
+		m_ActiveScene->Update();
+	}
 }
 
 void biggin::SceneManager::FixedUpdate() const
