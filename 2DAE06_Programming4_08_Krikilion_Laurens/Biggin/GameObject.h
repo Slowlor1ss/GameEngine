@@ -9,7 +9,7 @@ namespace biggin
 	{
 	public:
 		GameObject();
-		GameObject(GameObject* parent) { SetParent(parent); };
+		GameObject(GameObject* parent);
 		~GameObject();
 
 		GameObject(const GameObject& other) = delete;
@@ -58,7 +58,8 @@ namespace biggin
 
 		const glm::vec2								GetWorldPosition();
 
-		void										SetPositionDirty() { m_PositionDirty = true; };
+		void										SetPositionDirty();
+		bool										GetPositionDirty() const { return m_PositionDirty; };
 
 
 	private:

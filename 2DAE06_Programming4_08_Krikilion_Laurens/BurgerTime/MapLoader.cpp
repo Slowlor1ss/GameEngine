@@ -10,10 +10,8 @@
 #include "Logger.h"
 #include "PeterPepper.h"
 
-//NOTE:
-//Very much still in working on this and its far from finished
 //Map loader works by reading a text file generated from a image with a small badly coded python script :D
-
+//TODO: load background image
 MapLoader::MapLoader(biggin::GameObject* go, const std::string& file, character::PeterPepper* player)
 	: Component(go)
 	, m_File(file)
@@ -22,8 +20,7 @@ MapLoader::MapLoader(biggin::GameObject* go, const std::string& file, character:
 {
 }
 
-
-void MapLoader::Start()
+void MapLoader::Initialize(biggin::GameObject*)
 {
 	LoadMap(m_File);
 }
@@ -133,7 +130,7 @@ void MapLoader::MakeCollider(int i, int colliderBeginPos, unsigned short collisi
 	const int colliderEndPos = i + 1;
 	float colliderWidth = m_GridCellSize * (colliderEndPos - colliderBeginPos);
 	float colliderHeight = m_GridCellSize * 4;
-	glm::vec2 pos = { m_GridCellSize * colliderBeginPos, m_GridCellSize * m_LineNumber + colliderHeight - m_GridCellSize * 0.5f };
+	glm::vec2 pos = { m_GridCellSize * colliderBeginPos, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f };
 
 	b2Filter filter{};
 	filter.categoryBits = collisionGroup;

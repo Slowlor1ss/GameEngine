@@ -9,7 +9,13 @@ using namespace biggin;
 
 GameObject::GameObject() : m_Transform(new Transform(this))
 {
-	m_Components.push_back(m_Transform);
+	m_Components.emplace_back(m_Transform);
+}
+
+biggin::GameObject::GameObject(GameObject* parent) : m_Transform(new Transform(this))
+{
+	m_Components.emplace_back(m_Transform);
+	SetParent(parent);
 }
 
 biggin::GameObject::~GameObject()
@@ -134,7 +140,7 @@ bool GameObject::RemoveChild(GameObject* go)
 
 void GameObject::AddChild(GameObject* go)
 {
-	m_Childeren.push_back(go);
+	m_Childeren.emplace_back(go);
 	//already happens in SetParent() (same for removing the parent)
 	//go->SetParent(shared_from_this());
 }
@@ -149,19 +155,19 @@ const Transform* GameObject::GetTransform()
 void GameObject::SetLocalPosition(float x, float y)
 {
 	m_Transform->SetLocalPosition(x, y, 0);
-	m_PositionDirty = true;
+	SetPositionDirty();
 }
 
 void GameObject::SetLocalPosition(const glm::vec2& pos)
 {
 	m_Transform->SetLocalPosition(pos.x, pos.y, 0);
-	m_PositionDirty = true;
+	SetPositionDirty();
 }
 
 void biggin::GameObject::TranslateLocalPosition(const glm::vec2& pos)
 {
 	m_Transform->TranslateLocalPosition({ pos.x, pos.y, 0 });
-	m_PositionDirty = true;
+	SetPositionDirty();
 }
 
 const glm::vec2 GameObject::GetLocalPosition()
@@ -173,7 +179,19 @@ const glm::vec2 GameObject::GetWorldPosition()
 {
 	if (m_PositionDirty)
 		UpdateWorldPosition();
+
 	return m_Transform->GetWorldPosition();
+}
+
+void biggin::GameObject::SetPositionDirty()
+{
+	//if dirty flag hasn't already been set; set the dirty flag gon all children aswell
+	if (!m_PositionDirty){
+		for (const auto child : m_Childeren)
+			child->SetPositionDirty();
+	}
+
+	m_PositionDirty = true;
 }
 
 void GameObject::UpdateWorldPosition()
@@ -183,7 +201,7 @@ void GameObject::UpdateWorldPosition()
 		if (!m_Parent)
 			m_Transform->SetWorldPosition(m_Transform->GetLocalPosition());
 		else
-			m_Transform->TranslateWorldPosition(m_Transform->GetLocalPosition()); //TODO: chnage this to make it more redable
+			m_Transform->SetWorldPosition( m_Parent->GetWorldPosition()+m_Transform->GetLocalPosition());
 	}
 	m_PositionDirty = false;
 }

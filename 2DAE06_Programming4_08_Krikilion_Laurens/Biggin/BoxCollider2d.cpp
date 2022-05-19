@@ -29,7 +29,7 @@ BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigg
 
 	//m_B2WorldRef = biggin::SceneManager::GetInstance().GetActiveScene().Getb2World();
 	m_Box2dManagerRef = biggin::SceneManager::GetInstance().GetActiveScene().Getb2Manager();
-	const glm::vec2& pos = go->GetLocalPosition();
+	const glm::vec2& pos = go->GetWorldPosition();
 
 	//define the body
 	b2BodyDef bd;
@@ -49,7 +49,7 @@ BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigg
 		b2Box.SetAsBox(size.x / 2.0f, size.y / 2.0f, b2Vec2(0.0f, 0.0f), 0);
 	else
 		//aligns bottom left with given pos
-		b2Box.SetAsBox(size.x / 2.0f, size.y / 2.0f, b2Vec2(size.x / 2.0f, -size.y / 2.0f), 0);
+		b2Box.SetAsBox(size.x / 2.0f, size.y / 2.0f, b2Vec2(size.x / 2.0f, size.y / 2.0f), 0);
 
 	//creating the fixture
 	b2FixtureDef fd;
@@ -59,7 +59,7 @@ BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigg
 	fd.density = 0.f;
 	fd.friction = 0.f;
 	fd.filter = filter;
-	auto fixture = m_pBody->CreateFixture(&fd);
+	const auto fixture = m_pBody->CreateFixture(&fd);
 	fixture->SetUserData(this);
 
 }
@@ -76,7 +76,7 @@ BoxCollider2d::~BoxCollider2d()
 
 void biggin::BoxCollider2d::Start()
 {
-	const glm::vec2 pos{ m_GameObjectRef->GetLocalPosition() };
+	const glm::vec2 pos{ m_GameObjectRef->GetWorldPosition() };
 	m_pBody->SetTransform({ pos.x + m_LocalOffset.x ,pos.y + m_LocalOffset.y }, 0);
 }
 
@@ -84,9 +84,8 @@ void BoxCollider2d::FixedUpdate()
 {
 	m_EnableCollider = true;
 
-
-	const glm::vec2 pos{ m_GameObjectRef->GetLocalPosition() };
-	auto transform = b2Vec2{ pos.x, pos.y } + m_LocalOffset - m_pBody->GetPosition() ;
+	const glm::vec2 pos{ m_GameObjectRef->GetWorldPosition() };
+	const auto transform = b2Vec2{ pos.x, pos.y } + m_LocalOffset - m_pBody->GetPosition() ;
 
 	if (transform == b2Vec2_zero)
 		return;
@@ -95,9 +94,10 @@ void BoxCollider2d::FixedUpdate()
 	//manually preform a step with high position iterations to prevent tunneling
 	m_Box2dManagerRef->GetWorld()->Step(GameTime::GetFixedTimeStep(), 8, 10);
 	//m_pBody->ApplyLinearImpulseToCenter(10.f * transform, true);
-
-	auto posb = m_pBody->GetPosition() - m_LocalOffset;
-	m_GameObjectRef->SetLocalPosition(posb.x, posb.y);
+	auto wp = m_GameObjectRef->GetWorldPosition();
+	const auto posb = m_pBody->GetPosition() - m_LocalOffset - b2Vec2{ wp.x, wp.y };
+	m_GameObjectRef->TranslateLocalPosition({posb.x, posb.y});
+	//m_GameObjectRef->SetLocalPosition(posb.x, posb.y);
 }
 
 void BoxCollider2d::BeginContact(BoxCollider2d* other)

@@ -23,7 +23,7 @@ namespace biggin
 	private:
 		std::shared_ptr<Texture2D> m_pTexture{nullptr};
 
-		const Transform* m_Transform;
+		GameObject* m_GameObjectRef{nullptr};
 		glm::vec2 m_Offset;
 		SDL_Rect m_SrcRect;
 		SDL_Rect m_DstRect;

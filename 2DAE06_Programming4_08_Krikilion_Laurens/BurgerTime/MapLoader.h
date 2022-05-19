@@ -48,7 +48,7 @@ public:
 	MapLoader& operator=(const MapLoader& other) = delete;
 	MapLoader& operator=(MapLoader&& other) noexcept = delete;
 
-	void Start() override;
+	void Initialize(biggin::GameObject*) override;
 
 	static constexpr float GetGridSize() { return m_GridCellSize; }
 

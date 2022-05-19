@@ -268,16 +268,58 @@ void GameLoader::RenderMenu()
 
 void GameLoader::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos)
 {
-	auto burger = std::make_shared<GameObject>();
-	//burger->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
-	burger->AddComponent(new RenderComponent(burger.get(), "BurgerTimeSpriteSheet.png"));
-	burger->AddComponent(new RenderComponent(burger.get(), "BurgerTimeSpriteSheet.png"));
-	burger->AddComponent(new RenderComponent(burger.get(), "BurgerTimeSpriteSheet.png"));
-	burger->AddComponent(new RenderComponent(burger.get(), "BurgerTimeSpriteSheet.png"));
-	burger->AddComponent(new Subject(burger.get()));
-	//TODO: find fix for local pos part
-	burger->AddComponent(new Burger(burger.get(), pos, MapLoader::GetGridSize(), ingredient));
 	auto& scene = SceneManager::GetInstance().GetActiveScene();
+
+	//making the burger
+	const auto burger = std::make_shared<GameObject>();
+	burger->SetLocalPosition(pos);
+	const auto burgerComponent = new Burger(burger.get(), ingredient);
+	burger->AddComponent(burgerComponent);
 	scene.Add(burger);
 
+	//Adding the 4 child components out burger par uses
+	//TODO: maybe do this in a for loop as its 4 times the same code
+	b2Filter filter{};
+	filter.maskBits = 0xFFFF ^ static_cast<unsigned short>(biggin::CollisionGroup::Group1); //Ignore group 1
+	filter.categoryBits = static_cast<unsigned short>(biggin::CollisionGroup::Group2);//set self to group 2
+
+	for (size_t i{0}; i < Burger::GetBurgerSize(); ++i)
+	{
+		const auto burgerCell = std::make_shared<GameObject>(burger.get());
+		burgerCell->AddComponent(new Subject(burgerCell.get()));
+		burgerCell->AddComponent(new RenderComponent(burgerCell.get(), "BurgerTimeSpriteSheet.png"));
+		burgerCell->AddComponent(
+		new BoxCollider2d(
+			burgerCell.get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize()-5 }, true, b2_dynamicBody,
+			{ burgerComponent }, "Burger", {0, 5}, false, filter)
+		);
+		scene.Add(burgerCell);
+	}
+
+	//const auto burgerCell2 = std::make_shared<GameObject>(burger.get());
+	//burgerCell2->AddComponent(new RenderComponent(burgerCell2.get(), "BurgerTimeSpriteSheet.png"));
+	//burgerCell2->AddComponent(
+	//	new BoxCollider2d(
+	//		burgerCell2.get(), { MapLoader::GetGridSize() - 5, MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
+	//		{ burgerComponent }, "Burger", {}, false, filter)
+	//);
+	//scene.Add(burgerCell2);
+
+	//const auto burgerCell3 = std::make_shared<GameObject>(burger.get());
+	//burgerCell3->AddComponent(new RenderComponent(burgerCell3.get(), "BurgerTimeSpriteSheet.png"));
+	//burgerCell3->AddComponent(
+	//	new BoxCollider2d(
+	//		burgerCell3.get(), { MapLoader::GetGridSize() - 5, MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
+	//		{ burgerComponent }, "Burger", {}, false, filter)
+	//);
+	//scene.Add(burgerCell3);
+
+	//const auto burgerCell4 = std::make_shared<GameObject>(burger.get());
+	//burgerCell4->AddComponent(new RenderComponent(burgerCell4.get(), "BurgerTimeSpriteSheet.png"));
+	//burgerCell4->AddComponent(
+	//	new BoxCollider2d(
+	//		burgerCell4.get(), { MapLoader::GetGridSize() - 5, MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
+	//		{ burgerComponent }, "Burger", {}, false, filter)
+	//);
+	//scene.Add(burgerCell4);
 }

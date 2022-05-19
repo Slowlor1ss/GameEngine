@@ -11,7 +11,7 @@ void biggin::Subject::AddObserver(Observer* observer)
 {
 	const auto it = std::ranges::find(m_pObservers, observer);
 	if (it == m_pObservers.end())
-		m_pObservers.push_back(observer);
+		m_pObservers.emplace_back(observer);
 }
 
 //https://gameprogrammingpatterns.com/observer.html#the-subject
@@ -21,7 +21,7 @@ void biggin::Subject::RemoveObserver(Observer* observer)
 	//Prevent observers from modifying the list(m_pObservers) in their onNotify() methods
 	if (m_BusyNotifying)
 	{
-		m_pPendingDelete.push_back(observer);
+		m_pPendingDelete.emplace_back(observer);
 	}
 	else //not notifying so its safe to delete
 	{

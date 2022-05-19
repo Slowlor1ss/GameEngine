@@ -83,7 +83,7 @@ inline std::vector<std::string> Split(const std::string& str, const std::string&
 
         len = pos - last_pos;
         if (!trim_empty || len != 0) {
-            tokens.push_back(str.substr(last_pos, len));
+            tokens.emplace_back(str.substr(last_pos, len));
         }
 
         if (pos == str.size()) {
@@ -117,7 +117,7 @@ inline std::vector<std::string> Compact(const std::vector<std::string>& tokens)
 
     for (size_t i = 0; i < tokens.size(); ++i) {
         if (!tokens[i].empty()) {
-            compacted.push_back(tokens[i]);
+            compacted.emplace_back(tokens[i]);
         }
     }
 

@@ -9,14 +9,14 @@
 using namespace biggin;
 
 RenderComponent::RenderComponent(GameObject* go, std::string path, const glm::vec2& offset) : Component(go)
-	, m_Transform(go->GetTransform())
+	, m_GameObjectRef(go)
 	, m_Offset(offset)
 {
 	m_pTexture = ResourceManager::GetInstance().LoadTexture(path);
 }
 
 RenderComponent::RenderComponent(GameObject* go) : Component(go)
-	,m_Transform(go->GetTransform())
+	, m_GameObjectRef(go)
 	,m_Offset({0,0})
 	,m_pTexture(nullptr)
 {
@@ -28,9 +28,15 @@ void RenderComponent::Render() const
 	{
 		Renderer::GetInstance().RenderTexture(*m_pTexture, &m_DstRect, &m_SrcRect, m_Flip);
 	}
+	else if(!SDL_RectEmpty(&m_SrcRect))
+	{
+		const auto& pos = m_GameObjectRef->GetWorldPosition();
+		const SDL_Rect dstRect{ static_cast<int>(pos.x + m_Offset.x), static_cast<int>(pos.y + m_Offset.y) , m_SrcRect.w, m_SrcRect.h};
+		Renderer::GetInstance().RenderTexture(*m_pTexture, &dstRect, &m_SrcRect, m_Flip);
+	}
 	else
 	{
-		const auto& pos = m_Transform->GetLocalPosition();
+		const auto& pos = m_GameObjectRef->GetWorldPosition();
 		Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x + m_Offset.x, pos.y + m_Offset.y);
 	}
 }

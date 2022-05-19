@@ -36,6 +36,8 @@ namespace biggin
 		glm::vec2 GetLocalPos() { return { m_LocalOffset.x,m_LocalOffset.y }; }
 		void TranslateLocalOffset(const glm::vec2& transform) { m_LocalOffset += b2Vec2{ transform.x,transform.y }; }
 
+		GameObject* GetOwningGameObject() const { return GetGameObject(); }
+
 	private:
 		b2Body* m_pBody{ nullptr };
 

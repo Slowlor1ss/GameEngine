@@ -76,7 +76,7 @@ biggin::Scene& biggin::SceneManager::CreateScene(const std::string& name)
 
 	const auto& scene = std::shared_ptr<Scene>(new Scene(name));
 	//const auto& scene = std::make_shared<Scene>(name);
-	m_Scenes.push_back(scene);
+	m_Scenes.emplace_back(scene);
 
 	if (!m_HasActiveScene)
 		m_ActiveScene = scene;

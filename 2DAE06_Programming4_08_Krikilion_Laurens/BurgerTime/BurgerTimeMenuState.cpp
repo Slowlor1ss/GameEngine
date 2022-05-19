@@ -216,11 +216,16 @@ void MainMenuState::LoadSinglePlayer()
 	map->AddComponent(new MapLoader(map.get(), "../Data/Level1.txt", peterPepper));
 	scene.Add(map);
 
+	//auto test = std::make_shared<GameObject>();
+	//test->AddComponent(new Subject(test.get()));
+	//test->AddComponent(new BoxCollider2d(test.get(), { 30, 30 }, false, b2_staticBody, { }, "", {}, false));
+	//test->AddComponent(new RenderComponent(test.get(), "test.png"));
+	//scene.Add(test);
 
 	//Add Player2
 	//auto playerObject2 = std::make_shared<GameObject>();
 	//playerObject2->SetLocalPosition(300, 100);
-
+	//
 	//playerObject2->AddComponent(new Subject(playerObject2.get()));
 	//playerObject2->AddComponent(new HealthComponent(playerObject2.get(), 4, {healthUI2}));
 	//playerObject2->AddComponent(new ScoreComponent(playerObject2.get(), {scoreUI2, &CSteamAchievements::GetInstance()}));
@@ -238,12 +243,12 @@ void MainMenuState::LoadSinglePlayer()
 	//playerSprite2->SetCurrentSprite(1);
 	//playerObject2->AddComponent(playerSprite2);
 	//scene.Add(playerObject2);
-
+	//
 	//InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonB, 1 }, 
 	//	std::make_unique<DamagePlayer>(peterPepper2));
 	//InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonY, 1 },
 	//	std::make_unique<IncreaseScore>(playerObject2.get()));
-
+	//
 	////Movement bindings
 	//InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_i },
 	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Up));	
@@ -253,20 +258,20 @@ void MainMenuState::LoadSinglePlayer()
 	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Down));
 	//InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_l },
 	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::Right));
-
+	//
 	//InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 1 },
 	//	std::make_unique<MoveCommand>(peterPepper2, MoveCommand::ActionDirection::All));
-
+	//
 	//testing walls
 	//auto wall = std::make_shared<GameObject>();
-
+	//
 	//wall->AddComponent(new Subject(wall.get()));
 	//wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody));
 	//wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody, { 0, 48 }));
 	//wall->AddComponent(new BoxCollider2d(wall.get(), { 48, 48 }, false, {}, b2_staticBody, { 0, 48 * 2 }));
 	//wall->SetLocalPosition(150, 100);
 	//scene.Add(wall);
-
+	//
 	//Debug
 	//InputManager::GetInstance().MapActionKey({ ActionState::TriggerL, ControllerButton::None, 0 },
 	//	std::make_unique<DebugFloatCTXCommand>());
