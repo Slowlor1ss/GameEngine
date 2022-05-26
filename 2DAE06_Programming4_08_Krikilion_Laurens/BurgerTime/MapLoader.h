@@ -1,6 +1,11 @@
 #pragma once
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 #include "Component.h"
+#include "Observer.h"
+#include "Subject.h"
 
 enum class BurgerIngredients;
 
@@ -11,12 +16,12 @@ namespace character
 
 namespace biggin
 {
+	class RenderComponent;
 	class GameObject;
 }
 
-class MapLoader : public biggin::Component
+class MapLoader final : public biggin::Component, public biggin::Observer
 {
-	//TODO: add catcher the thing that catches the burger at the bottom so burgs know when to stop falling
 	//TODO: add extra collider
 	//TODO: add player location
 	enum class MapValues : char
@@ -40,7 +45,7 @@ class MapLoader : public biggin::Component
 	};
 
 public:
-	MapLoader(biggin::GameObject* go, const std::string& file, character::PeterPepper* player);
+	MapLoader(biggin::GameObject* go, const std::vector<Observer*>& observers = {});
 	~MapLoader() override = default;
 
 	MapLoader(const MapLoader& other) = delete;
@@ -49,24 +54,42 @@ public:
 	MapLoader& operator=(MapLoader&& other) noexcept = delete;
 
 	void Initialize(biggin::GameObject*) override;
+	void Start() override;
+	void OnNotify(Component* entity, const std::string& event) override;
+	void Update() override;
+
+	void ResetLevel();
+	void LoadNext();
 
 	static constexpr float GetGridSize() { return m_GridCellSize; }
 
+
 private:
+	void ReadJsonLevelFile(const std::string& file);
 	void LoadMap(const std::string& file);
 	void ReadLevelFile(const std::string& file);
 	void ReadItemsFile(const std::string& file);
 	void ProcessLineMapFile(const std::string& line) const;
 	void MakeCollider(int i, int colliderBeginPos, unsigned short collisionGroup = 1, std::string tag = "Platform") const;
-	void ProcessLineItemsFile(const std::string& line) const;
+	void ProcessLineItemsFile(const std::string& line);
 
-	void SpawnBurgerPart(int& i, BurgerIngredients ingredent) const;
+	void SpawnBurgerPart(int& i, BurgerIngredients ingredent);
 
-	std::string m_File;
+	int m_CurrentLevelIdx;
+
+	std::vector<std::string> m_LevelPaths;
+	std::vector<std::string> m_ImagePaths;
 	int m_LineNumber{0};
 
+	int m_AmntBurgerParts{};
+	int m_AmntLandedParts{};
+
+	bool m_LoadNextLevel;
+
 	biggin::GameObject* m_GameObjectRef{ nullptr };
-	character::PeterPepper* m_PlayerRef{ nullptr };
+	std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
+	biggin::RenderComponent* m_BackgroundImgRef{ nullptr };
+	biggin::Subject* m_pNotifier;
 
 	static constexpr float m_GridCellSize{ 16 };//size of one cell is 16x16
 

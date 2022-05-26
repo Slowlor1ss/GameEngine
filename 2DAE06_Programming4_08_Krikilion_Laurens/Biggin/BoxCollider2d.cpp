@@ -92,7 +92,7 @@ void BoxCollider2d::FixedUpdate()
 
 	m_pBody->SetTransform(b2Vec2{ pos.x, pos.y } + m_LocalOffset, 0);
 	//manually preform a step with high position iterations to prevent tunneling
-	m_Box2dManagerRef->GetWorld()->Step(GameTime::GetFixedTimeStep(), 8, 10);
+	m_Box2dManagerRef->GetWorld()->Step(GameTime::GetFixedTimeStep(), 4, 6);
 	//m_pBody->ApplyLinearImpulseToCenter(10.f * transform, true);
 	auto wp = m_GameObjectRef->GetWorldPosition();
 	const auto posb = m_pBody->GetPosition() - m_LocalOffset - b2Vec2{ wp.x, wp.y };
@@ -116,4 +116,10 @@ void BoxCollider2d::EndContact(BoxCollider2d* other)
 
 	m_pNotifier->notify(other, "EndContact");
 	other->m_pOtherCollider = nullptr;
+}
+
+void BoxCollider2d::AddObservers(const std::vector<Observer*>& observers) const
+{
+	for (const auto observer : observers)
+		m_pNotifier->AddObserver(observer);
 }

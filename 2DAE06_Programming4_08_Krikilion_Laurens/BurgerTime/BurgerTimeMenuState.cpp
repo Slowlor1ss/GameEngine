@@ -61,6 +61,8 @@ void MainMenuState::RenderMenu(GameLoader* UiMenu)
 		if (!m_IsLoadedSinglePlayer)
 			LoadSinglePlayer();
 
+		SceneManager::GetInstance().ChangeActiveScene("SinglePlayer");
+
 		UiMenu->GetState()->Exit();
 		UiMenu->SetState(m_pRunningState);
 		UiMenu->GetState()->Enter();
@@ -97,17 +99,22 @@ void MainMenuState::LoadSinglePlayer()
 		<< "If Peter Piper picked a peck of pickled peppers,\n"
 		<< "where's the peck of pickled peppers Peter Piper picked? \n\n";
 
-
 	auto& sceneManager = SceneManager::GetInstance();
 	auto& scene = sceneManager.CreateScene("SinglePlayer");
 	sceneManager.ChangeActiveScene("SinglePlayer");
 	const auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 
-	auto go = std::make_shared<GameObject>();
+	//Load map
+	auto map = std::make_shared<GameObject>();
+	map->Setname("Map");
+	map->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
+	map->AddComponent(new Subject(map.get()));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39 * MapLoader::GetGridSize(), 1000 }, false));
+	map->AddComponent(new RenderComponent(map.get()));
+	map->AddComponent(new MapLoader(map.get(), { m_pRunningState }));
 
-	go->AddComponent(new RenderComponent(go.get(), "BurgerTimeStage1.png"));
-	scene.Add(go);
-
+	scene.Add(map);
 	//Add Fps
 	auto fpsObject = std::make_shared<GameObject>();
 
@@ -145,6 +152,7 @@ void MainMenuState::LoadSinglePlayer()
 
 	//Add Player
 	auto playerObject = std::make_shared<GameObject>();
+	playerObject->Setname("Player");
 
 	playerObject->AddComponent(new Subject(playerObject.get()));
 	playerObject->AddComponent(new HealthComponent(playerObject.get(), 4, { healthUI }));
@@ -183,38 +191,29 @@ void MainMenuState::LoadSinglePlayer()
 	InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
 		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
 
-	//Add HealthUI P2
-	auto HealthVisualsObject2 = std::make_shared<GameObject>();
-
-	HealthVisualsObject2->AddComponent(new RenderComponent(HealthVisualsObject2.get()));
-	const auto healthText2 = new TextComponent(HealthVisualsObject2.get());
-	healthText2->SetColor({ 255, 255, 0, 1 });
-	HealthVisualsObject2->AddComponent(healthText2);
-	const auto healthUI2 = new HealthUI(HealthVisualsObject2.get());
-	HealthVisualsObject2->AddComponent(healthUI2);
-	HealthVisualsObject2->SetLocalPosition({ 990, 500 });
-	scene.Add(HealthVisualsObject2);
-
-	//Add ScoreUI P2
-	auto ScoreVisualsObject2 = std::make_shared<GameObject>();
-
-	ScoreVisualsObject2->AddComponent(new RenderComponent(ScoreVisualsObject2.get()));
-	const auto scoreText2 = new TextComponent(ScoreVisualsObject2.get());
-	scoreText2->SetColor({ 255, 255, 0, 1 });
-	ScoreVisualsObject2->AddComponent(scoreText2);
-	const auto scoreUI2 = new ScoreUI(ScoreVisualsObject2.get());
-	ScoreVisualsObject2->AddComponent(scoreUI2);
-	ScoreVisualsObject2->SetLocalPosition({ 890, 550 });
-	scene.Add(ScoreVisualsObject2);
-
-	//Load map
-	auto map = std::make_shared<GameObject>();
-	map->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
-	map->AddComponent(new Subject(map.get()));
-	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
-	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39 * MapLoader::GetGridSize(), 1000 }, false));
-	map->AddComponent(new MapLoader(map.get(), "../Data/Level1.txt", peterPepper));
-	scene.Add(map);
+	////Add HealthUI P2
+	//auto HealthVisualsObject2 = std::make_shared<GameObject>();
+	//
+	//HealthVisualsObject2->AddComponent(new RenderComponent(HealthVisualsObject2.get()));
+	//const auto healthText2 = new TextComponent(HealthVisualsObject2.get());
+	//healthText2->SetColor({ 255, 255, 0, 1 });
+	//HealthVisualsObject2->AddComponent(healthText2);
+	//const auto healthUI2 = new HealthUI(HealthVisualsObject2.get());
+	//HealthVisualsObject2->AddComponent(healthUI2);
+	//HealthVisualsObject2->SetLocalPosition({ 990, 500 });
+	//scene.Add(HealthVisualsObject2);
+	//
+	////Add ScoreUI P2
+	//auto ScoreVisualsObject2 = std::make_shared<GameObject>();
+	//
+	//ScoreVisualsObject2->AddComponent(new RenderComponent(ScoreVisualsObject2.get()));
+	//const auto scoreText2 = new TextComponent(ScoreVisualsObject2.get());
+	//scoreText2->SetColor({ 255, 255, 0, 1 });
+	//ScoreVisualsObject2->AddComponent(scoreText2);
+	//const auto scoreUI2 = new ScoreUI(ScoreVisualsObject2.get());
+	//ScoreVisualsObject2->AddComponent(scoreUI2);
+	//ScoreVisualsObject2->SetLocalPosition({ 890, 550 });
+	//scene.Add(ScoreVisualsObject2);
 
 	//auto test = std::make_shared<GameObject>();
 	//test->AddComponent(new Subject(test.get()));
@@ -286,7 +285,22 @@ void MainMenuState::LoadSinglePlayer()
 
 void RunningState::Enter()
 {
-	SceneManager::GetInstance().ChangeActiveScene("SinglePlayer");
+}
+
+void RunningState::OnNotify(biggin::Component* /*entity*/, const std::string& event)
+{
+	if (event == "FinishedLevel")
+	{
+		//create new scene
+		//move player, score, and health
+		//reset/remove old scene
+	}
+	else if (event == "GameOver")
+	{
+		//save high-score
+		//reset all
+		//load main menu
+	}
 }
 
 void RunningState::RenderMenu(GameLoader* UiMenu)

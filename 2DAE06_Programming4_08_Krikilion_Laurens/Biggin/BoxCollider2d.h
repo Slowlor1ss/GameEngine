@@ -6,6 +6,7 @@
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <glm/glm.hpp>
 #include "Scene.h"
+#include "Subject.h"
 #pragma warning(pop)
 
 namespace biggin
@@ -26,6 +27,8 @@ namespace biggin
 
 		void BeginContact(BoxCollider2d* other);
 		void EndContact(BoxCollider2d* other);
+
+		void AddObservers(const std::vector<Observer*>& observers) const;
 
 		std::string GetTag() const { return m_Tag; }
 		void SetTag(const std::string& tag) { m_Tag = tag ; }

@@ -1,7 +1,11 @@
 #pragma once
+#include <vector>
+#include <string>
 
 namespace biggin
 {
+	class Observer;
+	class Scene;
 	class Component;
 	class Transform;
 
@@ -26,6 +30,7 @@ namespace biggin
 
 
 		void										AddComponent(Component* component);
+		void										AddComponentPending(Component* component);
 
 		//partly based on https://stackoverflow.com/questions/44105058/implementing-component-system-from-unity-in-c
 		template<typename ComponentType>
@@ -38,14 +43,18 @@ namespace biggin
 		bool										RemoveComponent();
 		template<typename ComponentType>
 		int											RemoveComponents();
+		template<typename ComponentType>
+		int											RemoveComponentsPending();
 
-		//TODO: for all children set transform relative to the transform of the parent
-		void										SetParent(GameObject* parent, bool keepWorldPos = true); //TODO: all children should have this as parent one the new parent is set also check if parent is not itself
+		void										Setname(std::string name) { m_Name = name; };
+		std::string									Getname() const { return m_Name; };
+
+		void										SetParent(GameObject* parent, bool keepWorldPos = true);
 		GameObject*									GetParent() const { return m_Parent; };
 
 		size_t										GetChildCount() const { return m_Childeren.size(); };
 		GameObject*									GetChildAt(unsigned int index) const;
-		std::vector<GameObject*>					GetAllChilderen() const { return m_Childeren; }; //TODO: keep it private
+		std::vector<GameObject*>					GetAllChilderen() const { return m_Childeren; };
 
 
 		//void										SetTransform(Transform* transform) { m_Transform = transform; };
@@ -61,6 +70,14 @@ namespace biggin
 		void										SetPositionDirty();
 		bool										GetPositionDirty() const { return m_PositionDirty; };
 
+		void										SetSceneRef(Scene* scene);
+		Scene*										GetSceneRef() const { return m_SceneRef; };
+
+		void										RemoveObserver(Observer* observer);
+		void										RemoveObservers(const std::vector<Observer*>& observers);
+		void										AddObserver(Observer* observer);
+		void										AddObservers(const std::vector<Observer*>& observers);
+
 
 	private:
 		//TODO: maybe make them private
@@ -73,12 +90,18 @@ namespace biggin
 		void										UpdateWorldPosition();
 
 		//Allows "caching" of the transform component to we don't have to find it in the components list every time
-		Transform* m_Transform{ nullptr };
-		GameObject* m_Parent{ nullptr };
-		std::vector<Component*> m_Components; //TODO: maybe make these raw ptrs
-		std::vector<GameObject*> m_Childeren;
-
+		Transform* m_pTransform { nullptr };
 		bool m_PositionDirty{false};
+
+		GameObject* m_Parent{ nullptr };
+		std::vector<Component*> m_Components{};
+		std::vector<GameObject*> m_Childeren{};
+
+		Scene* m_SceneRef{nullptr};
+		std::string m_Name;
+
+		std::vector <Component*> m_pPendingAdd{};
+		std::vector <Component*> m_pPendingDelete{};
 	};
 
 	/**
@@ -137,10 +160,13 @@ namespace biggin
 				return dynamic_cast<ComponentType*>(component);
 			});
 
-		bool success = index != m_Components.end();
+		const bool success = index != m_Components.end();
 
 		if (success)
-			m_Components.erase(index); //TODO: if we use raw pointers later we should also delete the object here
+		{
+			delete* index;
+			m_Components.erase(index);
+		}
 
 		return success;
 	}
@@ -157,25 +183,71 @@ namespace biggin
 			return 0;
 
 		int numRemoved = 0;
-		bool success = false;
+		//bool success = false;
+		//
+		//do
+		//{
+		//	const auto& index = std::find_if(m_Components.begin(),
+		//		m_Components.end(),
+		//		[](auto& component)
+		//		{
+		//			return dynamic_cast<ComponentType*>(component);
+		//		});
+		//
+		//	success = index != m_Components.end();
+		//
+		//	if (success)
+		//	{
+		//		m_Components.erase(index);
+		//		++numRemoved;
+		//	}
+		//} while (success);
 
-		do
+		for (auto i = m_Components.begin(); i != m_Components.end();)
 		{
-			auto& index = std::find_if(m_Components.begin(),
-				m_Components.end(),
-				[](auto& component)
-				{
-					return dynamic_cast<ComponentType*>(component);
-				});
-
-			success = index != m_Components.end();
-
-			if (success)
+			if (dynamic_cast<ComponentType*>(*i))
 			{
-				m_Components.erase(index);
+				delete *i;
+				*i = nullptr;
+				i = m_Components.erase(i);
 				++numRemoved;
 			}
-		} while (success);
+			else
+				++i;
+		}
+
+		//std::erase_if(m_Components,
+		//			[&](auto& component)
+		//			{
+		//				if( dynamic_cast<ComponentType*>(component))
+		//				{
+		//					++numRemoved;
+		//					return true;
+		//				}
+		//				return false;
+		//			});
+
+		return numRemoved;
+	}
+
+	template<typename ComponentType>
+	int GameObject::RemoveComponentsPending()
+	{
+		if (m_Components.empty())
+			return 0;
+
+		int numRemoved = 0;
+
+		for (auto i = m_Components.begin(); i != m_Components.end();)
+		{
+			if (dynamic_cast<ComponentType*>(*i))
+			{
+				m_pPendingDelete.emplace_back(*i);
+				++numRemoved;
+			}
+
+			++i;
+		}
 
 		return numRemoved;
 	}

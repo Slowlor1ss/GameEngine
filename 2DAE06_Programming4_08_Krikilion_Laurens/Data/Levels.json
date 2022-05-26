@@ -1,0 +1,18 @@
+[
+{
+	"levelPath":"../Data/Level1.txt",
+	"backgroundImage":"../Data/BurgerTimeStage1.png"
+},
+{
+	"levelPath":"../Data/Level2.txt",
+	"backgroundImage":"../Data/BurgerTimeStage2.png"
+},
+{
+	"levelPath":"../Data/Level1.txt",
+	"backgroundImage":"../Data/BurgerTimeStage1.png"
+},
+{
+	"levelPath":"../Data/Level1.txt",
+	"backgroundImage":"../Data/BurgerTimeStage1.png"
+}
+]

@@ -180,6 +180,9 @@
     <ClInclude Include="MenuState.h">
       <Filter>Ui</Filter>
     </ClInclude>
+    <ClInclude Include="RemoveOnEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -301,6 +304,9 @@
     </ClCompile>
     <ClCompile Include="MenuRenderer.cpp">
       <Filter>Ui</Filter>
+    </ClCompile>
+    <ClCompile Include="RemoveOnEvent.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

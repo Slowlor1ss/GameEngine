@@ -1,37 +1,42 @@
-HHH__HH__HHH__HH__HHH__HH__HHH__HH__HHH
+B_____________________________________E
+
+
+
+
+
+HHHBEHHBEHHHBEHHBEHHHBEHHBEHHHBEHHBEHHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
-HHH__HH__HHH__HH__HHH  HH  HHH  HH  HHH
+HHHBEHHBEHHHBEHHBEHHH  HH  HHH  HH  HHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
-HHH__HH__HHH  HH  HHH__HH__HHH__HH__HHH
+HHHBEHHBEHHH  HH  HHHBEHHBEHHHBEHHBEHHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
-HHH  HH  HHH__HH__HHH  HH  HHH__HH__HHH
+HHH  HH  HHHBEHHBEHHH  HH  HHHBEHHBEHHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
 HHH  HH  HHH  HH  HHH  HH  HHH  HH  HHH
-______________HH__HHH__HH______________
+B____________EHHBEHHHBEHHB____________E
               HH  HHH  HH              
               HH  HHH  HH              
-              HH  HHH__HH_____         
+              HH  HHHBEHHB___E         
               HH  HHH  HH              
               HH  HHH  HH              
-         _____HH__HHH  HH              
+         B___EHHBEHHH  HH              
               HH  HHH  HH              
               HH  HHH  HH              
-              HH  HHH__HH_____         
+              HH  HHHBEHHB___E         
               HH  HHH  HH              
               HH  HHH  HH              
-         _________HHH_________         
+         B_______EHHHB_______E         
                   HHH                  
-   ______         HHH         ______   
+   C____A         HHH         C____A   
                   HHH                  
                   HHH                  
                   HHH                  
-                  ___                  
+                  B_E                  
                                        
                                        
                                        
                                        
-            ______   ______            
- 									   
+            C____A   C____A            

@@ -1,4 +1,3 @@
-#include "BigginPCH.h"
 #include "MapLoader.h"
 #include <fstream>
 #include <Box2D/Dynamics/b2Body.h>
@@ -9,24 +8,119 @@
 #include "GameObject.h"
 #include "Logger.h"
 #include "PeterPepper.h"
+#include "Observer.h"
+#include <document.h>
+#include <istreamwrapper.h>
+#include "RenderComponent.h"
 
 //Map loader works by reading a text file generated from a image with a small badly coded python script :D
 //TODO: load background image
-MapLoader::MapLoader(biggin::GameObject* go, const std::string& file, character::PeterPepper* player)
+MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& observers)
 	: Component(go)
-	, m_File(file)
+	, m_CurrentLevelIdx(0)
 	, m_GameObjectRef(go)
-	, m_PlayerRef(player)
+	, m_pNotifier(go->GetComponent<biggin::Subject>())
 {
+	if (m_pNotifier == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
+
+	for (const auto observer : observers)
+		m_pNotifier->AddObserver(observer);
+
+	ReadJsonLevelFile("../Data/Levels.json");
 }
 
 void MapLoader::Initialize(biggin::GameObject*)
 {
-	LoadMap(m_File);
+	if (m_LevelPaths.empty())
+		Logger::GetInstance().LogErrorAndBreak("No level paths were found; add levels in the Levels.json file");
+
+	m_BackgroundImgRef = m_GameObjectRef->GetComponent<biggin::RenderComponent>();
+	m_BackgroundImgRef->SetOffset(-m_GameObjectRef->GetWorldPosition());
+	//m_PlayerRef = m_GameObjectRef->GetSceneRef()->FindGameObjectsWithName("Player");
+	if (m_PlayerRef.empty())
+		Logger::GetInstance().LogWarning("No player found");
+
+	LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
+
+}
+
+void MapLoader::Start()
+{
+}
+
+void MapLoader::OnNotify(Component* /*entity*/, const std::string& event)
+{
+	if (event == "BurgerReachedEnd")
+	{
+		if (m_AmntLandedParts == m_AmntBurgerParts)
+		{
+			//player finished level
+			//m_pNotifier->notify(this, "FinishedLevel");
+			m_LoadNextLevel = true;
+			//ResetLevel();
+		}
+	}
+}
+
+void MapLoader::Update()
+{
+	if (m_LoadNextLevel)
+	{
+		m_pNotifier->notify(this, "FinishedLevel");
+		ResetLevel();
+		LoadNext();
+		m_LoadNextLevel = false;
+	}
+}
+
+void MapLoader::ResetLevel()
+{
+
+	m_GameObjectRef->RemoveComponentsPending<biggin::BoxCollider2d>();
+	m_AmntBurgerParts = 0;
+	m_AmntLandedParts = 0;
+}
+
+void MapLoader::LoadNext()
+{
+	++m_CurrentLevelIdx;
+	if (m_CurrentLevelIdx < m_LevelPaths.size())
+	{
+		LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
+	}
+	else
+	{
+		//end of game
+	}
+}
+
+void MapLoader::ReadJsonLevelFile(const std::string& file)
+{
+	std::ifstream is{ file };
+
+	if (!is)
+		throw std::runtime_error("Couldn't open/find file with name " + file);
+
+	// Handle file content
+	rapidjson::Document jsonDoc;
+	rapidjson::IStreamWrapper isw{ is };
+	jsonDoc.ParseStream(isw);
+
+	for (auto jsonDocItr = jsonDoc.Begin(); jsonDocItr != jsonDoc.End(); ++jsonDocItr)
+	{
+		m_LevelPaths.emplace_back((*jsonDocItr)["levelPath"].GetString());
+		m_ImagePaths.emplace_back((*jsonDocItr)["backgroundImage"].GetString());
+	}
+
+	if (m_LevelPaths.size() != m_ImagePaths.size())
+		Logger::GetInstance().LogErrorAndBreak("Not every level has a background image");
 }
 
 void MapLoader::LoadMap(const std::string& file)
 {
+	m_BackgroundImgRef->SetTexture(m_ImagePaths[m_CurrentLevelIdx]);
+
 	//remove the extension if there is one
 	const std::string rawName = file.substr(0, file.find_last_of("."));
 
@@ -118,7 +212,7 @@ void MapLoader::ProcessLineMapFile(const std::string& line) const
 			MakeCollider(i, colliderBeginPos, static_cast<unsigned short>(biggin::CollisionGroup::None), "Catcher");
 			break;
 		case MapValues::Player:
-			m_PlayerRef->SetPosition(glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition());
+			//m_PlayerRef[0]->SetLocalPosition(glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition());
 			break;
         default: ;
 		}
@@ -135,12 +229,12 @@ void MapLoader::MakeCollider(int i, int colliderBeginPos, unsigned short collisi
 	b2Filter filter{};
 	filter.categoryBits = collisionGroup;
 
-	m_GameObjectRef->AddComponent(new biggin::BoxCollider2d(
+	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
 		m_GameObjectRef, { colliderWidth, colliderHeight }, false, b2_staticBody,
 		{}, tag, pos, false, filter));
 }
 
-void MapLoader::ProcessLineItemsFile(const std::string& line) const
+void MapLoader::ProcessLineItemsFile(const std::string& line)
 {
 	for (int i{ 0 }; i < static_cast<int>(line.length()); ++i)
 	{
@@ -165,11 +259,11 @@ void MapLoader::ProcessLineItemsFile(const std::string& line) const
 	}
 }
 
-void MapLoader::SpawnBurgerPart(int& i, BurgerIngredients ingredent) const
+void MapLoader::SpawnBurgerPart(int& i, BurgerIngredients ingredent)
 {
 	const glm::vec2 pos = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
 	//spawn burger top
-	GameLoader::BurgerPrefab(ingredent, pos);
+	GameLoader::BurgerPrefab(ingredent, pos, { this });
 	//move to last letter of the burger
 	i += Burger::GetBurgerSize() - 1;
 }

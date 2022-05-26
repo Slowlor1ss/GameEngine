@@ -30,6 +30,7 @@
 #include "StatsAndAchievements.h"
 #include "Subject.h"
 #include "InputManager.h"
+#include "RemoveOnEvent.h"
 
 using namespace biggin;
 
@@ -266,60 +267,46 @@ void GameLoader::RenderMenu()
 //	scene.Start();
 //}
 
-void GameLoader::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos)
+void GameLoader::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const std::vector<Observer*>& observers)
 {
 	auto& scene = SceneManager::GetInstance().GetActiveScene();
+
+
+	//adding the 4 child components out burger par uses
+	b2Filter filter{};
+	filter.maskBits = 0xFFFF ^ static_cast<unsigned short>(biggin::CollisionGroup::Group1); //Ignore group 1 (extra colliders) //TODO: make group in burger and use that one here
+	filter.categoryBits = static_cast<unsigned short>(biggin::CollisionGroup::Group2);//set self to group 2
+
+	std::shared_ptr<GameObject> burgerCells[Burger::GetBurgerSize()]{};
+
+	for (size_t i{ 0 }; i < Burger::GetBurgerSize(); ++i)
+	{
+		burgerCells[i] = std::make_shared<GameObject>();
+		burgerCells[i]->AddComponent(new Subject(burgerCells[i].get()));
+		burgerCells[i]->AddComponent(new RenderComponent(burgerCells[i].get(), "BurgerTimeSpriteSheet.png"));
+		burgerCells[i]->AddComponent(
+			new BoxCollider2d(
+				burgerCells[i].get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
+				{}, "Burger", { 0, 5 }, false, filter)
+		);
+		burgerCells[i]->AddComponent(new RemoveOnEvent(burgerCells[i].get(), "FinishedLevel", "Map"));
+		scene.Add(burgerCells[i]);
+	}
 
 	//making the burger
 	const auto burger = std::make_shared<GameObject>();
 	burger->SetLocalPosition(pos);
-	const auto burgerComponent = new Burger(burger.get(), ingredient);
+	burger->AddComponent(new Subject(burger.get())); //used to notify when a burger has reached the catcher
+	const auto burgerComponent = new Burger(burger.get(), ingredient, observers);
 	burger->AddComponent(burgerComponent);
-	scene.Add(burger);
+	burger->AddComponent(new RemoveOnEvent(burger.get(), "FinishedLevel", "Map"));
 
-	//Adding the 4 child components out burger par uses
-	//TODO: maybe do this in a for loop as its 4 times the same code
-	b2Filter filter{};
-	filter.maskBits = 0xFFFF ^ static_cast<unsigned short>(biggin::CollisionGroup::Group1); //Ignore group 1
-	filter.categoryBits = static_cast<unsigned short>(biggin::CollisionGroup::Group2);//set self to group 2
-
+	//setting the parent and adding the observers
 	for (size_t i{0}; i < Burger::GetBurgerSize(); ++i)
 	{
-		const auto burgerCell = std::make_shared<GameObject>(burger.get());
-		burgerCell->AddComponent(new Subject(burgerCell.get()));
-		burgerCell->AddComponent(new RenderComponent(burgerCell.get(), "BurgerTimeSpriteSheet.png"));
-		burgerCell->AddComponent(
-		new BoxCollider2d(
-			burgerCell.get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize()-5 }, true, b2_dynamicBody,
-			{ burgerComponent }, "Burger", {0, 5}, false, filter)
-		);
-		scene.Add(burgerCell);
+		burgerCells[i]->SetParent(burger.get(), false);
+		burgerCells[i]->AddObserver(burgerComponent);
 	}
 
-	//const auto burgerCell2 = std::make_shared<GameObject>(burger.get());
-	//burgerCell2->AddComponent(new RenderComponent(burgerCell2.get(), "BurgerTimeSpriteSheet.png"));
-	//burgerCell2->AddComponent(
-	//	new BoxCollider2d(
-	//		burgerCell2.get(), { MapLoader::GetGridSize() - 5, MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
-	//		{ burgerComponent }, "Burger", {}, false, filter)
-	//);
-	//scene.Add(burgerCell2);
-
-	//const auto burgerCell3 = std::make_shared<GameObject>(burger.get());
-	//burgerCell3->AddComponent(new RenderComponent(burgerCell3.get(), "BurgerTimeSpriteSheet.png"));
-	//burgerCell3->AddComponent(
-	//	new BoxCollider2d(
-	//		burgerCell3.get(), { MapLoader::GetGridSize() - 5, MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
-	//		{ burgerComponent }, "Burger", {}, false, filter)
-	//);
-	//scene.Add(burgerCell3);
-
-	//const auto burgerCell4 = std::make_shared<GameObject>(burger.get());
-	//burgerCell4->AddComponent(new RenderComponent(burgerCell4.get(), "BurgerTimeSpriteSheet.png"));
-	//burgerCell4->AddComponent(
-	//	new BoxCollider2d(
-	//		burgerCell4.get(), { MapLoader::GetGridSize() - 5, MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
-	//		{ burgerComponent }, "Burger", {}, false, filter)
-	//);
-	//scene.Add(burgerCell4);
+	scene.Add(burger);
 }

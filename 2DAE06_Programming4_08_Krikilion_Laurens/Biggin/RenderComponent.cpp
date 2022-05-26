@@ -8,17 +8,19 @@
 
 using namespace biggin;
 
-RenderComponent::RenderComponent(GameObject* go, std::string path, const glm::vec2& offset) : Component(go)
+RenderComponent::RenderComponent(GameObject* go, const std::string& path, const glm::vec2& offset)
+	: Component(go)
 	, m_GameObjectRef(go)
 	, m_Offset(offset)
 {
 	m_pTexture = ResourceManager::GetInstance().LoadTexture(path);
 }
 
-RenderComponent::RenderComponent(GameObject* go) : Component(go)
+RenderComponent::RenderComponent(GameObject* go)
+	: Component(go)
+	, m_pTexture(nullptr)
 	, m_GameObjectRef(go)
-	,m_Offset({0,0})
-	,m_pTexture(nullptr)
+	, m_Offset({0,0})
 {
 }
 
@@ -39,5 +41,31 @@ void RenderComponent::Render() const
 		const auto& pos = m_GameObjectRef->GetWorldPosition();
 		Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x + m_Offset.x, pos.y + m_Offset.y);
 	}
+}
+
+void biggin::RenderComponent::SetTexture(const std::shared_ptr<Texture2D> texture)
+{
+	m_pTexture = texture;
+}
+
+void biggin::RenderComponent::SetTexture(const std::string& path)
+{
+	m_pTexture = ResourceManager::GetInstance().LoadTexture(path);
+}
+
+void biggin::RenderComponent::SetSourceRect(const SDL_Rect& src)
+{
+	m_SrcRect = src;
+}
+
+void biggin::RenderComponent::SetDstRect(const SDL_Rect& dst)
+{
+	m_DstRect = dst;
+}
+
+void biggin::RenderComponent::TranslateDstRect(const SDL_Point& translation)
+{
+	m_DstRect.x += translation.x;
+	m_DstRect.y += translation.y;
 }
 

@@ -7,22 +7,40 @@
 #include "MapLoader.h"
 #include "RenderComponent.h"
 #include "SpriteRenderComponent.h"
+#include "Subject.h"
 
-Burger::Burger(biggin::GameObject* go, BurgerIngredients ingredient)
+Burger::Burger(biggin::GameObject* go, BurgerIngredients ingredient, const std::vector<Observer*>& observers)
 	: Component(go)
 	, m_Ingredient(ingredient)
+	, m_pNotifier(go->GetComponent<biggin::Subject>())
 {
+	if (m_pNotifier == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
 
+	for (const auto observer : observers)
+		m_pNotifier->AddObserver(observer);
+}
+
+Burger::~Burger()
+{
+	for (auto child : m_Childeren)
+	{
+		child->RemoveObserver(this);
+	}
+}
+
+void Burger::Initialize(biggin::GameObject* )
+{
 }
 
 void Burger::Start()
 {
-	//m_RenderComponents.reserve(m_BurgerSize);
-
-//m_RenderComponents = go->GetComponents<biggin::RenderComponent>();
 	m_Childeren = GetGameObject()->GetAllChilderen();
-	//if (m_RenderComponents.empty())
-	//	Logger::GetInstance().LogErrorAndBreak("Missing RenderComponent(s)");
+
+	if (m_Childeren.size() != m_BurgerSize)
+	{
+		Logger::GetInstance().LogWarning("Expected " + std::to_string(m_BurgerSize) + "burger but got " + std::to_string(m_Childeren.size()));
+	}
 
 	switch (m_Ingredient)
 	{
@@ -40,23 +58,6 @@ void Burger::Start()
 		break;
 	default:;
 	}
-
-	//auto playerSprite = new biggin::SpriteRenderComponent(go, { 6,{13* int(tileSize), 7* int(tileSize)},{int(tileSize),int(tileSize)} });
-
-	//b2Filter filter{};
-	//filter.maskBits = 0xFFFF ^ static_cast<unsigned short>(biggin::CollisionGroup::Group1); //Ignore group 1
-	//filter.categoryBits = static_cast<unsigned short>(biggin::CollisionGroup::Group2);//set self to group 2
-
-	//for (size_t i{ 0 }; i < m_BurgerSize; ++i)
-	//{
-	//	glm::vec2 localPos = pos + glm::vec2{ tileSize * i, 0 };
-
-	//	m_ColliderComponents.emplace_back(new biggin::BoxCollider2d(
-	//		go, { tileSize - 5, tileSize - 5 }, true, b2_dynamicBody,
-	//		{ this }, "Burger", localPos, false, filter));
-
-	//	go->AddComponent(m_ColliderComponents.back());
-	//}
 }
 
 void Burger::OnNotify(Component* entity, const std::string& event)
@@ -94,16 +95,11 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 				m_Touched[index] = true;
 				(*it)->TranslateLocalPosition({ 0, int(MapLoader::GetGridSize() / 2.f) });
-				//m_Childeren[index]->SetLocalPosition({});
-				//m_RenderComponents[index]->TranslateDstRect({ 0, int(MapLoader::GetGridSize()/2.f) });
 			}
 			else
 			{
 				Logger::GetInstance().LogDebug("No matching child found");
 			}
-				
-			//thisCollider->TranslateLocalOffset({0, MapLoader::GetGridSize()/2.f});
-
 
 			++m_AmntTouchedParts;
 			if (m_AmntTouchedParts == m_BurgerSize)
@@ -119,8 +115,6 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 				m_Touched[i] = true;
 				m_Childeren[i]->TranslateLocalPosition({ 0, int(MapLoader::GetGridSize() / 2.f) });
-				//m_RenderComponents[i]->TranslateDstRect({ 0, int(MapLoader::GetGridSize() / 2.f) });
-				//m_ColliderComponents[i]->TranslateLocalOffset({0, MapLoader::GetGridSize() / 2.f});
 			}
 		}
 		else if (tag == "Catcher")
@@ -128,11 +122,12 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 			//set the tag of our burger to catcher so other burgers land on top of it
 			static_cast<biggin::BoxCollider2d*>(entity)->GetOther()->SetTag("Catcher");
 			m_ReachedBottom = true;
+			m_pNotifier->notify(this, "BurgerReachedEnd");
 		}
 	}
 	else if (event == "EndContact")
 	{
-		Logger::GetInstance().LogDebug("ovelap ended Burger");
+		//Logger::GetInstance().LogDebug("ovelap ended Burger");
 	}
 }
 
@@ -144,23 +139,11 @@ void Burger::FixedUpdate()
 	{
 		auto deltaVelo = glm::vec2{ 0, m_Velocity } * GameTime::GetFixedTimeStep();
 		GetGameObject()->TranslateLocalPosition(deltaVelo);
-		//for (const auto renderComponent : m_RenderComponents)
-		//{
-		//	renderComponent->TranslateDstRect({ int(deltaVelo.x), int(deltaVelo.y) });
-		//}
 	}
 }
 
 void Burger::InitRenderComp(int collumnIdx) const
 {
-	//for (int i{ 0 }; i < m_RenderComponents.size(); ++i)
-	//{
-	//	m_RenderComponents[i]->SetSourceRect({ (14 + i) * int(tileSize), collumnIdx * int(tileSize), int(tileSize),int(tileSize) });
-
-	//	glm::vec2 localPos = pos + glm::vec2{ tileSize * i, -tileSize };
-	//	m_RenderComponents[i]->SetDstRect({ int(localPos.x), int(localPos.y), int(tileSize),int(tileSize) });
-	//}
-
 	constexpr auto tileSize = MapLoader::GetGridSize();
 	for (int i{ 0 }; i < m_Childeren.size(); ++i)
 	{
@@ -169,6 +152,5 @@ void Burger::InitRenderComp(int collumnIdx) const
 
 		glm::vec2 localPos = glm::vec2{ tileSize * i, -tileSize };
 		m_Childeren[i]->SetLocalPosition(localPos);
-		//m_RenderComponents[i]->SetDstRect({ int(localPos.x), int(localPos.y), int(tileSize),int(tileSize) });
 	}
 }

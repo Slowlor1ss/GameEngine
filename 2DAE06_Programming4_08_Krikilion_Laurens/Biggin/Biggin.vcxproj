@@ -266,6 +266,7 @@
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="NullSoundSystem.hpp" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="RemoveOnEvent.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
@@ -360,6 +361,7 @@
     <ClCompile Include="MenuRenderer.cpp" />
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="Observer.cpp" />
+    <ClCompile Include="RemoveOnEvent.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Scene.cpp" />

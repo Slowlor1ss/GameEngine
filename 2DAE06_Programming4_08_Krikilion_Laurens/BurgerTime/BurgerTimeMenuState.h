@@ -1,5 +1,7 @@
 #pragma once
+#include <string>
 #include "MenuState.h"
+#include "Observer.h"
 
 //https://gameprogrammingpatterns.com/state.html
 
@@ -60,10 +62,12 @@ protected:
 
 };
 
-class RunningState : public BurgerTimeMenuState
+class RunningState final : public BurgerTimeMenuState, public biggin::Observer
 {
 public:
 	~RunningState() override = default;
+
+	void OnNotify(biggin::Component* entity, const std::string& event) override;
 
 	void RenderMenu(GameLoader* UiMenu) override;
 
@@ -73,7 +77,7 @@ protected:
 
 };
 
-class OptionsState : public BurgerTimeMenuState
+class OptionsState final : public BurgerTimeMenuState
 {
 public:
 	~OptionsState() override = default;
