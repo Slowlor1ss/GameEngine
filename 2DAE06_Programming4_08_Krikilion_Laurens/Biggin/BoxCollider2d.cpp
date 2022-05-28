@@ -3,6 +3,7 @@
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <Box2D/Dynamics/b2World.h>
+#include <Box2D/Dynamics/Contacts/b2Contact.h>
 #include "Box2dManager.h"
 #include "GameObject.h"
 #include "GameTime.h"
@@ -11,6 +12,7 @@
 #include "SceneManager.h"
 #include "Subject.h"
 #include "Box2dManager.h"
+#include "Utils.hpp"
 
 using namespace biggin;
 
@@ -62,6 +64,7 @@ BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigg
 	const auto fixture = m_pBody->CreateFixture(&fd);
 	fixture->SetUserData(this);
 
+	m_DelayedEnableCallback = utils::DelayedCallback(GameTime::GetFixedTimeStep()*2, [&] {m_EnableCollider = true; }, 1);
 }
 
 BoxCollider2d::~BoxCollider2d()
@@ -82,7 +85,8 @@ void biggin::BoxCollider2d::Start()
 
 void BoxCollider2d::FixedUpdate()
 {
-	m_EnableCollider = true;
+	if (!m_EnableCollider)
+		m_DelayedEnableCallback.Update(GameTime::GetFixedTimeStep());
 
 	const glm::vec2 pos{ m_GameObjectRef->GetWorldPosition() };
 	const auto transform = b2Vec2{ pos.x, pos.y } + m_LocalOffset - m_pBody->GetPosition() ;
@@ -92,7 +96,7 @@ void BoxCollider2d::FixedUpdate()
 
 	m_pBody->SetTransform(b2Vec2{ pos.x, pos.y } + m_LocalOffset, 0);
 	//manually preform a step with high position iterations to prevent tunneling
-	m_Box2dManagerRef->GetWorld()->Step(GameTime::GetFixedTimeStep(), 4, 6);
+	m_Box2dManagerRef->GetWorld()->Step(GameTime::GetFixedTimeStep(), 0, 5);
 	//m_pBody->ApplyLinearImpulseToCenter(10.f * transform, true);
 	auto wp = m_GameObjectRef->GetWorldPosition();
 	const auto posb = m_pBody->GetPosition() - m_LocalOffset - b2Vec2{ wp.x, wp.y };
@@ -102,7 +106,7 @@ void BoxCollider2d::FixedUpdate()
 
 void BoxCollider2d::BeginContact(BoxCollider2d* other)
 {
-	//ignores first frame ovelap events when some object haven't been positioned yet
+	//ignores first few ovelap events when some object haven't been positioned yet
 	if (!m_EnableCollider) return;
 
 	other->m_pOtherCollider = this;
@@ -111,9 +115,10 @@ void BoxCollider2d::BeginContact(BoxCollider2d* other)
 
 void BoxCollider2d::EndContact(BoxCollider2d* other)
 {
-	//ignores first frame ovelap events when some object haven't been positioned yet
+	//ignores first few ovelap events when some object haven't been positioned yet
 	if (!m_EnableCollider) return;
 
+	other->m_pOtherCollider = this;
 	m_pNotifier->notify(other, "EndContact");
 	other->m_pOtherCollider = nullptr;
 }
@@ -123,3 +128,8 @@ void BoxCollider2d::AddObservers(const std::vector<Observer*>& observers) const
 	for (const auto observer : observers)
 		m_pNotifier->AddObserver(observer);
 }
+
+//bool biggin::BoxCollider2d::GetIsColliding() const
+//{
+//	return m_pBody->GetContactList();
+//}

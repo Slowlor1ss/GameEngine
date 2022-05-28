@@ -12,6 +12,7 @@
 #include "Burger.h"
 #include "BurgerTimeCommands.hpp"
 #include "Command.h"
+#include "EnemyMovement.h"
 #include "FpsCounter.h"
 #include "SceneManager.h"
 #include "Renderer.h"
@@ -154,6 +155,7 @@ void MainMenuState::LoadSinglePlayer()
 	auto playerObject = std::make_shared<GameObject>();
 	playerObject->Setname("Player");
 
+
 	playerObject->AddComponent(new Subject(playerObject.get()));
 	playerObject->AddComponent(new HealthComponent(playerObject.get(), 4, { healthUI }));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
@@ -277,6 +279,45 @@ void MainMenuState::LoadSinglePlayer()
 
 	InputManager::GetInstance().MapActionKey({biggin::ActionState::Up, biggin::ControllerButton::Start, 0, SDLK_c },
 		std::make_unique<PrintControls>());
+
+	auto enemy = std::make_shared<GameObject>();
+	enemy->SetLocalPosition(16*9, 16*5);
+
+	enemy->AddComponent(new RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
+	auto enemySprite = new SpriteRenderComponent(enemy.get(), { 9,{0,0},{32,32} });
+	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runHorizontal), { 2, 20 });
+	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runVertical), { 2, 18 });
+	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::peppered), { 2, 31 });
+	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::die), { 4, 27 });
+	enemySprite->SetCurrentSprite(0);
+	enemy->AddComponent(enemySprite);
+
+	enemy->AddComponent(new Subject(enemy.get()));
+	b2Filter filter{};
+	//filter.categoryBits = biggin::BoxCollider2d::CollisionGroup::None;
+	filter.maskBits = MapLoader::mapCollisionsGroup; //ignore everything except for mapCollisionsGroup
+
+	auto enemyMovComp = new EnemyMovement(enemy.get(), EnemyMovement::movementDirection::movingRight);
+	enemy->AddComponent(enemyMovComp);
+	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
+	, "ColliderTop", {0, -16}, true, filter));
+	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
+	, "ColliderBottom", { 0, 16 }, true, filter));
+	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
+	, "ColliderLeft", { -24, 0 }, true, filter));
+	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
+	, "ColliderRight", { 24, 0 }, true, filter));
+
+	//playerObject->AddComponent(new BoxCollider2d(enemy.get(), { 30, 30 }, true, b2_dynamicBody, { enemyMovComp }
+	//, "ColliderTop", { 0, 30 }, false, filter));
+
+
+	scene.Add(enemy);
+
+	////Foreground
+	//auto foreground = std::make_shared<GameObject>();
+	//foreground->AddComponent(new RenderComponent(foreground.get(), "BurgerTimeStageForeground.png"));
+	//scene.Add(foreground);
 
 	scene.Start();
 

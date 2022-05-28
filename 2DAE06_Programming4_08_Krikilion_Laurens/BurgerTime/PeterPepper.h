@@ -4,6 +4,7 @@
 
 namespace biggin
 {
+	class BoxCollider2d;
 	class SpriteRenderComponent;
 	class HealthComponent;
 }
@@ -35,7 +36,7 @@ namespace character
 
 	private:
 		void UpdateAnimationState();
-		void UpdateMovementDirection();
+		void UpdateMovementDirectionState();
 		bool m_IsDead;
 		float m_Speed;
 		glm::vec2 m_Velocity{};
@@ -45,6 +46,8 @@ namespace character
 		AnimationState m_CurrAnimState{AnimationState::Idle};
 		bool m_VerticalMovDisabled{ false };
 		bool m_HorizontalMovDisabled{ false };
+
+		biggin::GameObject* m_pGameObjectRef{ nullptr };
 
 		biggin::HealthComponent* m_pHealthComp;
 		biggin::SpriteRenderComponent* m_pSpriteComp;

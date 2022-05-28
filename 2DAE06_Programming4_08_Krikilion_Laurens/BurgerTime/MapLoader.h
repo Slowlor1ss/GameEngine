@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "BoxCollider2d.h"
+#include "Burger.h"
 #include "Component.h"
 #include "Observer.h"
 #include "Subject.h"
@@ -28,17 +30,29 @@ class MapLoader final : public biggin::Component, public biggin::Observer
 	{
 		//Map
 		Ladder = 'H',
-		ColliderBegin = 'B',
-		ColliderEnd = 'E',
-		ExtraColliderStart = 'S', //colliders that should block the player but not items
+
+		ColliderBegin = 'b',
+		ColliderEnd = 'e',
+		ColliderBeginBig = 'B',
+		ColliderEndBig = 'E',
+
+		//colliders that should block the player but not items
+		//and are bigger than the normal colliders to fill up the necessary space
+		ExtraColliderStart = 'S',
 		ExtraColliderQuit = 'Q',
+
+		//used for catching the burgers
 		CatcherBegin = 'C',
 		CatcherEnd = 'A',
+
 		//Items
 		BurgerTop = '1',
 		Lettuce = '2',
 		Meat = '3',
 		BurgerBottom = '4',
+		Cheese = '5',
+		Tomato = '6',
+
 		Pepper = 'P',
 
 		Player = 'X'
@@ -70,7 +84,7 @@ private:
 	void ReadLevelFile(const std::string& file);
 	void ReadItemsFile(const std::string& file);
 	void ProcessLineMapFile(const std::string& line) const;
-	void MakeCollider(int i, int colliderBeginPos, unsigned short collisionGroup = 1, std::string tag = "Platform") const;
+	void MakeCollider(int i, int colliderBeginPos, int sizeMultiplier = 1, unsigned short collisionGroup = 8, std::string tag = "Platform") const;
 	void ProcessLineItemsFile(const std::string& line);
 
 	void SpawnBurgerPart(int& i, BurgerIngredients ingredent);
@@ -92,5 +106,13 @@ private:
 	biggin::Subject* m_pNotifier;
 
 	static constexpr float m_GridCellSize{ 16 };//size of one cell is 16x16
+	//static constexpr unsigned short m_MapCollisionGroups{ biggin::BoxCollider2d::CollisionGroup::Group3 | Burger::burgerIgnoreGroup };
+
+public:
+	enum mapCollisionGroup : unsigned short
+	{
+		platformGroup = biggin::BoxCollider2d::CollisionGroup::Group3,
+		mapCollisionsGroup = platformGroup | static_cast<int>(Burger::burgerIgnoreGroup)
+	};
 
 };

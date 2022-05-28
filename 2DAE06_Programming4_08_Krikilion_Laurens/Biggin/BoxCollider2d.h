@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include "Scene.h"
 #include "Subject.h"
+#include "Utils.hpp"
 #pragma warning(pop)
 
 namespace biggin
@@ -39,7 +40,9 @@ namespace biggin
 		glm::vec2 GetLocalPos() { return { m_LocalOffset.x,m_LocalOffset.y }; }
 		void TranslateLocalOffset(const glm::vec2& transform) { m_LocalOffset += b2Vec2{ transform.x,transform.y }; }
 
-		GameObject* GetOwningGameObject() const { return GetGameObject(); }
+		const GameObject* GetOwningGameObject() const { return GetGameObject(); }
+
+		//bool GetIsColliding() const;
 
 	private:
 		b2Body* m_pBody{ nullptr };
@@ -55,20 +58,23 @@ namespace biggin
 		//collider were currently overlapping with
 		BoxCollider2d* m_pOtherCollider{nullptr};
 		std::shared_ptr<Box2dManager> m_Box2dManagerRef;
+		utils::DelayedCallback m_DelayedEnableCallback;
+
+	public:
+		enum CollisionGroup : unsigned short
+		{
+			None = (1 << 0),
+			Group1 = (1 << 1),
+			Group2 = (1 << 2),
+			Group3 = (1 << 3),
+			Group4 = (1 << 4),
+			Group5 = (1 << 5),
+			Group6 = (1 << 6),
+			Group7 = (1 << 7),
+			Group8 = (1 << 8),
+			Group9 = (1 << 9)
+		};
 	};
 
-	enum class CollisionGroup : unsigned short
-	{
-		None = (1 << 0),
-		Group1 = (1 << 1),
-		Group2 = (1 << 2),
-		Group3 = (1 << 3),
-		Group4 = (1 << 4),
-		Group5 = (1 << 5),
-		Group6 = (1 << 6),
-		Group7 = (1 << 7),
-		Group8 = (1 << 8),
-		Group9 = (1 << 9)
-	};
 }
 

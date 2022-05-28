@@ -26,6 +26,7 @@ namespace biggin
 		void RenderDebug() const;
 
 		void Add(const std::shared_ptr<GameObject>& object);
+		void AddPending(const std::shared_ptr<GameObject>& object);
 		void Remove(const GameObject* object);
 
 		std::shared_ptr<GameObject> FindGameObjectWithName(const std::string& name) const;
@@ -41,6 +42,7 @@ namespace biggin
 		std::string m_Name{};
 		std::vector <std::shared_ptr<GameObject>> m_Objects{};
 		std::vector <const GameObject*> m_pPendingDelete{};
+		std::vector <std::shared_ptr<GameObject>> m_pPendingAdd{};
 
 		std::shared_ptr<Box2dManager> m_B2Manager{nullptr};
 	};

@@ -17,6 +17,14 @@ void Scene::Add(const std::shared_ptr<GameObject>& object)
 	object->Initialize(object.get());
 }
 
+void Scene::AddPending(const std::shared_ptr<GameObject>& object)
+{
+	object->SetSceneRef(this);
+	m_pPendingAdd.emplace_back(object);
+	object->Initialize(object.get());
+}
+
+//Removed is always delayed till after the update as it would be dangerous to instantly remove an object from the scene
 void Scene::Remove(const GameObject* object)
 {
 	m_pPendingDelete.emplace_back(object);
@@ -61,6 +69,13 @@ void Scene::Update()
 		object->Update();
 	}
 
+	if (!m_pPendingAdd.empty())
+	{
+		//https://www.geeksforgeeks.org/stdback_inserter-in-cpp/
+		std::ranges::move(m_pPendingAdd, std::back_inserter(m_Objects));
+		m_pPendingAdd.clear();
+	}
+
 	//https://en.cppreference.com/w/cpp/algorithm/remove
 	if (!m_pPendingDelete.empty())
 	{
@@ -75,6 +90,7 @@ void Scene::Update()
 		m_Objects.erase(pendingDeleteEnd, m_Objects.end());
 		m_pPendingDelete.clear();
 	}
+
 }
 
 void Scene::FixedUpdate()

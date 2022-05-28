@@ -66,7 +66,7 @@ void GameObject::Update()
 	for (auto& component : m_pPendingAdd)
 	{
 		m_Components.emplace_back(component);
-		component->Initialize(this);
+		//component->Initialize(this);
 	}
 	m_pPendingAdd.clear();
 

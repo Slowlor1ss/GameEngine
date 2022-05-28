@@ -26,6 +26,9 @@ RenderComponent::RenderComponent(GameObject* go)
 
 void RenderComponent::Render() const
 {
+	if (m_pTexture == nullptr)
+		return;
+
 	if (!SDL_RectEmpty(&m_SrcRect) && !SDL_RectEmpty(&m_DstRect))
 	{
 		Renderer::GetInstance().RenderTexture(*m_pTexture, &m_DstRect, &m_SrcRect, m_Flip);

@@ -60,6 +60,12 @@
     <ClCompile Include="HealthUI.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="EnemyMovement.cpp">
+      <Filter>Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyColliderHandeler.cpp">
+      <Filter>Characters</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PeterPepper.h">
@@ -97,6 +103,12 @@
     </ClInclude>
     <ClInclude Include="HealthUI.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyMovement.h">
+      <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyColliderHandeler.h">
+      <Filter>Characters</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

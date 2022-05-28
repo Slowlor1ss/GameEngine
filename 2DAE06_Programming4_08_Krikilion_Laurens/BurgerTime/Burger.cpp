@@ -11,8 +11,8 @@
 
 Burger::Burger(biggin::GameObject* go, BurgerIngredients ingredient, const std::vector<Observer*>& observers)
 	: Component(go)
-	, m_Ingredient(ingredient)
 	, m_pNotifier(go->GetComponent<biggin::Subject>())
+	, m_Ingredient(ingredient)
 {
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
@@ -31,33 +31,12 @@ Burger::~Burger()
 
 void Burger::Initialize(biggin::GameObject* )
 {
+
 }
 
 void Burger::Start()
 {
-	m_Childeren = GetGameObject()->GetAllChilderen();
 
-	if (m_Childeren.size() != m_BurgerSize)
-	{
-		Logger::GetInstance().LogWarning("Expected " + std::to_string(m_BurgerSize) + "burger but got " + std::to_string(m_Childeren.size()));
-	}
-
-	switch (m_Ingredient)
-	{
-	case BurgerIngredients::BurgerTop:
-		InitRenderComp(6);
-		break;
-	case BurgerIngredients::Lettuce:
-		InitRenderComp(11);
-		break;
-	case BurgerIngredients::Meat:
-		InitRenderComp(9);
-		break;
-	case BurgerIngredients::BurgerBottom:
-		InitRenderComp(7);
-		break;
-	default:;
-	}
 }
 
 void Burger::OnNotify(Component* entity, const std::string& event)
@@ -133,6 +112,9 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 void Burger::FixedUpdate()
 {
+	if (!m_Initialized)
+		InitializeBurger();
+
 	if (m_ReachedBottom) return;
 
 	if (m_IsFalling)
@@ -142,12 +124,48 @@ void Burger::FixedUpdate()
 	}
 }
 
+void Burger::InitializeBurger()
+{
+	m_Childeren = GetGameObject()->GetAllChilderen();
+
+	if (m_Childeren.size() != m_BurgerSize)
+	{
+		Logger::GetInstance().LogWarning("Expected " + std::to_string(m_BurgerSize) + "burger but got " + std::to_string(m_Childeren.size()));
+	}
+
+	switch (m_Ingredient)
+	{
+	case BurgerIngredients::BurgerTop:
+		InitRenderComp(6);
+		break;
+	case BurgerIngredients::Lettuce:
+		InitRenderComp(11);
+		break;
+	case BurgerIngredients::Meat:
+		InitRenderComp(9);
+		break;
+	case BurgerIngredients::BurgerBottom:
+		InitRenderComp(7);
+		break;
+	case BurgerIngredients::Cheese:
+		InitRenderComp(8);
+		break;
+	case BurgerIngredients::Tomato:
+		InitRenderComp(10);
+		break;
+	default:;
+	}
+
+	m_Initialized = true;
+}
+
 void Burger::InitRenderComp(int collumnIdx) const
 {
 	constexpr auto tileSize = MapLoader::GetGridSize();
 	for (int i{ 0 }; i < m_Childeren.size(); ++i)
 	{
 		biggin::RenderComponent* renderComponent = m_Childeren[i]->GetComponent<biggin::RenderComponent>();
+		renderComponent->SetTexture("BurgerTimeSpriteSheet.png");
 		renderComponent->SetSourceRect({ (14 + i) * static_cast<int>(tileSize), collumnIdx * static_cast<int>(tileSize), static_cast<int>(tileSize),static_cast<int>(tileSize) });
 
 		glm::vec2 localPos = glm::vec2{ tileSize * i, -tileSize };

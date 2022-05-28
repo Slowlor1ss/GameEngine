@@ -14,7 +14,6 @@
 #include "RenderComponent.h"
 
 //Map loader works by reading a text file generated from a image with a small badly coded python script :D
-//TODO: load background image
 MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& observers)
 	: Component(go)
 	, m_CurrentLevelIdx(0)
@@ -32,21 +31,21 @@ MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& obser
 
 void MapLoader::Initialize(biggin::GameObject*)
 {
-	if (m_LevelPaths.empty())
-		Logger::GetInstance().LogErrorAndBreak("No level paths were found; add levels in the Levels.json file");
-
-	m_BackgroundImgRef = m_GameObjectRef->GetComponent<biggin::RenderComponent>();
-	m_BackgroundImgRef->SetOffset(-m_GameObjectRef->GetWorldPosition());
-	//m_PlayerRef = m_GameObjectRef->GetSceneRef()->FindGameObjectsWithName("Player");
-	if (m_PlayerRef.empty())
-		Logger::GetInstance().LogWarning("No player found");
-
-	LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
-
 }
 
 void MapLoader::Start()
 {
+	if (m_LevelPaths.empty())
+		Logger::GetInstance().LogErrorAndBreak("No level paths were found; add levels in the Levels.json file");
+
+	m_BackgroundImgRef = m_GameObjectRef->GetComponent<biggin::RenderComponent>();
+
+	m_BackgroundImgRef->SetOffset(-m_GameObjectRef->GetWorldPosition());
+	m_PlayerRef = m_GameObjectRef->GetSceneRef()->FindGameObjectsWithName("Player");
+	if (m_PlayerRef.empty())
+		Logger::GetInstance().LogWarning("No player found");
+
+	LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
 }
 
 void MapLoader::OnNotify(Component* /*entity*/, const std::string& event)
@@ -186,45 +185,40 @@ void MapLoader::ProcessLineMapFile(const std::string& line) const
             colliderBeginPos = i;
             break;
         case MapValues::ColliderEnd:
-	        {
 			MakeCollider( i, colliderBeginPos);
-
-	    //        colliderEndPos = i + 1;
-	    //        float colliderWidth = m_GridCellSize * (colliderEndPos - colliderBeginPos);
-	    //        float colliderHeight = m_GridCellSize * 0.5f;
-	    //        glm::vec2 pos = { m_GridCellSize * colliderBeginPos, m_GridCellSize * m_LineNumber /*- colliderHeight */};
-
-	    //        m_GameObjectRef->AddComponent(new biggin::BoxCollider2d(
-		   //         m_GameObjectRef, {colliderWidth, colliderHeight}, true, b2_staticBody, 
-					//{m_PlayerRef}, "DisableUp", pos, false));
-	        }
             break;
+		case MapValues::ColliderBeginBig:
+			colliderBeginPos = i;
+			break;
+		case MapValues::ColliderEndBig:
+			MakeCollider(i, colliderBeginPos, 4);
+			break;
 		case MapValues::ExtraColliderStart:
 			colliderBeginPos = i;
 			break;
 		case MapValues::ExtraColliderQuit:
-			MakeCollider(i, colliderBeginPos, static_cast<unsigned short>(biggin::CollisionGroup::Group1));
+			MakeCollider(i, colliderBeginPos, 4, Burger::burgerIgnoreGroup);
 			break;
 		case MapValues::CatcherBegin:
 			colliderBeginPos = i;
 			break;
 		case MapValues::CatcherEnd:
-			MakeCollider(i, colliderBeginPos, static_cast<unsigned short>(biggin::CollisionGroup::None), "Catcher");
+			MakeCollider(i, colliderBeginPos, 1, mapCollisionGroup::platformGroup, "Catcher");
 			break;
 		case MapValues::Player:
-			//m_PlayerRef[0]->SetLocalPosition(glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition());
+			m_PlayerRef[0]->SetLocalPosition(glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition());
 			break;
         default: ;
 		}
 	}
 }
 
-void MapLoader::MakeCollider(int i, int colliderBeginPos, unsigned short collisionGroup, std::string tag) const
+void MapLoader::MakeCollider(int i, int colliderBeginPos, int sizeMultiplier, unsigned short collisionGroup, std::string tag) const
 {
 	const int colliderEndPos = i + 1;
 	float colliderWidth = m_GridCellSize * (colliderEndPos - colliderBeginPos);
-	float colliderHeight = m_GridCellSize * 4;
-	glm::vec2 pos = { m_GridCellSize * colliderBeginPos, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f };
+	float colliderHeight = m_GridCellSize * sizeMultiplier;//4;
+	const glm::vec2 pos = { m_GridCellSize * colliderBeginPos, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f };
 
 	b2Filter filter{};
 	filter.categoryBits = collisionGroup;
@@ -252,6 +246,12 @@ void MapLoader::ProcessLineItemsFile(const std::string& line)
 		case MapValues::BurgerBottom:
 			SpawnBurgerPart(i, BurgerIngredients::BurgerBottom);
 			break;
+		case MapValues::Cheese:
+			SpawnBurgerPart(i, BurgerIngredients::Cheese);
+			break;
+		case MapValues::Tomato:
+			SpawnBurgerPart(i, BurgerIngredients::Tomato);
+			break;
 		case MapValues::Pepper:
 			break;
 		default:;
@@ -261,6 +261,8 @@ void MapLoader::ProcessLineItemsFile(const std::string& line)
 
 void MapLoader::SpawnBurgerPart(int& i, BurgerIngredients ingredent)
 {
+	++m_AmntBurgerParts;
+
 	const glm::vec2 pos = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
 	//spawn burger top
 	GameLoader::BurgerPrefab(ingredent, pos, { this });

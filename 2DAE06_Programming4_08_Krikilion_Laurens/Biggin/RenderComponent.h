@@ -22,6 +22,7 @@ namespace biggin
 		void TranslateDstRect(const SDL_Point& translation);
 		void SetOffset(const glm::vec2& offset) { m_Offset = offset; };
 		void SetFlip(SDL_RendererFlip flip) { m_Flip = flip; };
+		bool HasTexture() const { return m_pTexture != nullptr; }
 
 	private:
 		std::shared_ptr<Texture2D> m_pTexture{nullptr};

@@ -16,6 +16,7 @@ character::PeterPepper::PeterPepper(biggin::GameObject* go, float movementSpeed)
 	, m_pSpriteComp(nullptr)
 {
 	++m_AmntPlayers;
+	m_pGameObjectRef = go;
 }
 
 void character::PeterPepper::Initialize(biggin::GameObject* go)
@@ -36,7 +37,7 @@ void character::PeterPepper::Update()
 
 	//negate y pos because (0,0) is at the top left
 	//const glm::vec2 velocity = biggin::InputManager::GetInstance().GetLThumb(m_PlayerIndex) * glm::vec2{1,-1};
-	//GetGameObject()->TranslateLocalPosition(m_Velocity*GameTime::GetFixedTimeStep());
+	//m_pGameObjectRef->TranslateLocalPosition(m_Velocity*GameTime::GetFixedTimeStep());
 	//m_Velocity = {0,0};
 }
 
@@ -58,7 +59,7 @@ void character::PeterPepper::UpdateAnimationState()
 	}
 }
 
-void character::PeterPepper::UpdateMovementDirection()
+void character::PeterPepper::UpdateMovementDirectionState()
 {
 	if (m_Velocity.x != 0)
 	{
@@ -88,7 +89,7 @@ void character::PeterPepper::FixedUpdate()
 	else if(m_HorizontalMovDisabled)
 		m_Velocity *= glm::vec2{ 0, 1 };
 
-	UpdateMovementDirection();
+	UpdateMovementDirectionState();
 
 	UpdateAnimationState();
 
@@ -103,14 +104,14 @@ void character::PeterPepper::FixedUpdate()
 
 	m_pSpriteComp->SetFlip(m_CurrMovementDir == MoveDirection::Right ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 
-	GetGameObject()->TranslateLocalPosition(m_Velocity * GameTime::GetFixedTimeStep());
+	m_pGameObjectRef->TranslateLocalPosition(m_Velocity * GameTime::GetFixedTimeStep());
 
 	m_Velocity = {0,0};
 }
 
 void character::PeterPepper::SetPosition(const glm::vec2& pos) const
 {
-	GetGameObject()->SetLocalPosition(pos);
+	m_pGameObjectRef->SetLocalPosition(pos);
 }
 
 void character::PeterPepper::Damage()

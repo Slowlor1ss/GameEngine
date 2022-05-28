@@ -32,7 +32,7 @@ biggin::TextComponent::TextComponent(biggin::GameObject* go, const std::string& 
 		m_TextTexture->SetTexture(std::make_shared<Texture2D>(texture));
 }
 
-biggin::TextComponent::TextComponent(biggin::GameObject* go) : TextComponent(go, "Default Text", ResourceManager::GetInstance().LoadFont("Lingua.otf", 36))
+biggin::TextComponent::TextComponent(biggin::GameObject* go) : TextComponent(go, "Default Text", ResourceManager::GetInstance().LoadFont("Lingua.otf", 32))
 {}
 
 void biggin::TextComponent::Update()

@@ -272,27 +272,6 @@ void GameLoader::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const
 	auto& scene = SceneManager::GetInstance().GetActiveScene();
 
 
-	//adding the 4 child components out burger par uses
-	b2Filter filter{};
-	filter.maskBits = 0xFFFF ^ static_cast<unsigned short>(biggin::CollisionGroup::Group1); //Ignore group 1 (extra colliders) //TODO: make group in burger and use that one here
-	filter.categoryBits = static_cast<unsigned short>(biggin::CollisionGroup::Group2);//set self to group 2
-
-	std::shared_ptr<GameObject> burgerCells[Burger::GetBurgerSize()]{};
-
-	for (size_t i{ 0 }; i < Burger::GetBurgerSize(); ++i)
-	{
-		burgerCells[i] = std::make_shared<GameObject>();
-		burgerCells[i]->AddComponent(new Subject(burgerCells[i].get()));
-		burgerCells[i]->AddComponent(new RenderComponent(burgerCells[i].get(), "BurgerTimeSpriteSheet.png"));
-		burgerCells[i]->AddComponent(
-			new BoxCollider2d(
-				burgerCells[i].get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
-				{}, "Burger", { 0, 5 }, false, filter)
-		);
-		burgerCells[i]->AddComponent(new RemoveOnEvent(burgerCells[i].get(), "FinishedLevel", "Map"));
-		scene.Add(burgerCells[i]);
-	}
-
 	//making the burger
 	const auto burger = std::make_shared<GameObject>();
 	burger->SetLocalPosition(pos);
@@ -300,13 +279,24 @@ void GameLoader::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const
 	const auto burgerComponent = new Burger(burger.get(), ingredient, observers);
 	burger->AddComponent(burgerComponent);
 	burger->AddComponent(new RemoveOnEvent(burger.get(), "FinishedLevel", "Map"));
+	scene.AddPending(burger);
 
-	//setting the parent and adding the observers
+	//adding the 4 child components out burger par uses
+	b2Filter filter{};
+	filter.maskBits = 0xFFFF ^ Burger::burgerIgnoreGroup; //Ignore group 1
+	filter.categoryBits = Burger::burgerCollisionGroup; //set self to group 2
+
 	for (size_t i{0}; i < Burger::GetBurgerSize(); ++i)
 	{
-		burgerCells[i]->SetParent(burger.get(), false);
-		burgerCells[i]->AddObserver(burgerComponent);
+		const auto burgerCell = std::make_shared<GameObject>(burger.get());
+		burgerCell->AddComponent(new Subject(burgerCell.get()));
+		burgerCell->AddComponent(new RenderComponent(burgerCell.get()));
+		burgerCell->AddComponent(
+		new BoxCollider2d(
+			burgerCell.get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize()-5 }, true, b2_dynamicBody,
+			{ burgerComponent }, "Burger", {0, 5}, false, filter)
+		);
+		burgerCell->AddComponent(new RemoveOnEvent(burgerCell.get(), "FinishedLevel", "Map"));
+		scene.AddPending(burgerCell);
 	}
-
-	scene.Add(burger);
 }

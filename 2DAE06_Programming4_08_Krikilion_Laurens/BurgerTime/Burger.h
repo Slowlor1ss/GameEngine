@@ -1,4 +1,5 @@
 #pragma once
+#include "BoxCollider2d.h"
 #include "Component.h"
 #include "Observer.h"
 #include "RenderComponent.h"
@@ -15,6 +16,8 @@ enum class BurgerIngredients
 	Lettuce,
 	Meat,
 	BurgerBottom,
+	Cheese,
+	Tomato,
 };
 
 class Burger final : public biggin::Component, public biggin::Observer
@@ -33,11 +36,15 @@ public:
 	void OnNotify(Component* entity, const std::string& event) override;
 	void FixedUpdate() override;
 
+	void InitializeBurger();
+
 	bool ReachedBottom() const { return m_ReachedBottom; }
 	static constexpr int GetBurgerSize() { return m_BurgerSize; }
 
 private:
 	void InitRenderComp(int collumnIdx) const;
+
+	bool m_Initialized{ false };
 
 	int m_AmntTouchedParts{0};
 	bool m_IsFalling{ false };
@@ -52,5 +59,12 @@ private:
 	biggin::Subject* m_pNotifier{ nullptr };
 
 	BurgerIngredients m_Ingredient;
+
+public:
+	enum BurgerCollisionGroup : unsigned short
+	{
+		burgerIgnoreGroup = biggin::BoxCollider2d::CollisionGroup::Group1,
+		burgerCollisionGroup = biggin::BoxCollider2d::CollisionGroup::Group2,
+	};
 };
 

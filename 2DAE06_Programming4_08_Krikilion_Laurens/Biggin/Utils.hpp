@@ -1,7 +1,82 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
+#include <functional>
 
 namespace utils {
+
+    //struct written together with ruben in prog2
+    struct DelayedCallback{
+        DelayedCallback() = default;
+        DelayedCallback(float interval, std::function<void()> func, int nTimes = 1);
+
+        int nTimes{ 1 };	//If it happens once or multiple times (-1 for inf)
+        bool finished{ false };
+        float interval{ 2.f };	//The times it takes for the timer to execute its behavior or whatever
+
+        float accumulatedTime{ 0.f };
+
+        std::function<void()> func;
+
+        void Update(float deltaTime);
+        void Reset();
+
+    private:
+        int startNTimes{ 0 };
+    };
+
+    inline DelayedCallback::DelayedCallback(float interval, std::function<void()> func, int nTimes)
+        : nTimes{ nTimes }, interval{ interval }, func{ func }, startNTimes(nTimes){
+	    if (nTimes == 0)
+		    finished = true;
+    }
+
+    inline void DelayedCallback::Update(float deltaTime){
+        if (finished) return;
+
+        accumulatedTime += deltaTime;
+        if (accumulatedTime >= interval)
+        {
+            //our timer ticked 
+            func();
+            if (nTimes > 0)
+				--nTimes;
+
+            if (nTimes == 0) finished = true;
+            else  accumulatedTime -= interval;
+        }
+    }
+
+    inline void DelayedCallback::Reset(){
+        nTimes = startNTimes;
+        accumulatedTime = 0;
+        finished = false;
+    }
+
+    //https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
+    inline bool ApproximatelyEqual(float a, float b, float epsilon = FLT_EPSILON)
+    {
+        return fabs(a - b) <= ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+    }
+
+    inline bool definitelyGreaterThan(float a, float b, float epsilon = FLT_EPSILON)
+    {
+        return (a - b) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+    }
+
+    inline bool definitelyLessThan(float a, float b, float epsilon = FLT_EPSILON)
+    {
+        return (b - a) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+    }
+
+    inline bool GreaterThanWithMargin(float a, float b, float margin)
+    {
+        return a - b > margin;
+    }
+
+    inline bool LessThanWithMargin(float a, float b, float margin)
+    {
+        return b - a > margin;
+    }
 
     template <typename T, typename P>
     inline bool AllEqual(T val, P item) { return val == item; }
@@ -22,6 +97,8 @@ namespace utils {
 
     //
     //Array functions
+    //Wrote these in the start just for fun
+    //but std::array should probably be used instead
     //
     template<typename T>
     inline void CopyArray(T* dst, const T* src, size_t size) {

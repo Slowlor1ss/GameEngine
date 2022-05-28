@@ -1,4 +1,6 @@
 #include "BigginPCH.h"
+#include <iostream>
+#include <sstream>
 #include "SpriteRenderComponent.h"
 #include "GameObject.h"
 #include "GameTime.h"
