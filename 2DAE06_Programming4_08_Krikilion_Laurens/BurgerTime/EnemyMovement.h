@@ -36,19 +36,20 @@ public:
 
 	void Initialize(biggin::GameObject*) override;
 	void OnNotify(Component* entity, const std::string& event) override;
+	void HandleHitWall(const glm::vec2& playerPos, const glm::vec2& pos, movementDirection wallDir);
 	void Update() override;
 	void FixedUpdate() override;
 
-	void Disable();
+	//void Disable();
 	void Peppered(float time = 3.f);
 	void Die();
 
 private:
 	bool CheckAndFixStuck();
-	bool FixStuckMovingUp();
-	bool FixStuckMovingDown();
-	bool FixStuckMovingLeft();
-	bool FixStuckMovingRight();
+	//bool FixStuckMovingUp();
+	//bool FixStuckMovingDown();
+	//bool FixStuckMovingLeft();
+	//bool FixStuckMovingRight();
 
 	bool IsMovingSideways() const { return m_CurrentDirection == movementDirection::movingLeft || m_CurrentDirection == movementDirection::movingRight; }
 
@@ -59,18 +60,19 @@ private:
 	int m_AmntCollidingLeft{ 0 };
 	int m_AmntCollidingRight{ 0 };
 
+	float m_CooldownCounter{};
+	float m_Cooldown{0.5f};
+
 	movementDirection m_CurrentDirection;
-	//used to make sure the enemy doesn't quickly move to the side and then back up or down
-	//only stays available for a short time
-	movementDirection m_OldDirection{movementDirection::none}; 
+
 	float m_Velocity{50};
 	bool m_Disabled{false};
 
 	biggin::SpriteRenderComponent* m_pSpriteComp{nullptr};
-	utils::DelayedCallback m_DelayedResetOldDir;
+
 	utils::DelayedCallback m_DelayedResetDisabled;
 	GameTime& m_GameTimeRef;
 
-	static constexpr float m_PlayerPosMargin{ 2 };
+	static constexpr float m_PlayerPosMargin{ 25 };
 };
 

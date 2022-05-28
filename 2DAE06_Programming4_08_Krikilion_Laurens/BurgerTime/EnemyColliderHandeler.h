@@ -30,6 +30,8 @@
 
 //Update enemy ai to target one of the 2 players
 
+class EnemyMovement;
+
 class EnemyColliderHandeler final : public biggin::Component, public biggin::Observer
 {
 public:
@@ -50,5 +52,6 @@ private:
 	bool m_Stunned{false};
 	bool m_IsAlive{true};
 	std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
+	EnemyMovement* m_MovementRef{nullptr};
 };
 

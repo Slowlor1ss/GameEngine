@@ -12,6 +12,7 @@
 #include "Burger.h"
 #include "BurgerTimeCommands.hpp"
 #include "Command.h"
+#include "EnemyColliderHandeler.h"
 #include "EnemyMovement.h"
 #include "FpsCounter.h"
 #include "SceneManager.h"
@@ -300,13 +301,17 @@ void MainMenuState::LoadSinglePlayer()
 	auto enemyMovComp = new EnemyMovement(enemy.get(), EnemyMovement::movementDirection::movingRight);
 	enemy->AddComponent(enemyMovComp);
 	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderTop", {0, -16}, true, filter));
+	, "ColliderTop", {0, -17}, true, filter));
 	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderBottom", { 0, 16 }, true, filter));
+	, "ColliderBottom", { 0, 17 }, true, filter));
 	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderLeft", { -24, 0 }, true, filter));
+	, "ColliderLeft", { -33, 0 }, true, filter));
 	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderRight", { 24, 0 }, true, filter));
+	, "ColliderRight", { 33, 0 }, true, filter));
+
+	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 25 }, true, b2_dynamicBody, {}
+	, "Enemy", { }, true));
+	enemy->AddComponent(new EnemyColliderHandeler(enemy.get()));
 
 	//playerObject->AddComponent(new BoxCollider2d(enemy.get(), { 30, 30 }, true, b2_dynamicBody, { enemyMovComp }
 	//, "ColliderTop", { 0, 30 }, false, filter));

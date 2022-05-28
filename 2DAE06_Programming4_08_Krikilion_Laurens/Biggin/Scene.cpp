@@ -82,9 +82,9 @@ void Scene::Update()
 		auto pendingDeleteEnd = m_Objects.end();
 
 		for (auto gameObject : m_pPendingDelete)
-			pendingDeleteEnd = std::remove_if(m_Objects.begin(), pendingDeleteEnd, [gameObject](const std::shared_ptr<GameObject>& ptr)
+			pendingDeleteEnd = std::remove_if(m_Objects.begin(), pendingDeleteEnd, [gameObject](const std::shared_ptr<GameObject>& object)
 				{
-					return ptr.get() == gameObject;
+					return object.get() == gameObject;
 				});
 
 		m_Objects.erase(pendingDeleteEnd, m_Objects.end());

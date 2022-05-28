@@ -1,6 +1,8 @@
 #include "EnemyColliderHandeler.h"
 #include "BoxCollider2d.h"
+#include "EnemyMovement.h"
 #include "GameObject.h"
+#include "PeterPepper.h"
 
 EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go)
 	:Component(go)
@@ -10,18 +12,26 @@ EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go)
 void EnemyColliderHandeler::Initialize(biggin::GameObject* go)
 {
 	m_PlayerRef = go->GetSceneRef()->FindGameObjectsWithName("Player");
+	m_MovementRef = go->GetComponent<EnemyMovement>();
 }
 
 void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event)
 {
 	if (event == "BeginContact")
 	{
-		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther()->GetTag();
+		const auto* otherColider = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther();
+		const auto tag = otherColider->GetTag();
 		if (tag == "Player")
 		{
 			if (!m_Stunned && m_IsAlive)
 			{
-				const biggin::GameObject* playerGameObj = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther()->GetOwningGameObject();
+				const biggin::GameObject* playerGameObj = otherColider->GetOwningGameObject();
+				const auto it = std::ranges::find_if(m_PlayerRef,
+				                                     [playerGameObj](const std::shared_ptr<biggin::GameObject>& object)
+				                                     {
+					                                     return object.get() == playerGameObj;
+				                                     });
+				(*it).get()->GetComponent<character::PeterPepper>()->Damage();
 			}
 		}
 		else if (tag == "Burger")
@@ -31,6 +41,28 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 		else if (tag == "Pepper")
 		{
 			m_Stunned = true;
+			m_MovementRef->Peppered();
 		}
 	}
+	else if (event == "EndContact")
+	{
+		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther()->GetTag();
+		if (tag == "Burger")
+		{
+
+		}
+	}
+	else if (event == "BurgerFalling")
+	{
+		m_IsAlive = false;
+		m_MovementRef->Die();
+	}
+}
+
+void EnemyColliderHandeler::Update()
+{
+}
+
+void EnemyColliderHandeler::FixedUpdate()
+{
 }

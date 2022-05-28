@@ -66,7 +66,7 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 			
 			const auto owner = static_cast<biggin::BoxCollider2d*>(entity)->GetOther()->GetOwningGameObject();
 
-			const auto it = std::ranges::find(m_Childeren, owner);
+			const auto it = std::find(m_Childeren.begin(), m_Childeren.end(), owner);
 			if (it != m_Childeren.end())
 			{
 				const __int64 index = std::distance(m_Childeren.begin(), it);
