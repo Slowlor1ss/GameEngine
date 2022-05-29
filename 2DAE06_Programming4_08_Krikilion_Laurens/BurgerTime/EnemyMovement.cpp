@@ -11,8 +11,6 @@ EnemyMovement::EnemyMovement(biggin::GameObject* go, movementDirection movDir)
 	,m_CurrentDirection(movDir)
 	,m_GameTimeRef{ GameTime::GetInstance() }
 {
-	//Reset old pos after interval
-	m_DelayedResetOldDir = utils::DelayedCallback(1.f, [&] {m_OldDirection = movementDirection::none; }, 1);
 	//Interval is set in disabled function
 	m_DelayedResetDisabled = utils::DelayedCallback(0, [&] {m_Disabled = false; }, 1);
 
@@ -131,8 +129,6 @@ void EnemyMovement::Update()
 		return;
 	}
 
-	m_DelayedResetOldDir.Update(m_GameTimeRef.GetDeltaT());
-
 	if (m_CooldownCounter > 0)
 	{
 		m_CooldownCounter -= m_GameTimeRef.GetDeltaT();
@@ -156,7 +152,6 @@ void EnemyMovement::Update()
 			std::cout << "moving up\n";
 			m_pSpriteComp->SetPause(false); //just in case
 			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runVertical));
-			m_DelayedResetOldDir.Reset();
 		}
 		else if (m_AmntCollidingBottom == 0 && utils::GreaterThanWithMargin(playerPos.y, pos.y, m_PlayerPosMargin) ) //check if we can move down and if player is below us
 		{
@@ -166,7 +161,6 @@ void EnemyMovement::Update()
 			std::cout << "moving down\n";
 			m_pSpriteComp->SetPause(false); //just in case
 			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runVertical));
-			m_DelayedResetOldDir.Reset();
 		}
 	}
 	else //is moving vertical
@@ -180,7 +174,6 @@ void EnemyMovement::Update()
 			m_pSpriteComp->SetPause(false); //just in case
 			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
 			m_pSpriteComp->SetFlip(SDL_FLIP_NONE);
-			m_DelayedResetOldDir.Reset();
 		}
 		else if (m_AmntCollidingRight == 0 && utils::GreaterThanWithMargin(playerPos.x, pos.x, m_PlayerPosMargin) )
 		{
@@ -191,32 +184,31 @@ void EnemyMovement::Update()
 			m_pSpriteComp->SetPause(false); //just in case
 			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
 			m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
-			m_DelayedResetOldDir.Reset();
 		}
 	}
 }
 
 void EnemyMovement::FixedUpdate()
 {
-	if(m_Disabled)
-		return;
+	//if(m_Disabled)
+	//	return;
 
-	switch (m_CurrentDirection)
-	{
-	case movementDirection::movingUp:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * GameTime::GetFixedTimeStep());
-		break;
-	case movementDirection::movingDown:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 }
-		* m_Velocity * GameTime::GetFixedTimeStep());
-		break;
-	case movementDirection::movingLeft:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
-		break;
-	case movementDirection::movingRight:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ 1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
-		break;
-	}
+	//switch (m_CurrentDirection)
+	//{
+	//case movementDirection::movingUp:
+	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * GameTime::GetFixedTimeStep());
+	//	break;
+	//case movementDirection::movingDown:
+	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 }
+	//	* m_Velocity * GameTime::GetFixedTimeStep());
+	//	break;
+	//case movementDirection::movingLeft:
+	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
+	//	break;
+	//case movementDirection::movingRight:
+	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ 1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
+	//	break;
+	//}
 }
 
 //void EnemyMovement::Disable()

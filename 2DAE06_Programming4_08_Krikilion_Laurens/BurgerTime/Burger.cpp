@@ -63,7 +63,8 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 		else if(tag == "Player")
 		{
 			Logger::GetInstance().LogDebug("ovelap started with player and burger");
-			
+
+			//the gameobject of the collider we are subscribed to and just hit the player
 			const auto owner = static_cast<biggin::BoxCollider2d*>(entity)->GetOther()->GetOwningGameObject();
 
 			const auto it = std::find(m_Childeren.begin(), m_Childeren.end(), owner);

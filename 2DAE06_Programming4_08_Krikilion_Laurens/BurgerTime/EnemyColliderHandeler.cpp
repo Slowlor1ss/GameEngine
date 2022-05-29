@@ -1,4 +1,5 @@
 #include "EnemyColliderHandeler.h"
+#include <iostream>
 #include "BoxCollider2d.h"
 #include "EnemyMovement.h"
 #include "GameObject.h"
@@ -19,8 +20,9 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 {
 	if (event == "BeginContact")
 	{
-		const auto* otherColider = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther();
+		const auto* otherColider = static_cast<const biggin::BoxCollider2d*>(entity);
 		const auto tag = otherColider->GetTag();
+		std::cout << tag << '\n';
 		if (tag == "Player")
 		{
 			if (!m_Stunned && m_IsAlive)
@@ -31,6 +33,9 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 				                                     {
 					                                     return object.get() == playerGameObj;
 				                                     });
+				if (it == m_PlayerRef.end())	
+					return;
+
 				(*it).get()->GetComponent<character::PeterPepper>()->Damage();
 			}
 		}

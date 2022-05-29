@@ -309,9 +309,10 @@ void MainMenuState::LoadSinglePlayer()
 	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
 	, "ColliderRight", { 33, 0 }, true, filter));
 
-	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 25 }, true, b2_dynamicBody, {}
+	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get());
+	enemy->AddComponent(enemyCollisionHandeler);
+	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 25 }, true, b2_dynamicBody, { enemyCollisionHandeler }
 	, "Enemy", { }, true));
-	enemy->AddComponent(new EnemyColliderHandeler(enemy.get()));
 
 	//playerObject->AddComponent(new BoxCollider2d(enemy.get(), { 30, 30 }, true, b2_dynamicBody, { enemyMovComp }
 	//, "ColliderTop", { 0, 30 }, false, filter));

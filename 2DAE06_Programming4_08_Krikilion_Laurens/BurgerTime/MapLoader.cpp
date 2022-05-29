@@ -52,6 +52,7 @@ void MapLoader::OnNotify(Component* /*entity*/, const std::string& event)
 {
 	if (event == "BurgerReachedEnd")
 	{
+		++m_AmntLandedParts;
 		if (m_AmntLandedParts == m_AmntBurgerParts)
 		{
 			//player finished level
