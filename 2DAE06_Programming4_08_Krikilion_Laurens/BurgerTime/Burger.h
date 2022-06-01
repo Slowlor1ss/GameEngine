@@ -39,6 +39,7 @@ public:
 	void InitializeBurger();
 
 	bool ReachedBottom() const { return m_ReachedBottom; }
+	bool IsFalling() const { return m_IsFalling; }
 	static constexpr int GetBurgerSize() { return m_BurgerSize; }
 
 private:

@@ -67,6 +67,7 @@ private:
 
 	float m_Velocity{50};
 	bool m_Disabled{false};
+	bool m_Dead{false};
 
 	biggin::SpriteRenderComponent* m_pSpriteComp{nullptr};
 

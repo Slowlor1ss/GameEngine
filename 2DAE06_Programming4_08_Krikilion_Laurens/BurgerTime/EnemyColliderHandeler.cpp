@@ -1,6 +1,7 @@
 #include "EnemyColliderHandeler.h"
 #include <iostream>
 #include "BoxCollider2d.h"
+#include "Burger.h"
 #include "EnemyMovement.h"
 #include "GameObject.h"
 #include "PeterPepper.h"
@@ -16,32 +17,24 @@ void EnemyColliderHandeler::Initialize(biggin::GameObject* go)
 	m_MovementRef = go->GetComponent<EnemyMovement>();
 }
 
+
 void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event)
 {
+	if (!m_IsAlive)
+		return;
+
 	if (event == "BeginContact")
 	{
 		const auto* otherColider = static_cast<const biggin::BoxCollider2d*>(entity);
 		const auto tag = otherColider->GetTag();
-		std::cout << tag << '\n';
+
 		if (tag == "Player")
 		{
-			if (!m_Stunned && m_IsAlive)
-			{
-				const biggin::GameObject* playerGameObj = otherColider->GetOwningGameObject();
-				const auto it = std::ranges::find_if(m_PlayerRef,
-				                                     [playerGameObj](const std::shared_ptr<biggin::GameObject>& object)
-				                                     {
-					                                     return object.get() == playerGameObj;
-				                                     });
-				if (it == m_PlayerRef.end())	
-					return;
-
-				(*it).get()->GetComponent<character::PeterPepper>()->Damage();
-			}
+			HandleEnemyPlayerBeginContact(otherColider);
 		}
 		else if (tag == "Burger")
 		{
-			
+			HandleEnemyBurgerBeginContact(otherColider);
 		}
 		else if (tag == "Pepper")
 		{
@@ -51,17 +44,99 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 	}
 	else if (event == "EndContact")
 	{
-		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther()->GetTag();
+		const auto* otherColider = static_cast<const biggin::BoxCollider2d*>(entity);
+		const auto tag = otherColider->GetTag();
+
 		if (tag == "Burger")
 		{
-
+			HandleEnemyBurgerEndContact(otherColider);
 		}
 	}
 	else if (event == "BurgerFalling")
 	{
-		m_IsAlive = false;
-		m_MovementRef->Die();
+		HandleHitByFallingBurger();
 	}
+}
+
+void EnemyColliderHandeler::HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider)
+{
+	if (!m_Stunned && m_IsAlive)
+	{
+		const biggin::GameObject* playerGameObj = otherColider->GetOwningGameObject();
+		const auto it = std::ranges::find_if(m_PlayerRef,
+			[playerGameObj](const std::shared_ptr<biggin::GameObject>& object)
+			{
+				return object.get() == playerGameObj;
+			});
+		if (it == m_PlayerRef.end())
+			return;
+
+		(*it).get()->GetComponent<character::PeterPepper>()->Damage();
+	}
+}
+
+void EnemyColliderHandeler::HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider)
+{
+	//the parent of the burger part were overlapping with is our actual burger game object
+	auto overlappedBurgerGameObject = otherColider->GetOwningGameObject()->GetParent();
+
+	if (m_BurgerGameObjectRef == nullptr)
+	{
+		m_BurgerGameObjectRef = overlappedBurgerGameObject;
+	}
+
+	if(IsBurgerFalling(overlappedBurgerGameObject))
+	{
+		HandleHitByFallingBurger();
+		return;
+	}
+
+	if (overlappedBurgerGameObject == m_BurgerGameObjectRef)
+	{
+		//as one burger is split up in multiple parts we keep track of how many part we are touching
+		//so we know when we are touching no parts anymore and thus no burger anymore
+		++m_AmntColliding;
+
+		if (m_AmntColliding == 1) //first overlap
+		{
+			m_BurgerGameObjectRef->AddObserver(this);
+		}
+	}
+}
+
+void EnemyColliderHandeler::HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider)
+{
+	if (otherColider->GetOwningGameObject()->GetParent() == m_BurgerGameObjectRef)
+	{
+		--m_AmntColliding;
+
+		if (m_AmntColliding == 0)
+		{
+			m_BurgerGameObjectRef->RemoveObserver(this);
+			m_BurgerGameObjectRef = nullptr;
+		}
+	}
+}
+
+bool EnemyColliderHandeler::IsBurgerFalling(biggin::GameObject* overlappedBurgerGameObject) const
+{
+	if (overlappedBurgerGameObject != m_BurgerGameObjectRef || m_AmntColliding == 1)
+	{
+		auto burger = overlappedBurgerGameObject->GetComponent<Burger>();
+		if (burger == nullptr)
+			return false;
+
+		//falling burger landed on enemy
+		if (burger->IsFalling())
+			return true;
+	}
+	return false;
+}
+
+void EnemyColliderHandeler::HandleHitByFallingBurger()
+{
+	m_IsAlive = false;
+	m_MovementRef->Die();
 }
 
 void EnemyColliderHandeler::Update()

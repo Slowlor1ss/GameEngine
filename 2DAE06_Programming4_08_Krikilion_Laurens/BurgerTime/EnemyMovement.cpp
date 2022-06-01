@@ -32,6 +32,9 @@ void EnemyMovement::Initialize(biggin::GameObject* go)
 
 void EnemyMovement::OnNotify(Component* entity, const std::string& event)
 {
+	if (m_Dead || m_Disabled)
+		return;
+
 	if (event == "BeginContact")
 	{
 		const auto pos = GetGameObject()->GetLocalPosition();
@@ -123,6 +126,9 @@ void EnemyMovement::HandleHitWall(const glm::vec2& playerPos, const glm::vec2& p
 
 void EnemyMovement::Update()
 {
+	if (m_Dead)
+		return;
+
 	if (m_Disabled)
 	{
 		m_DelayedResetDisabled.Update(m_GameTimeRef.GetDeltaT());
@@ -190,25 +196,25 @@ void EnemyMovement::Update()
 
 void EnemyMovement::FixedUpdate()
 {
-	//if(m_Disabled)
-	//	return;
+	if(m_Disabled || m_Dead)
+		return;
 
-	//switch (m_CurrentDirection)
-	//{
-	//case movementDirection::movingUp:
-	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * GameTime::GetFixedTimeStep());
-	//	break;
-	//case movementDirection::movingDown:
-	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 }
-	//	* m_Velocity * GameTime::GetFixedTimeStep());
-	//	break;
-	//case movementDirection::movingLeft:
-	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
-	//	break;
-	//case movementDirection::movingRight:
-	//	GetGameObject()->TranslateLocalPosition(glm::vec2{ 1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
-	//	break;
-	//}
+	switch (m_CurrentDirection)
+	{
+	case movementDirection::movingUp:
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * GameTime::GetFixedTimeStep());
+		break;
+	case movementDirection::movingDown:
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 }
+		* m_Velocity * GameTime::GetFixedTimeStep());
+		break;
+	case movementDirection::movingLeft:
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
+		break;
+	case movementDirection::movingRight:
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ 1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
+		break;
+	}
 }
 
 //void EnemyMovement::Disable()
@@ -228,7 +234,7 @@ void EnemyMovement::Peppered(float time)
 
 void EnemyMovement::Die()
 {
-	m_Disabled = true;
+	m_Dead = true;
 	m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::die));
 	m_pSpriteComp->SetFinishAndPause();
 }

@@ -39,6 +39,7 @@ void Burger::Start()
 
 }
 
+//burger needs to check how many enemies are on top of it
 void Burger::OnNotify(Component* entity, const std::string& event)
 {
 	if (m_ReachedBottom) return;
@@ -64,7 +65,7 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 		{
 			Logger::GetInstance().LogDebug("ovelap started with player and burger");
 
-			//the gameobject of the collider we are subscribed to and just hit the player
+			//the gameobject of the collider that we are subscribed to and just hit the player
 			const auto owner = static_cast<biggin::BoxCollider2d*>(entity)->GetOther()->GetOwningGameObject();
 
 			const auto it = std::find(m_Childeren.begin(), m_Childeren.end(), owner);
@@ -83,11 +84,15 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 			++m_AmntTouchedParts;
 			if (m_AmntTouchedParts == m_BurgerSize)
+			{
 				m_IsFalling = true;
+				m_pNotifier->notify(this, "BurgerFalling");
+			}
 		}
 		else if (tag == "Burger")
 		{
 			m_IsFalling = true;
+			m_pNotifier->notify(this, "BurgerFalling");
 
 			for (size_t i{0}; i < m_BurgerSize; ++i)
 			{

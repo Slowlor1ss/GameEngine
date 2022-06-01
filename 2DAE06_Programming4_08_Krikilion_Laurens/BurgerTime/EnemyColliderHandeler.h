@@ -30,6 +30,13 @@
 
 //Update enemy ai to target one of the 2 players
 
+//use more namespaces
+
+namespace biggin
+{
+	class BoxCollider2d;
+}
+
 class EnemyMovement;
 
 class EnemyColliderHandeler final : public biggin::Component, public biggin::Observer
@@ -45,13 +52,22 @@ public:
 
 	void Initialize(biggin::GameObject*) override;
 	void OnNotify(Component* entity, const std::string& event) override;
+	void HandleHitByFallingBurger();
 	void Update() override;
 	void FixedUpdate() override;
 
 private:
+	void HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider);
+	void HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider);
+	void HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider);
+	bool IsBurgerFalling(biggin::GameObject* overlappedBurgerGameObject) const;
+
 	bool m_Stunned{false};
 	bool m_IsAlive{true};
 	std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
 	EnemyMovement* m_MovementRef{nullptr};
+	biggin::GameObject* m_BurgerGameObjectRef{nullptr};
+
+	int m_AmntColliding{};
 };
 
