@@ -13,7 +13,15 @@ Burger::Burger(biggin::GameObject* go, BurgerIngredients ingredient, const std::
 	: Component(go)
 	, m_pNotifier(go->GetComponent<biggin::Subject>())
 	, m_Ingredient(ingredient)
+	, m_GameTimeRef{ GameTime::GetInstance() }
 {
+	m_FallDelayed.interval = GameTime::GetFixedTimeStep();
+	//According to Stephan T. Lavavej - "Avoid using bind(), ..., use lambdas"
+	//https://www.youtube.com/watch?v=zt7ThwVfap0&t=32m20s
+	m_FallDelayed.func = [this] {DropBurger(); };
+	//m_FallDelayed.func = std::bind(&Burger::DropBurger, this);
+	m_FallDelayed.finished = true;
+
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
 
@@ -53,16 +61,24 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 			if (!m_IsFalling) return;
 
-			for (size_t i{ 0 }; i < m_BurgerSize; ++i)
+			if (m_EnemiesOnBurger > 0)
 			{
-				m_Touched[i] = false;
+				--m_EnemiesOnBurger;
+				m_FallDelayed.Reset();
 			}
+
+			std::fill(std::begin(m_Touched), std::end(m_Touched), false);
+			//for (size_t i{ 0 }; i < m_BurgerSize; ++i)
+			//{
+			//	m_Touched[i] = false;
+			//}
 
 			m_AmntTouchedParts = 0;
 			m_IsFalling = false;
 		}
 		else if(tag == "Player")
 		{
+			if (m_IsFalling) return;
 			Logger::GetInstance().LogDebug("ovelap started with player and burger");
 
 			//the gameobject of the collider that we are subscribed to and just hit the player
@@ -75,7 +91,7 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 				if (m_Touched[index]) return;
 
 				m_Touched[index] = true;
-				(*it)->TranslateLocalPosition({ 0, int(MapLoader::GetGridSize() / 2.f) });
+				(*it)->TranslateLocalPosition({ 0, static_cast<int>(burgerTime::MapLoader::GetGridSize() / 2.f) });
 			}
 			else
 			{
@@ -91,16 +107,7 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 		}
 		else if (tag == "Burger")
 		{
-			m_IsFalling = true;
-			m_pNotifier->notify(this, "BurgerFalling");
-
-			for (size_t i{0}; i < m_BurgerSize; ++i)
-			{
-				if (m_Touched[i]) continue;;
-
-				m_Touched[i] = true;
-				m_Childeren[i]->TranslateLocalPosition({ 0, int(MapLoader::GetGridSize() / 2.f) });
-			}
+			DropBurger();
 		}
 		else if (tag == "Catcher")
 		{
@@ -109,15 +116,41 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 			m_ReachedBottom = true;
 			m_pNotifier->notify(this, "BurgerReachedEnd");
 		}
+		else if (tag == "Enemy")
+		{
+			if (!m_IsFalling)
+				++m_EnemiesOnBurger;
+		}
 	}
 	else if (event == "EndContact")
 	{
-		//Logger::GetInstance().LogDebug("ovelap ended Burger");
+		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetTag();
+		if (tag == "Enemy")
+		{
+			if (!m_IsFalling)
+				--m_EnemiesOnBurger;
+		}
+	}
+}
+
+void Burger::DropBurger()
+{
+	m_IsFalling = true;
+	m_pNotifier->notify(this, "BurgerFalling");
+
+	for (size_t i{ 0 }; i < m_BurgerSize; ++i)
+	{
+		if (m_Touched[i]) continue;;
+
+		m_Touched[i] = true;
+		m_Childeren[i]->TranslateLocalPosition({ 0, static_cast<int>(burgerTime::MapLoader::GetGridSize() / 2.f) });
 	}
 }
 
 void Burger::FixedUpdate()
 {
+	//as our we want to be sure our children are already initialized we initialize later
+	//and as box 2d gets updated in fixed update we initialize in fixed update to prevent overlaps when things haven't been positioned yet
 	if (!m_Initialized)
 		InitializeBurger();
 
@@ -128,6 +161,11 @@ void Burger::FixedUpdate()
 		auto deltaVelo = glm::vec2{ 0, m_Velocity } * GameTime::GetFixedTimeStep();
 		GetGameObject()->TranslateLocalPosition(deltaVelo);
 	}
+}
+
+void Burger::Update()
+{
+	m_FallDelayed.Update(m_GameTimeRef.GetDeltaT());
 }
 
 void Burger::InitializeBurger()
@@ -167,7 +205,7 @@ void Burger::InitializeBurger()
 
 void Burger::InitRenderComp(int collumnIdx) const
 {
-	constexpr auto tileSize = MapLoader::GetGridSize();
+	constexpr auto tileSize = burgerTime::MapLoader::GetGridSize();
 	for (int i{ 0 }; i < m_Childeren.size(); ++i)
 	{
 		biggin::RenderComponent* renderComponent = m_Childeren[i]->GetComponent<biggin::RenderComponent>();

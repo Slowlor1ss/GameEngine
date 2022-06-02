@@ -132,3 +132,52 @@ void biggin::Renderer::RenderPolygon(std::vector<glm::vec2> points, SDL_Color co
 	RenderPolygon(points.data(), static_cast<int>(points.size()), color, closed);
 }
 
+void biggin::Renderer::RenderPoint(glm::vec2 point, SDL_Color color) const
+{
+	SDL_SetRenderDrawColor(m_Renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderDrawPointF(m_Renderer, point.x, point.y);
+}
+
+//https://stackoverflow.com/questions/38334081/howto-draw-circles-arcs-and-vector-graphics-in-sdl
+void biggin::Renderer::RenderCircle(glm::vec2 point, int32_t radius, SDL_Color color) const
+{
+	SDL_SetRenderDrawColor(m_Renderer, color.r, color.g, color.b, color.a);
+
+	const int32 centreX{ static_cast<int32>(point.x) };
+	const int32 centreY{ static_cast<int32>(point.y) };
+
+	const int32_t diameter = (radius * 2);
+
+	int32_t x = (radius - 1);
+	int32_t y = 0;
+	int32_t tx = 1;
+	int32_t ty = 1;
+	int32_t error = (tx - diameter);
+
+	while (x >= y)
+	{
+		//  Each of the following renders an octant of the circle
+		SDL_RenderDrawPoint(m_Renderer, centreX + x, centreY - y);
+		SDL_RenderDrawPoint(m_Renderer, centreX + x, centreY + y);
+		SDL_RenderDrawPoint(m_Renderer, centreX - x, centreY - y);
+		SDL_RenderDrawPoint(m_Renderer, centreX - x, centreY + y);
+		SDL_RenderDrawPoint(m_Renderer, centreX + y, centreY - x);
+		SDL_RenderDrawPoint(m_Renderer, centreX + y, centreY + x);
+		SDL_RenderDrawPoint(m_Renderer, centreX - y, centreY - x);
+		SDL_RenderDrawPoint(m_Renderer, centreX - y, centreY + x);
+
+		if (error <= 0)
+		{
+			++y;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0)
+		{
+			--x;
+			tx += 2;
+			error += (tx - diameter);
+		}
+	}
+}

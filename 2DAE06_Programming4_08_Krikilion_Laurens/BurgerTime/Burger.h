@@ -4,6 +4,8 @@
 #include "Observer.h"
 #include "RenderComponent.h"
 
+class GameTime;
+
 namespace biggin
 {
 	class Subject;
@@ -33,8 +35,10 @@ public:
 
 	void Initialize(biggin::GameObject*) override;
 	void Start() override;
+	void DropBurger();
 	void OnNotify(Component* entity, const std::string& event) override;
 	void FixedUpdate() override;
+	void Update() override;
 
 	void InitializeBurger();
 
@@ -60,6 +64,11 @@ private:
 	biggin::Subject* m_pNotifier{ nullptr };
 
 	BurgerIngredients m_Ingredient;
+
+	int m_EnemiesOnBurger{};
+	GameTime& m_GameTimeRef;
+
+	utils::DelayedCallback m_FallDelayed;
 
 public:
 	enum BurgerCollisionGroup : unsigned short

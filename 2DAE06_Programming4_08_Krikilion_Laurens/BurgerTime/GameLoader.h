@@ -27,8 +27,6 @@ public:
 	void SetState(BurgerTimeMenuState* state) { m_pState = state; }
 	//void LoadGame();
 
-	static void BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const std::vector<biggin::Observer*>& observers = {});
-
 private:
 
 	BurgerTimeMenuState* m_pState;

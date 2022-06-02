@@ -1,36 +1,6 @@
 #include "GameLoader.h"
-#include "Biggin.h"
-#include <thread>
-#include "audio.h"
-#include "Box2dManager.h"
-#include "BoxCollider2d.h"
-#include "Burger.h"
-#include "BurgerTimeCommands.hpp"
 #include "BurgerTimeMenuState.h"
-#include "Command.h"
-#include "FpsCounter.h"
-#include "SceneManager.h"
-#include "Renderer.h"
-#include "ResourceManager.h"
-#include "TextComponent.h"
-#include "GameObject.h"
-#include "GameTime.h"
-#include "Logger.h"
-#include "Scene.h"
-#include "HealthComponent.h"
-#include "HealthUI.h"
-#include "imgui.h"
-#include "MapLoader.h"
-#include "PeterPepper.h"
-#include "RenderComponent.h"
-#include "ScoreComponent.h"
-#include "ScoreUI.h"
-#include "SoundServiceLocator.h"
-#include "SpriteRenderComponent.h"
-#include "StatsAndAchievements.h"
-#include "Subject.h"
-#include "InputManager.h"
-#include "RemoveOnEvent.h"
+
 
 using namespace biggin;
 
@@ -266,37 +236,3 @@ void GameLoader::RenderMenu()
 //
 //	scene.Start();
 //}
-
-void GameLoader::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const std::vector<Observer*>& observers)
-{
-	auto& scene = SceneManager::GetInstance().GetActiveScene();
-
-
-	//making the burger
-	const auto burger = std::make_shared<GameObject>();
-	burger->SetLocalPosition(pos);
-	burger->AddComponent(new Subject(burger.get())); //used to notify when a burger has reached the catcher
-	const auto burgerComponent = new Burger(burger.get(), ingredient, observers);
-	burger->AddComponent(burgerComponent);
-	burger->AddComponent(new RemoveOnEvent(burger.get(), "FinishedLevel", "Map"));
-	scene.AddPending(burger);
-
-	//adding the 4 child components out burger par uses
-	b2Filter filter{};
-	filter.maskBits = 0xFFFF ^ Burger::burgerIgnoreGroup; //Ignore group 1
-	filter.categoryBits = Burger::burgerCollisionGroup; //set self to group 2
-
-	for (size_t i{0}; i < Burger::GetBurgerSize(); ++i)
-	{
-		const auto burgerCell = std::make_shared<GameObject>(burger.get());
-		burgerCell->AddComponent(new Subject(burgerCell.get()));
-		burgerCell->AddComponent(new RenderComponent(burgerCell.get()));
-		burgerCell->AddComponent(
-		new BoxCollider2d(
-			burgerCell.get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize()-5 }, true, b2_dynamicBody,
-			{ burgerComponent }, "Burger", {0, 5}, false, filter)
-		);
-		burgerCell->AddComponent(new RemoveOnEvent(burgerCell.get(), "FinishedLevel", "Map"));
-		scene.AddPending(burgerCell);
-	}
-}

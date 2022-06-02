@@ -27,6 +27,9 @@ namespace biggin
 
 		void RenderPolygon(std::vector<glm::vec2> points, SDL_Color color, bool closed = true) const;
 		void RenderPolygon(const glm::vec2* points, int vertexCount, SDL_Color color, bool closed = true) const;
+		void RenderPoint(glm::vec2 point, SDL_Color color = {255, 0, 0, 1}) const;
+
+		void RenderCircle(glm::vec2 point, int32_t radius, SDL_Color color = { 255, 0, 0, 1 }) const;
 
 		SDL_Renderer* GetSDLRenderer() const { return m_Renderer; }
 

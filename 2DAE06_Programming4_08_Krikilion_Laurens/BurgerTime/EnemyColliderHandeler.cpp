@@ -4,11 +4,28 @@
 #include "Burger.h"
 #include "EnemyMovement.h"
 #include "GameObject.h"
+#include "Logger.h"
 #include "PeterPepper.h"
 
-EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go)
+EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers)
 	:Component(go)
+	,m_EnemyType(type)
+	,m_pNotifier(go->GetComponent<biggin::Subject>())
 {
+	if (m_pNotifier == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
+
+	for (const auto observer : observers)
+		m_pNotifier->AddObserver(observer);
+}
+
+EnemyColliderHandeler::~EnemyColliderHandeler()
+{
+	if (m_BurgerGameObjectRef != nullptr)
+	{
+		m_BurgerGameObjectRef->RemoveObserver(this);
+		m_BurgerGameObjectRef = nullptr;
+	}
 }
 
 void EnemyColliderHandeler::Initialize(biggin::GameObject* go)
@@ -17,6 +34,17 @@ void EnemyColliderHandeler::Initialize(biggin::GameObject* go)
 	m_MovementRef = go->GetComponent<EnemyMovement>();
 }
 
+void EnemyColliderHandeler::AddObservers(const std::vector<Observer*>& observers) const
+{
+	for (const auto observer : observers)
+		m_pNotifier->AddObserver(observer);
+}
+
+void EnemyColliderHandeler::RemoveObservers(const std::vector<Observer*>& observers) const
+{
+	for (const auto observer : observers)
+		m_pNotifier->RemoveObserver(observer);
+}
 
 void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event)
 {
@@ -54,7 +82,7 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 	}
 	else if (event == "BurgerFalling")
 	{
-		HandleHitByFallingBurger();
+		Die();
 	}
 }
 
@@ -78,7 +106,7 @@ void EnemyColliderHandeler::HandleEnemyPlayerBeginContact(const biggin::BoxColli
 void EnemyColliderHandeler::HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider)
 {
 	//the parent of the burger part were overlapping with is our actual burger game object
-	auto overlappedBurgerGameObject = otherColider->GetOwningGameObject()->GetParent();
+	const auto overlappedBurgerGameObject = otherColider->GetOwningGameObject()->GetParent();
 
 	if (m_BurgerGameObjectRef == nullptr)
 	{
@@ -87,7 +115,7 @@ void EnemyColliderHandeler::HandleEnemyBurgerBeginContact(const biggin::BoxColli
 
 	if(IsBurgerFalling(overlappedBurgerGameObject))
 	{
-		HandleHitByFallingBurger();
+		Die();
 		return;
 	}
 
@@ -126,15 +154,15 @@ bool EnemyColliderHandeler::IsBurgerFalling(biggin::GameObject* overlappedBurger
 		if (burger == nullptr)
 			return false;
 
-		//falling burger landed on enemy
 		if (burger->IsFalling())
 			return true;
 	}
 	return false;
 }
 
-void EnemyColliderHandeler::HandleHitByFallingBurger()
+void EnemyColliderHandeler::Die()
 {
+	m_pNotifier->notify(this, "EnemyDied");
 	m_IsAlive = false;
 	m_MovementRef->Die();
 }

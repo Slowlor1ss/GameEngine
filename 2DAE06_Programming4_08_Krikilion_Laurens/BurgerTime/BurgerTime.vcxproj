@@ -230,6 +230,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll" "$(Out
     </ClCompile>
     <ClCompile Include="EnemyColliderHandeler.cpp" />
     <ClCompile Include="EnemyMovement.cpp" />
+    <ClCompile Include="EnemySpawner.cpp" />
     <ClCompile Include="GameLoader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -251,6 +252,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll" "$(Out
     <ClInclude Include="BurgerTimeCommands.hpp" />
     <ClInclude Include="EnemyColliderHandeler.h" />
     <ClInclude Include="EnemyMovement.h" />
+    <ClInclude Include="EnemySpawner.h" />
     <ClInclude Include="GameLoader.h" />
     <ClInclude Include="HealthComponent.h" />
     <ClInclude Include="HealthUI.h" />

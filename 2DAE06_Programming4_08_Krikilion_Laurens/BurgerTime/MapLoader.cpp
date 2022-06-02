@@ -11,7 +11,11 @@
 #include "Observer.h"
 #include <document.h>
 #include <istreamwrapper.h>
+#include "EnemySpawner.h"
+#include "RemoveOnEvent.h"
 #include "RenderComponent.h"
+
+using namespace burgerTime;
 
 //Map loader works by reading a text file generated from a image with a small badly coded python script :D
 MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& observers)
@@ -35,12 +39,20 @@ void MapLoader::Initialize(biggin::GameObject*)
 
 void MapLoader::Start()
 {
+	const auto spawnerGo = m_GameObjectRef->GetSceneRef()->FindGameObjectWithName("EnemySpawner");
+	if (spawnerGo != nullptr)
+	{
+		m_EnemySpawnerRef = spawnerGo->GetComponent<EnemySpawner>();
+		if (m_CurrentLevelIdx < m_EnemySettingsPerLevel.size())
+			m_EnemySpawnerRef->SetMaxEnemies(m_EnemySettingsPerLevel[m_CurrentLevelIdx]);
+	}
+
 	if (m_LevelPaths.empty())
 		Logger::GetInstance().LogErrorAndBreak("No level paths were found; add levels in the Levels.json file");
 
 	m_BackgroundImgRef = m_GameObjectRef->GetComponent<biggin::RenderComponent>();
-
 	m_BackgroundImgRef->SetOffset(-m_GameObjectRef->GetWorldPosition());
+
 	m_PlayerRef = m_GameObjectRef->GetSceneRef()->FindGameObjectsWithName("Player");
 	if (m_PlayerRef.empty())
 		Logger::GetInstance().LogWarning("No player found");
@@ -56,30 +68,31 @@ void MapLoader::OnNotify(Component* /*entity*/, const std::string& event)
 		if (m_AmntLandedParts == m_AmntBurgerParts)
 		{
 			//player finished level
-			//m_pNotifier->notify(this, "FinishedLevel");
-			m_LoadNextLevel = true;
-			//ResetLevel();
+			m_pNotifier->notify(this, "FinishedLevel");
+			ResetLevel();
+			LoadNext();
+			m_LoadNextLevel = false;
 		}
 	}
 }
 
 void MapLoader::Update()
 {
-	if (m_LoadNextLevel)
-	{
-		m_pNotifier->notify(this, "FinishedLevel");
-		ResetLevel();
-		LoadNext();
-		m_LoadNextLevel = false;
-	}
+	//if (m_LoadNextLevel) //TODO: check this
+	//{
+	//	m_pNotifier->notify(this, "FinishedLevel");
+	//	ResetLevel();
+	//	LoadNext();
+	//	m_LoadNextLevel = false;
+	//}
 }
 
 void MapLoader::ResetLevel()
 {
-
 	m_GameObjectRef->RemoveComponentsPending<biggin::BoxCollider2d>();
 	m_AmntBurgerParts = 0;
 	m_AmntLandedParts = 0;
+	m_EnemySpawnerRef->Reset();
 }
 
 void MapLoader::LoadNext()
@@ -87,6 +100,8 @@ void MapLoader::LoadNext()
 	++m_CurrentLevelIdx;
 	if (m_CurrentLevelIdx < m_LevelPaths.size())
 	{
+		if (m_CurrentLevelIdx < m_EnemySettingsPerLevel.size())
+			m_EnemySpawnerRef->SetMaxEnemies(m_EnemySettingsPerLevel[m_CurrentLevelIdx]);
 		LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
 	}
 	else
@@ -109,12 +124,34 @@ void MapLoader::ReadJsonLevelFile(const std::string& file)
 
 	for (auto jsonDocItr = jsonDoc.Begin(); jsonDocItr != jsonDoc.End(); ++jsonDocItr)
 	{
+		//if it has no level path there's no point in continuing for that block
+		if (!(*jsonDocItr).HasMember("levelPath"))
+			continue;
+
 		m_LevelPaths.emplace_back((*jsonDocItr)["levelPath"].GetString());
-		m_ImagePaths.emplace_back((*jsonDocItr)["backgroundImage"].GetString());
+
+		if ((*jsonDocItr).HasMember("backgroundImage"))
+			m_ImagePaths.emplace_back((*jsonDocItr)["backgroundImage"].GetString());
+
+		EnemySpawner::EnemySettings settings{};
+		if ((*jsonDocItr).HasMember("maxHotDogs"))
+			settings.maxHotDogs = (*jsonDocItr)["maxHotDogs"].GetInt();
+
+		if ((*jsonDocItr).HasMember("maxEggs"))
+			settings.maxEggs = (*jsonDocItr)["maxEggs"].GetInt();
+
+		if ((*jsonDocItr).HasMember("maxPickles"))
+			settings.maxPickles = (*jsonDocItr)["maxPickles"].GetInt();
+
+		if ((*jsonDocItr).HasMember("speed"))
+			settings.velocity = (*jsonDocItr)["speed"].GetFloat();
+
+		m_EnemySettingsPerLevel.emplace_back(settings);
+
 	}
 
-	if (m_LevelPaths.size() != m_ImagePaths.size())
-		Logger::GetInstance().LogErrorAndBreak("Not every level has a background image");
+	//if (m_LevelPaths.size() != m_ImagePaths.size())
+	//	Logger::GetInstance().LogErrorAndBreak("Not every level has a background image");
 }
 
 void MapLoader::LoadMap(const std::string& file)
@@ -122,10 +159,27 @@ void MapLoader::LoadMap(const std::string& file)
 	m_BackgroundImgRef->SetTexture(m_ImagePaths[m_CurrentLevelIdx]);
 
 	//remove the extension if there is one
-	const std::string rawName = file.substr(0, file.find_last_of("."));
+	const std::string rawName = file.substr(0, file.find_last_of('.'));
 
     ReadLevelFile(rawName + ".txt");
     ReadItemsFile(rawName + "items.txt");
+
+	CreateMapSideColliders();
+}
+
+void MapLoader::CreateMapSideColliders()
+{
+	b2Filter filter{};
+	filter.categoryBits = mapCollisionGroup::platformGroup;
+
+	//left
+	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
+		m_GameObjectRef, { m_GridCellSize, 1000 }, false, b2_staticBody, {}, {},
+		{ -m_GridCellSize, 0 }, false, filter));
+	//right
+	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
+		m_GameObjectRef, { m_GridCellSize, 1000 }, false, b2_staticBody, {}, {},
+		{ m_MapMaxWidthIdx * m_GridCellSize, 0 }, false, filter));
 }
 
 void MapLoader::ReadLevelFile(const std::string& file)
@@ -172,11 +226,12 @@ void MapLoader::ReadItemsFile(const std::string& file)
 	}
 }
 
-void MapLoader::ProcessLineMapFile(const std::string& line) const
+void MapLoader::ProcessLineMapFile(const std::string& line)
 {
+	const int lineWidth{ static_cast<int>(line.length()) };
     int colliderBeginPos{ 0 };
     
-	for (int i{0}; i < static_cast<int>(line.length()); ++i)
+	for (int i{0}; i < lineWidth; ++i)
 	{
 		switch (static_cast<MapValues>(line[i]))
 		{
@@ -206,27 +261,18 @@ void MapLoader::ProcessLineMapFile(const std::string& line) const
 		case MapValues::CatcherEnd:
 			MakeCollider(i, colliderBeginPos, 1, mapCollisionGroup::platformGroup, "Catcher");
 			break;
+		case MapValues::EnemySpawner:
+			SpawnEnemySpawner(i, lineWidth-1);
+			break;
 		case MapValues::Player:
 			m_PlayerRef[0]->SetLocalPosition(glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition());
 			break;
         default: ;
 		}
 	}
-}
 
-void MapLoader::MakeCollider(int i, int colliderBeginPos, int sizeMultiplier, unsigned short collisionGroup, std::string tag) const
-{
-	const int colliderEndPos = i + 1;
-	float colliderWidth = m_GridCellSize * (colliderEndPos - colliderBeginPos);
-	float colliderHeight = m_GridCellSize * sizeMultiplier;//4;
-	const glm::vec2 pos = { m_GridCellSize * colliderBeginPos, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f };
-
-	b2Filter filter{};
-	filter.categoryBits = collisionGroup;
-
-	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
-		m_GameObjectRef, { colliderWidth, colliderHeight }, false, b2_staticBody,
-		{}, tag, pos, false, filter));
+	if (m_MapMaxWidthIdx < (lineWidth - 1))
+		m_MapMaxWidthIdx = lineWidth;
 }
 
 void MapLoader::ProcessLineItemsFile(const std::string& line)
@@ -260,15 +306,86 @@ void MapLoader::ProcessLineItemsFile(const std::string& line)
 	}
 }
 
-void MapLoader::SpawnBurgerPart(int& i, BurgerIngredients ingredent)
+void MapLoader::MakeCollider(int idx, int colliderBeginPos, int sizeMultiplier, unsigned short collisionGroup, std::string tag) const
+{
+	const int colliderEndPos = idx + 1;
+	float colliderWidth = m_GridCellSize * (colliderEndPos - colliderBeginPos);
+	float colliderHeight = m_GridCellSize * sizeMultiplier;//4;
+	const glm::vec2 pos = { m_GridCellSize * colliderBeginPos, (m_GridCellSize * m_LineNumber) - (m_GridCellSize * 0.5f )};
+
+	b2Filter filter{};
+	filter.categoryBits = collisionGroup;
+
+	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
+		m_GameObjectRef, { colliderWidth, colliderHeight }, false, b2_staticBody,
+		{}, tag, pos, false, filter));
+}
+
+void MapLoader::SpawnBurgerPart(int& idx, BurgerIngredients ingredent)
 {
 	++m_AmntBurgerParts;
 
-	const glm::vec2 pos = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
+	const glm::vec2 pos = glm::vec2{ m_GridCellSize * idx, (m_GridCellSize * m_LineNumber) - (m_GridCellSize * 0.5f )} + m_GameObjectRef->GetLocalPosition();
 	//spawn burger top
-	GameLoader::BurgerPrefab(ingredent, pos, { this });
+	burgerTime::BurgerPrefab(ingredent, pos, { this });
 	//move to last letter of the burger
-	i += Burger::GetBurgerSize() - 1;
+	idx += Burger::GetBurgerSize() - 1;
 }
 
+void MapLoader::SpawnEnemySpawner(int idx, int mapMaxWidthIdx) const
+{
+	if (m_EnemySpawnerRef == nullptr)
+		return;
 
+	float offset = idx < (mapMaxWidthIdx / 2) ? -m_GridCellSize*2 : m_GridCellSize*2;
+	const glm::vec2 pos = glm::vec2{ m_GridCellSize * idx + offset, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
+	m_EnemySpawnerRef->AddSpawnLocation(pos);
+}
+
+void burgerTime::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const std::vector<biggin::Observer*>& observers)
+{
+	auto& scene = biggin::SceneManager::GetInstance().GetActiveScene();
+
+
+	//making the burger
+	const auto burger = std::make_shared<biggin::GameObject>();
+	burger->SetLocalPosition(pos);
+	burger->AddComponent(new biggin::Subject(burger.get())); //used to notify when a burger has reached the catcher
+	const auto burgerComponent = new Burger(burger.get(), ingredient, observers);
+	burger->AddComponent(burgerComponent);
+	burger->AddComponent(new biggin::RemoveOnEvent(burger.get(), "FinishedLevel", "Map"));
+	scene.AddPending(burger);
+
+	//adding the 4 child components out burger par uses
+	b2Filter filter{};
+	filter.maskBits = 0xFFFF ^ Burger::burgerIgnoreGroup; //Ignore group 1
+	filter.categoryBits = Burger::burgerCollisionGroup; //set self to group 2
+
+	for (size_t i{ 0 }; i < Burger::GetBurgerSize(); ++i)
+	{
+		const auto burgerCell = std::make_shared<biggin::GameObject>(burger.get());
+		burgerCell->AddComponent(new biggin::Subject(burgerCell.get()));
+		burgerCell->AddComponent(new biggin::RenderComponent(burgerCell.get()));
+		burgerCell->AddComponent(
+			new biggin::BoxCollider2d(
+				burgerCell.get(), { MapLoader::GetGridSize(), MapLoader::GetGridSize() - 5 }, true, b2_dynamicBody,
+				{ burgerComponent }, "Burger", { 0, 5 }, false, filter)
+		);
+		burgerCell->AddComponent(new biggin::RemoveOnEvent(burgerCell.get(), "FinishedLevel", "Map"));
+		scene.AddPending(burgerCell);
+	}
+}
+
+//void burgerTime::EnemySpawnerPrefab(glm::vec2 pos)
+//{
+//	auto& scene = biggin::SceneManager::GetInstance().GetActiveScene();
+//
+//
+//	//making the burger
+//	const auto spawner = std::make_shared<biggin::GameObject>();
+//	spawner->SetLocalPosition(pos);
+//
+//	spawner->AddComponent(new biggin::RemoveOnEvent(spawner.get(), "FinishedLevel", "Map"));
+//	
+//	scene.AddPending(spawner);
+//}

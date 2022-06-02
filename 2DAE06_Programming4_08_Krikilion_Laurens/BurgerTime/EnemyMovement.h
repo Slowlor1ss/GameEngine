@@ -26,7 +26,7 @@ public:
 	};
 	enum class AnimationState { runHorizontal, runVertical, peppered, die };
 
-	EnemyMovement(biggin::GameObject* go, movementDirection movDir);
+	EnemyMovement(biggin::GameObject* go, float velocity);
 	~EnemyMovement() override = default;
 
 	EnemyMovement(const EnemyMovement& other) = delete;
@@ -46,6 +46,7 @@ public:
 
 private:
 	bool CheckAndFixStuck();
+	void SetDirection(movementDirection newDir);
 	//bool FixStuckMovingUp();
 	//bool FixStuckMovingDown();
 	//bool FixStuckMovingLeft();

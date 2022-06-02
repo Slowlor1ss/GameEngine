@@ -1,4 +1,5 @@
 #pragma once
+#include "BoxCollider2d.h"
 #include "Component.h"
 #include "Observer.h"
 
@@ -51,5 +52,12 @@ namespace character
 
 		biggin::HealthComponent* m_pHealthComp;
 		biggin::SpriteRenderComponent* m_pSpriteComp;
+
+	public:
+		enum PlayerCollisionGroup : unsigned short
+		{
+			playerIgnoreGroup = biggin::BoxCollider2d::CollisionGroup::Group4,
+			playerCollisionGroup = biggin::BoxCollider2d::CollisionGroup::Group5,
+		};
 	};
 }

@@ -17,6 +17,7 @@ namespace biggin
 		virtual void Initialize(GameObject*) {};
 		//gets called when all game objects have been added to the scene and game is loaded
 	    virtual void Start() {};
+
 	    virtual void Update() {};
 	    virtual void FixedUpdate() {};
 	    virtual void Render() const {};

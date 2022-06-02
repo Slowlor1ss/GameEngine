@@ -6,14 +6,14 @@
 #include "Logger.h"
 #include "SpriteRenderComponent.h"
 
-EnemyMovement::EnemyMovement(biggin::GameObject* go, movementDirection movDir)
+EnemyMovement::EnemyMovement(biggin::GameObject* go, float velocity)
 	:Component(go)
-	,m_CurrentDirection(movDir)
+	,m_CurrentDirection(movementDirection::none)
 	,m_GameTimeRef{ GameTime::GetInstance() }
+	,m_Velocity(velocity)
 {
 	//Interval is set in disabled function
 	m_DelayedResetDisabled = utils::DelayedCallback(0, [&] {m_Disabled = false; }, 1);
-
 	m_CooldownCounter = m_Cooldown;
 }
 
@@ -25,9 +25,9 @@ void EnemyMovement::Initialize(biggin::GameObject* go)
 	if (m_pSpriteComp == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing SpriteRenderComponent");
 
-	m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
-	if (m_CurrentDirection == movementDirection::movingRight)
-		m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
+	//m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
+	//if (m_CurrentDirection == movementDirection::movingRight)
+	//	m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
 }
 
 void EnemyMovement::OnNotify(Component* entity, const std::string& event)
@@ -67,19 +67,23 @@ void EnemyMovement::OnNotify(Component* entity, const std::string& event)
 		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetOther()->GetTag();
 		if (tag == "ColliderTop")
 		{
-			--m_AmntCollidingTop;
+			if (m_AmntCollidingTop>0)
+				--m_AmntCollidingTop;
 		}
 		else if (tag == "ColliderBottom")
 		{
-			--m_AmntCollidingBottom;
+			if (m_AmntCollidingBottom > 0)
+				--m_AmntCollidingBottom;
 		}
 		else if (tag == "ColliderLeft")
 		{
-			--m_AmntCollidingLeft;
+			if (m_AmntCollidingLeft > 0)
+				--m_AmntCollidingLeft;
 		}
 		else if (tag == "ColliderRight")
 		{
-			--m_AmntCollidingRight;
+			if (m_AmntCollidingRight > 0)
+				--m_AmntCollidingRight;
 		}
 	}
 }
@@ -95,33 +99,63 @@ void EnemyMovement::HandleHitWall(const glm::vec2& playerPos, const glm::vec2& p
 		{
 		case movementDirection::movingUp:
 		case movementDirection::movingDown:
-			if (utils::LessThanWithMargin(playerPos.x, pos.x, m_PlayerPosMargin))
+			if (utils::LessThanWithMargin(playerPos.x, pos.x, m_PlayerPosMargin) || m_AmntCollidingRight > 0)
 			{
-				m_CurrentDirection = movementDirection::movingLeft;
 				m_CooldownCounter = m_Cooldown;
+				SetDirection(movementDirection::movingLeft);
 			}
 			else
 			{
-				m_CurrentDirection = movementDirection::movingRight;
 				m_CooldownCounter = m_Cooldown;
+				SetDirection(movementDirection::movingRight);
 			}
 			break;
 		case movementDirection::movingLeft:
 		case movementDirection::movingRight:
-			if (utils::LessThanWithMargin(playerPos.y, pos.y, m_PlayerPosMargin))
+			if (utils::LessThanWithMargin(playerPos.y, pos.y, m_PlayerPosMargin) || m_AmntCollidingBottom > 0)
 			{
-				m_CurrentDirection = movementDirection::movingUp;
 				m_CooldownCounter = m_Cooldown;
+				SetDirection(movementDirection::movingUp);
 			}
 			else
 			{
-				m_CurrentDirection = movementDirection::movingDown;
 				m_CooldownCounter = m_Cooldown;
+				SetDirection(movementDirection::movingDown);
 			}
 			break;
 		}
 	}
 
+}
+
+void EnemyMovement::SetDirection( movementDirection newDir)
+{
+	switch (newDir)
+	{
+	case movementDirection::movingUp:
+		m_CurrentDirection = movementDirection::movingUp;
+		m_pSpriteComp->SetPause(false); //just in case
+		m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runVertical));
+		break;
+	case movementDirection::movingDown:
+		m_CurrentDirection = movementDirection::movingDown;
+		m_pSpriteComp->SetPause(false); //just in case
+		m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runVertical));
+		break;
+	case movementDirection::movingLeft:
+		m_CurrentDirection = movementDirection::movingLeft;
+		m_pSpriteComp->SetPause(false); //just in case
+		m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
+		m_pSpriteComp->SetFlip(SDL_FLIP_NONE);
+		break;
+	case movementDirection::movingRight:
+		m_CurrentDirection = movementDirection::movingRight;
+		m_pSpriteComp->SetPause(false); //just in case
+		m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
+		m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
+		break;
+	default: ;
+	}
 }
 
 void EnemyMovement::Update()
@@ -154,19 +188,13 @@ void EnemyMovement::Update()
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingUp;
-			std::cout << "moving up\n";
-			m_pSpriteComp->SetPause(false); //just in case
-			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runVertical));
+			SetDirection(movementDirection::movingUp);
 		}
 		else if (m_AmntCollidingBottom == 0 && utils::GreaterThanWithMargin(playerPos.y, pos.y, m_PlayerPosMargin) ) //check if we can move down and if player is below us
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingDown;
-			std::cout << "moving down\n";
-			m_pSpriteComp->SetPause(false); //just in case
-			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runVertical));
+			SetDirection(movementDirection::movingDown);
 		}
 	}
 	else //is moving vertical
@@ -175,21 +203,13 @@ void EnemyMovement::Update()
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingLeft;
-			std::cout << "moving left\n";
-			m_pSpriteComp->SetPause(false); //just in case
-			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
-			m_pSpriteComp->SetFlip(SDL_FLIP_NONE);
+			SetDirection(movementDirection::movingLeft);
 		}
 		else if (m_AmntCollidingRight == 0 && utils::GreaterThanWithMargin(playerPos.x, pos.x, m_PlayerPosMargin) )
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingRight;
-			std::cout << "moving right\n";
-			m_pSpriteComp->SetPause(false); //just in case
-			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
-			m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
+			SetDirection(movementDirection::movingRight);
 		}
 	}
 }
@@ -248,7 +268,7 @@ bool EnemyMovement::CheckAndFixStuck()
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingDown;
+			SetDirection(movementDirection::movingDown);
 			return true;
 		}
 		break;
@@ -257,7 +277,7 @@ bool EnemyMovement::CheckAndFixStuck()
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingUp;
+			SetDirection(movementDirection::movingUp);
 			return true;
 		}
 		break;
@@ -266,7 +286,7 @@ bool EnemyMovement::CheckAndFixStuck()
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingRight;
+			SetDirection(movementDirection::movingRight);
 			return true;
 		}
 		break;
@@ -275,7 +295,7 @@ bool EnemyMovement::CheckAndFixStuck()
 		{
 			m_CooldownCounter = m_Cooldown;
 
-			m_CurrentDirection = movementDirection::movingLeft;
+			SetDirection(movementDirection::movingLeft);
 			return true;
 		}
 		break;

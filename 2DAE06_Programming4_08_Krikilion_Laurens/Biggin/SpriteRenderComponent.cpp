@@ -26,6 +26,8 @@ void biggin::SpriteRenderComponent::Initialize(GameObject* go)
 	m_RenderComponent = go->GetComponent<RenderComponent>();
 	if (m_RenderComponent == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing RenderComponent");
+	//Set source rect to something very small to prevent showing the whole sprite sheet on the first frame
+	m_RenderComponent->SetSourceRect({ 1,1,1,1 });
 }
 
 void biggin::SpriteRenderComponent::AddAnimation(int animationState, const SpriteInfo& spriteInfo)
@@ -92,9 +94,11 @@ void biggin::SpriteRenderComponent::Update()
 	{
 		if (m_CurrentRelFrameIdx == m_CurrentSprite.frameCount-1)
 		{
-			m_CurrentRelFrameIdx = 0;
 			m_IsPaused = m_PausedWhenFinished;
-			m_PausedWhenFinished = false;
+			if(m_IsPaused)
+				m_PausedWhenFinished = false;
+			else
+				m_CurrentRelFrameIdx = 0;
 		}
 		else
 			++m_CurrentRelFrameIdx;

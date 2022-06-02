@@ -22,6 +22,9 @@
     <Filter Include="UI">
       <UniqueIdentifier>{ef0c39be-073a-486e-82c8-e538db3e9a54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Characters\Enemies">
+      <UniqueIdentifier>{514d4988-6ac6-46f0-aa0e-9953efb78783}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BurgerTime.cpp">
@@ -60,11 +63,14 @@
     <ClCompile Include="HealthUI.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyMovement.cpp">
-      <Filter>Characters</Filter>
-    </ClCompile>
     <ClCompile Include="EnemyColliderHandeler.cpp">
-      <Filter>Characters</Filter>
+      <Filter>Characters\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyMovement.cpp">
+      <Filter>Characters\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemySpawner.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,11 +110,14 @@
     <ClInclude Include="HealthUI.h">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyMovement.h">
-      <Filter>Characters</Filter>
-    </ClInclude>
     <ClInclude Include="EnemyColliderHandeler.h">
-      <Filter>Characters</Filter>
+      <Filter>Characters\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyMovement.h">
+      <Filter>Characters\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemySpawner.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

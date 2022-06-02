@@ -14,6 +14,7 @@
 #include "Command.h"
 #include "EnemyColliderHandeler.h"
 #include "EnemyMovement.h"
+#include "EnemySpawner.h"
 #include "FpsCounter.h"
 #include "SceneManager.h"
 #include "Renderer.h"
@@ -38,6 +39,7 @@
 #include "InputManager.h"
 
 using namespace biggin;
+using namespace burgerTime;
 
 MainMenuState* BurgerTimeMenuState::m_pMainMenuState{ new MainMenuState() };
 RunningState* BurgerTimeMenuState::m_pRunningState{ new RunningState() };
@@ -162,7 +164,11 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 	auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
 	playerObject->AddComponent(peterPepper);
-	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 30, 30 }, false, b2_dynamicBody, { peterPepper }, "Player"));
+	b2Filter filterPlayer{};
+	filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
+	filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {30, 30}, false, b2_dynamicBody, {peterPepper},
+	                                             "Player", {}, true, filterPlayer));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
@@ -281,44 +287,12 @@ void MainMenuState::LoadSinglePlayer()
 	InputManager::GetInstance().MapActionKey({biggin::ActionState::Up, biggin::ControllerButton::Start, 0, SDLK_c },
 		std::make_unique<PrintControls>());
 
-	auto enemy = std::make_shared<GameObject>();
-	enemy->SetLocalPosition(16*9, 16*5);
 
-	enemy->AddComponent(new RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
-	auto enemySprite = new SpriteRenderComponent(enemy.get(), { 9,{0,0},{32,32} });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runHorizontal), { 2, 20 });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runVertical), { 2, 18 });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::peppered), { 2, 31 });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::die), { 4, 27 });
-	enemySprite->SetCurrentSprite(0);
-	enemy->AddComponent(enemySprite);
+	auto enemySpawner = std::make_shared<GameObject>();
+	enemySpawner->Setname("EnemySpawner");
+	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get()));
+	scene.Add(enemySpawner);
 
-	enemy->AddComponent(new Subject(enemy.get()));
-	b2Filter filter{};
-	//filter.categoryBits = biggin::BoxCollider2d::CollisionGroup::None;
-	filter.maskBits = MapLoader::mapCollisionsGroup; //ignore everything except for mapCollisionsGroup
-
-	auto enemyMovComp = new EnemyMovement(enemy.get(), EnemyMovement::movementDirection::movingRight);
-	enemy->AddComponent(enemyMovComp);
-	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderTop", {0, -17}, true, filter));
-	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderBottom", { 0, 17 }, true, filter));
-	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderLeft", { -33, 0 }, true, filter));
-	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
-	, "ColliderRight", { 33, 0 }, true, filter));
-
-	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get());
-	enemy->AddComponent(enemyCollisionHandeler);
-	enemy->AddComponent(new BoxCollider2d(enemy.get(), { 25, 25 }, true, b2_dynamicBody, { enemyCollisionHandeler }
-	, "Enemy", { }, true));
-
-	//playerObject->AddComponent(new BoxCollider2d(enemy.get(), { 30, 30 }, true, b2_dynamicBody, { enemyMovComp }
-	//, "ColliderTop", { 0, 30 }, false, filter));
-
-
-	scene.Add(enemy);
 
 	////Foreground
 	//auto foreground = std::make_shared<GameObject>();

@@ -32,8 +32,11 @@
 
 //use more namespaces
 
+enum class EnemyType;
+
 namespace biggin
 {
+	class Subject;
 	class BoxCollider2d;
 }
 
@@ -42,8 +45,8 @@ class EnemyMovement;
 class EnemyColliderHandeler final : public biggin::Component, public biggin::Observer
 {
 public:
-	EnemyColliderHandeler(biggin::GameObject* go);
-	~EnemyColliderHandeler() = default;
+	EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers);
+	~EnemyColliderHandeler();
 
 	EnemyColliderHandeler(const EnemyColliderHandeler& other) = delete;
 	EnemyColliderHandeler(EnemyColliderHandeler&& other) noexcept = delete;
@@ -51,10 +54,14 @@ public:
 	EnemyColliderHandeler& operator=(EnemyColliderHandeler&& other) noexcept = delete;
 
 	void Initialize(biggin::GameObject*) override;
+	void AddObservers(const std::vector<Observer*>& observers) const;
+	void RemoveObservers(const std::vector<Observer*>& observers) const;
 	void OnNotify(Component* entity, const std::string& event) override;
-	void HandleHitByFallingBurger();
+	void Die();
 	void Update() override;
 	void FixedUpdate() override;
+
+	EnemyType GetEnemyType() const { return m_EnemyType; }
 
 private:
 	void HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider);
@@ -62,6 +69,7 @@ private:
 	void HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider);
 	bool IsBurgerFalling(biggin::GameObject* overlappedBurgerGameObject) const;
 
+	EnemyType m_EnemyType{};
 	bool m_Stunned{false};
 	bool m_IsAlive{true};
 	std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
@@ -69,5 +77,7 @@ private:
 	biggin::GameObject* m_BurgerGameObjectRef{nullptr};
 
 	int m_AmntColliding{};
+
+	biggin::Subject* m_pNotifier{ nullptr };
 };
 
