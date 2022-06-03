@@ -9,10 +9,8 @@
 #include <Biggin.h>
 #include <iostream>
 
+#pragma warning(push, 0)
 #include <steam_api.h>
-#pragma warning(push)
-#pragma warning (disable:26495)
-#pragma warning (disable:26813)
 #include <Box2D/Box2D.h>
 #pragma warning(pop)
 #include "SimpleSDL2SoundSystem.h"

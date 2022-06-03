@@ -2,18 +2,10 @@
 #include <SDL_keycode.h>
 #include "BurgerTimeCommands.hpp"
 #include "imgui.h"
-
 #include "GameLoader.h"
-#include "Biggin.h"
 #include <thread>
-#include "audio.h"
-#include "Box2dManager.h"
 #include "BoxCollider2d.h"
 #include "Burger.h"
-#include "BurgerTimeCommands.hpp"
-#include "Command.h"
-#include "EnemyColliderHandeler.h"
-#include "EnemyMovement.h"
 #include "EnemySpawner.h"
 #include "FpsCounter.h"
 #include "SceneManager.h"
@@ -26,7 +18,6 @@
 #include "Scene.h"
 #include "HealthComponent.h"
 #include "HealthUI.h"
-#include "imgui.h"
 #include "MapLoader.h"
 #include "PeterPepper.h"
 #include "RenderComponent.h"
@@ -167,7 +158,7 @@ void MainMenuState::LoadSinglePlayer()
 	b2Filter filterPlayer{};
 	filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
 	filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
-	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {16, 30}, false, b2_dynamicBody, {peterPepper},
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {20, 30}, false, b2_dynamicBody, {peterPepper},
 	                                             "Player", {}, true, filterPlayer));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
@@ -306,6 +297,7 @@ void MainMenuState::LoadSinglePlayer()
 
 void RunningState::Enter()
 {
+
 }
 
 void RunningState::OnNotify(biggin::Component* /*entity*/, const std::string& event)
@@ -338,6 +330,11 @@ void RunningState::RenderMenu(GameLoader* UiMenu)
 void OptionsState::Enter()
 {
 	SceneManager::GetInstance().SetScenesPaused(true);
+}
+
+void OptionsState::Exit()
+{
+	SceneManager::GetInstance().SetScenesPaused(false);
 }
 
 void OptionsState::RenderMenu(GameLoader* UiMenu)
@@ -386,8 +383,8 @@ void BurgerTimeMenuState::Cleanup()
 {
 	delete m_pMainMenuState;
 	m_pMainMenuState = nullptr;
-	delete m_pOptionsState;
-	m_pOptionsState = nullptr;
 	delete m_pRunningState;
 	m_pRunningState = nullptr;
+	delete m_pOptionsState;
+	m_pOptionsState = nullptr;
 }

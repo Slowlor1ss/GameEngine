@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
 #include <string>
+#pragma warning(push, 0)
+#include <glm/glm.hpp>
+#pragma warning (pop)
 
 namespace biggin
 {

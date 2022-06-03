@@ -1,5 +1,7 @@
 #pragma once
+#pragma warning(push, 0)
 #include <Box2D/Common/b2Draw.h>
+#pragma warning(pop)
 
 class Box2dRenderer final : public b2Draw
 {

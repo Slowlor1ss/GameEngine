@@ -1,5 +1,9 @@
 #pragma once
 #include "Singleton.h"
+#pragma warning(push, 0)
+#include <glm/glm.hpp>
+#include <SDL.h>
+#pragma warning (pop)
 
 struct b2Vec2;
 

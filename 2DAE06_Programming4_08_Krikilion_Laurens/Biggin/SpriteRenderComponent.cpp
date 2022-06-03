@@ -78,6 +78,18 @@ void biggin::SpriteRenderComponent::UpdateRenderVariables()
 	m_RenderComponent->SetSourceRect(m_SourceRect);
 }
 
+float biggin::SpriteRenderComponent::GetDuration(int animationState)
+{
+	if (!m_Sprites.contains(animationState))
+	{
+		std::cerr << "Theres no sprite animation for index: " << animationState << '\n';
+		return 0;
+	}
+
+	const auto& animation = m_Sprites[animationState];
+	return animation.frameCount * m_Speed;
+}
+
 void biggin::SpriteRenderComponent::Update()
 {
 	if (m_RenderVariablesDirty)

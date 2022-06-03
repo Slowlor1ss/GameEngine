@@ -1,9 +1,10 @@
 #include "BigginPCH.h"
 #include "BoxCollider2d.h"
+#pragma warning(push, 0)
 #include <Box2D/Collision/Shapes/b2PolygonShape.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <Box2D/Dynamics/b2World.h>
-#include <Box2D/Dynamics/Contacts/b2Contact.h>
+#pragma warning(pop)
 #include "Box2dManager.h"
 #include "GameObject.h"
 #include "GameTime.h"
@@ -11,7 +12,6 @@
 #include "Scene.h"
 #include "SceneManager.h"
 #include "Subject.h"
-#include "Box2dManager.h"
 #include "Utils.hpp"
 
 using namespace biggin;

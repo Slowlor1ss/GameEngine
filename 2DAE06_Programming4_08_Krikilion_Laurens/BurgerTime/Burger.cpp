@@ -15,9 +15,9 @@ Burger::Burger(biggin::GameObject* go, BurgerIngredients ingredient, const std::
 	: Component(go)
 	, m_pNotifier(go->GetComponent<biggin::Subject>())
 	, m_Ingredient(ingredient)
-	, m_GameTimeRef{ GameTime::GetInstance() }
+	, m_GameTimeRef{biggin::GameTime::GetInstance() }
 {
-	m_FallDelayed.interval = GameTime::GetFixedTimeStep();
+	m_FallDelayed.interval = biggin::GameTime::GetFixedTimeStep();
 	//According to Stephan T. Lavavej - "Avoid using bind(), ..., use lambdas"
 	//https://www.youtube.com/watch?v=zt7ThwVfap0&t=32m20s
 	m_FallDelayed.func = [this] {DropBurger(); };
@@ -147,11 +147,9 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 void Burger::DropBurger(int score)
 {
-	if (m_pPlayerGo == nullptr)
-		return;
-
-	if (auto* scoreComponent = m_pPlayerGo->GetComponent<burgerTime::ScoreComponent>())
-		scoreComponent->IncreaseScore(score);
+	if (m_pPlayerGo != nullptr)
+		if (auto* scoreComponent = m_pPlayerGo->GetComponent<burgerTime::ScoreComponent>())
+			scoreComponent->IncreaseScore(score);
 
 	m_IsFalling = true;
 	m_pNotifier->notify(this, "BurgerFalling");
@@ -179,7 +177,7 @@ void Burger::FixedUpdate()
 
 	if (m_IsFalling)
 	{
-		auto deltaVelo = glm::vec2{ 0, m_Velocity } * GameTime::GetFixedTimeStep();
+		auto deltaVelo = glm::vec2{ 0, m_Velocity } * biggin::GameTime::GetFixedTimeStep();
 		GetGameObject()->TranslateLocalPosition(deltaVelo);
 	}
 }
@@ -227,7 +225,7 @@ void Burger::InitializeBurger()
 void Burger::InitRenderComp(int collumnIdx) const
 {
 	constexpr auto tileSize = burgerTime::MapLoader::GetGridSize();
-	for (int i{ 0 }; i < m_pChilderen.size(); ++i)
+	for (int i{ 0 }; i < static_cast<int>(m_pChilderen.size()); ++i)
 	{
 		biggin::RenderComponent* renderComponent = m_pChilderen[i]->GetComponent<biggin::RenderComponent>();
 		renderComponent->SetTexture("BurgerTimeSpriteSheet.png");

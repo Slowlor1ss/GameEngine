@@ -32,6 +32,7 @@
 
 //use more namespaces
 
+class Burger;
 enum class EnemyType;
 
 namespace biggin
@@ -57,7 +58,8 @@ public:
 	void AddObservers(const std::vector<Observer*>& observers) const;
 	void RemoveObservers(const std::vector<Observer*>& observers) const;
 	void OnNotify(Component* entity, const std::string& event) override;
-	void Die();
+	void Die(const biggin::GameObject* playerGo);
+	void UpdateScoreOnDeath(const biggin::GameObject* playerGo);
 	void Update() override;
 	void FixedUpdate() override;
 
@@ -67,7 +69,7 @@ private:
 	void HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider);
 	void HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider);
 	void HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider);
-	bool IsBurgerFalling(biggin::GameObject* overlappedBurgerGameObject) const;
+	bool IsBurgerFalling(const Burger* burger) const;
 
 	EnemyType m_EnemyType{};
 	bool m_Stunned{false};

@@ -6,6 +6,7 @@
 #include "HealthComponent.h"
 #include "InputManager.h"
 #include "Logger.h"
+#include "MapLoader.h"
 #include "SpriteRenderComponent.h"
 
 character::PeterPepper::PeterPepper(biggin::GameObject* go, float movementSpeed) : Component(go)
@@ -76,6 +77,7 @@ void character::PeterPepper::UpdateMovementDirectionState()
 		return;
 	}
 
+	m_LastMovementDir = m_CurrMovementDir;
 	m_CurrMovementDir = MoveDirection::None;
 }
 
@@ -102,7 +104,7 @@ void character::PeterPepper::FixedUpdate()
 
 	m_pSpriteComp->SetFlip(m_CurrMovementDir == MoveDirection::Right ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 
-	m_pGameObjectRef->TranslateLocalPosition(m_Velocity * GameTime::GetFixedTimeStep());
+	m_pGameObjectRef->TranslateLocalPosition(m_Velocity * biggin::GameTime::GetFixedTimeStep());
 
 	m_Velocity = {0,0};
 }
@@ -135,6 +137,30 @@ void character::PeterPepper::Damage()
 int character::PeterPepper::GetHealth() const
 {
 	return m_pHealthComp->GetLives();
+}
+
+void character::PeterPepper::ShootPepper()
+{
+	glm::vec2 pos{ m_pGameObjectRef->GetLocalPosition() };
+
+	const auto dir = m_CurrMovementDir == MoveDirection::None ? m_LastMovementDir : m_CurrMovementDir;
+	switch (dir)
+	{
+	case MoveDirection::Left:
+		pos += glm::vec2{-burgerTime::MapLoader::GetGridSize(), 0};
+		break;
+	case MoveDirection::Right:
+		pos += glm::vec2{ burgerTime::MapLoader::GetGridSize(), 0 };
+		break;
+	case MoveDirection::Up:
+		pos += glm::vec2{ 0, -burgerTime::MapLoader::GetGridSize() };
+		break;
+	case MoveDirection::Down:
+		pos += glm::vec2{ 0, burgerTime::MapLoader::GetGridSize()};
+		break;
+	}
+
+	m_pPepperShooter->Shoot(pos);
 }
 
 void character::PeterPepper::OnNotify(Component* /*entity*/, const std::string& event)

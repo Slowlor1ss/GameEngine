@@ -2,6 +2,9 @@
 #include "BoxCollider2d.h"
 #include "Component.h"
 #include "Observer.h"
+#pragma warning(push, 0)
+#include <glm/glm.hpp>
+#pragma warning(pop)
 
 namespace biggin
 {
@@ -40,6 +43,8 @@ namespace character
 		float GetSpeed() const { return m_Speed; }
 		int GetHealth() const;
 
+		void ShootPepper();
+
 		void OnNotify(Component* entity, const std::string& event) override;
 
 
@@ -52,6 +57,7 @@ namespace character
 		inline static int m_AmntPlayers{0};
 		int m_PlayerIndex;
 		MoveDirection m_CurrMovementDir{MoveDirection::None};
+		MoveDirection m_LastMovementDir{MoveDirection::Down};
 		AnimationState m_CurrAnimState{AnimationState::Idle};
 		bool m_VerticalMovDisabled{ false };
 		bool m_HorizontalMovDisabled{ false };

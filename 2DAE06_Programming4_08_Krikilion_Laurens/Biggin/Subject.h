@@ -19,6 +19,7 @@ namespace biggin
 
 		void AddObserver(Observer* observer);
 		void RemoveObserver(Observer* observer);
+		void RemoveObserverUnsafe(Observer* observer);
 
 		void notify(Component* entity, const std::string& event);
 

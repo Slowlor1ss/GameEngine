@@ -5,10 +5,10 @@
 #include "Observer.h"
 #include "Utils.hpp"
 
-class GameTime;
 
 namespace biggin
 {
+	class GameTime;
 	
 class RemoveOnEvent final : public biggin::Component, public biggin::Observer
 {

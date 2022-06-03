@@ -1,6 +1,4 @@
 #pragma once
-#include <vector>
-#include <glm/detail/type_vec.hpp>
 #include "MenuState.h"
 
 namespace biggin

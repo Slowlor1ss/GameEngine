@@ -36,8 +36,20 @@ void biggin::Subject::RemoveObserver(Observer* observer)
 	{
 		const auto it = std::ranges::find(m_pObservers, observer);
 		if (it != m_pObservers.end())
+		{
 			m_pObservers.erase(it);
+			std::erase(observer->m_pNotifiers, this);
+		}
+
 	}
+}
+
+//used in the observer destructor so it can remove itself
+void biggin::Subject::RemoveObserverUnsafe(Observer* observer)
+{
+	const auto it = std::ranges::find(m_pObservers, observer);
+	if (it != m_pObservers.end())
+		m_pObservers.erase(it);
 }
 
 void biggin::Subject::notify(Component* entity, const std::string& event)
@@ -54,7 +66,10 @@ void biggin::Subject::notify(Component* entity, const std::string& event)
 		auto pendingDeleteEnd = m_pObservers.end();
 
 		for (auto* pObserver : m_pPendingDelete)
+		{
 			pendingDeleteEnd = std::remove(m_pObservers.begin(), pendingDeleteEnd, pObserver);
+			std::erase(pObserver->m_pNotifiers, this);
+		}
 
 		m_pObservers.erase(pendingDeleteEnd, m_pObservers.end());
 		m_pPendingDelete.clear();

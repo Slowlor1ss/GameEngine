@@ -10,7 +10,11 @@
 #include "Utils.hpp"
 
 class EnemyColliderHandeler;
-class GameTime;
+
+namespace biggin
+{
+	class GameTime;
+}
 
 enum class EnemyType
 {
@@ -65,6 +69,6 @@ private:
 
 	utils::DelayedCallback m_DelayedSpawn{};
 	utils::DelayedCallback m_DelayedSpawn2{};
-	GameTime& m_GameTimeRef;
+	biggin::GameTime& m_GameTimeRef;
 };
 

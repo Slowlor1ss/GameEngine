@@ -11,8 +11,7 @@ GameLoader::GameLoader()
 
 GameLoader::~GameLoader()
 {
-	delete m_pState;
-	m_pState = nullptr;
+	BurgerTimeMenuState::Cleanup();
 }
 
 void GameLoader::RenderMenu()

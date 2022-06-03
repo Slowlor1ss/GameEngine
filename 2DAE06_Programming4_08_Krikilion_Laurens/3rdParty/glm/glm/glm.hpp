@@ -65,6 +65,9 @@
 #	pragma message("GLM: Core library included")
 #endif//GLM_MESSAGES
 
+#pragma warning(push)
+#pragma warning (disable:26495)
+
 #include "vec2.hpp"
 #include "vec3.hpp"
 #include "vec4.hpp"
@@ -86,3 +89,5 @@
 #include "matrix.hpp"
 #include "vector_relational.hpp"
 #include "integer.hpp"
+
+#pragma warning (pop)

@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include "MenuState.h"
 #include "Observer.h"
 
 //https://gameprogrammingpatterns.com/state.html
@@ -86,6 +85,6 @@ public:
 
 protected:
 	void Enter() override;
-	void Exit() override {}
+	void Exit() override;
 
 };

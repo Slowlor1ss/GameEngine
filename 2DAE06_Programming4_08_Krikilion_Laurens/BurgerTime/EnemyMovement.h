@@ -6,10 +6,10 @@
 #include "Observer.h"
 #include "Utils.hpp"
 
-class GameTime;
 
 namespace biggin
 {
+	class GameTime;
 	class SpriteRenderComponent;
 }
 
@@ -72,8 +72,8 @@ private:
 
 	biggin::SpriteRenderComponent* m_pSpriteComp{nullptr};
 
-	utils::DelayedCallback m_DelayedResetDisabled;
-	GameTime& m_GameTimeRef;
+	utils::DelayedCallback m_DelayedResetDisabled{};
+	biggin::GameTime& m_GameTimeRef;
 
 	static constexpr float m_PlayerPosMargin{ 25 };
 };

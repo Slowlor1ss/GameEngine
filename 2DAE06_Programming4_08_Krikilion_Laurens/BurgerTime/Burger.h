@@ -4,10 +4,10 @@
 #include "Observer.h"
 #include "ScoreComponent.h"
 
-class GameTime;
 
 namespace biggin
 {
+	class GameTime;
 	class Subject;
 	class BoxCollider2d;
 }
@@ -43,6 +43,7 @@ public:
 
 	bool ReachedBottom() const { return m_ReachedBottom; }
 	bool IsFalling() const { return m_IsFalling; }
+	const biggin::GameObject* GetBurgerResponsible() const { return m_pPlayerGo; } //game object responsible for dropping the burger
 	static constexpr int GetBurgerSize() { return m_BurgerSize; }
 
 private:
@@ -66,7 +67,7 @@ private:
 	BurgerIngredients m_Ingredient;
 
 	int m_EnemiesOnBurger{};
-	GameTime& m_GameTimeRef;
+	biggin::GameTime& m_GameTimeRef;
 
 	utils::DelayedCallback m_FallDelayed{};
 	const biggin::GameObject* m_pPlayerGo{nullptr};

@@ -1,6 +1,8 @@
 #include "BigginPCH.h"
 #include "GameTime.h"
 
+using namespace biggin;
+
 void GameTime::Reset()
 {
 	std::chrono::steady_clock::time_point currTime{ std::chrono::steady_clock::now() };

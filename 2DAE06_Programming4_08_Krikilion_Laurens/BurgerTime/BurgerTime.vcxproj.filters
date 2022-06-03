@@ -48,12 +48,6 @@
     <ClCompile Include="GameLoader.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="ScoreComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HealthComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BurgerTimeMenuState.cpp">
       <Filter>UI</Filter>
     </ClCompile>
@@ -69,8 +63,20 @@
     <ClCompile Include="EnemyMovement.cpp">
       <Filter>Characters\Enemies</Filter>
     </ClCompile>
+    <ClCompile Include="HealthComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
     <ClCompile Include="EnemySpawner.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Characters\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="PepperComponent.cpp">
+      <Filter>Characters</Filter>
+    </ClCompile>
+    <ClCompile Include="PepperShooter.cpp">
+      <Filter>Characters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,12 +101,6 @@
     <ClInclude Include="BurgerTimeCommands.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScoreComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HealthComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BurgerTimeMenuState.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -117,7 +117,19 @@
       <Filter>Characters\Enemies</Filter>
     </ClInclude>
     <ClInclude Include="EnemySpawner.h">
-      <Filter>Header Files</Filter>
+      <Filter>Characters\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="HealthComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="PepperComponent.h">
+      <Filter>Characters</Filter>
+    </ClInclude>
+    <ClInclude Include="PepperShooter.h">
+      <Filter>Characters\Enemies</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

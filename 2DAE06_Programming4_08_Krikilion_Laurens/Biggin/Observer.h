@@ -13,7 +13,7 @@ namespace biggin
 			if (!m_pNotifiers.empty())
 				for (const auto pNotifier : m_pNotifiers)
 				{
-					pNotifier->RemoveObserver(this);
+					pNotifier->RemoveObserverUnsafe(this);
 				}
 		}
 		virtual void OnNotify(Component* entity, const std::string& event) = 0;

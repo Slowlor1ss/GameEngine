@@ -1,5 +1,7 @@
 #pragma once
+#pragma warning(push, 0)
 #include <Box2D/Dynamics/b2WorldCallbacks.h>
+#pragma warning (pop)
 
 class b2World;
 

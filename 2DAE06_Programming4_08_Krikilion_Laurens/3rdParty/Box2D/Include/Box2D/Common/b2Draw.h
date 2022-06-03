@@ -20,6 +20,8 @@
 #define B2_DRAW_H
 
 #include <Box2D/Common/b2Math.h>
+#pragma warning(push)
+#pragma warning (disable:26495)
 
 /// Color for debug drawing. Each value has the range [0,1].
 struct b2Color
@@ -94,4 +96,5 @@ protected:
 	uint32 m_drawFlags;
 };
 
+#pragma warning (pop)
 #endif

@@ -1,8 +1,7 @@
 #pragma once
 #include "InputManager.h"
 #include "PeterPepper.h"
-#pragma warning(push)
-#pragma warning (disable:4201)
+#pragma warning(push, 0)
 #include <glm/glm.hpp>
 #pragma warning(pop)
 #include <iostream>

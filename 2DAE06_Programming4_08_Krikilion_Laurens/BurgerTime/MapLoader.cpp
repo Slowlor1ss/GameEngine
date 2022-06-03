@@ -1,6 +1,10 @@
 #include "MapLoader.h"
+#pragma warning(push, 0)
 #include <fstream>
 #include <Box2D/Dynamics/b2Body.h>
+#include <document.h>
+#include <istreamwrapper.h>
+#pragma warning(pop)
 #include "Biggin.h"
 #include "BoxCollider2d.h"
 #include "Burger.h"
@@ -9,8 +13,6 @@
 #include "Logger.h"
 #include "PeterPepper.h"
 #include "Observer.h"
-#include <document.h>
-#include <istreamwrapper.h>
 #include "EnemySpawner.h"
 #include "GameTime.h"
 #include "RemoveOnEvent.h"
@@ -24,7 +26,7 @@ MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& obser
 	, m_CurrentLevelIdx(0)
 	, m_GameObjectRef(go)
 	, m_pNotifier(go->GetComponent<biggin::Subject>())
-	, m_GameTimeRef{ GameTime::GetInstance() }
+	, m_GameTimeRef{biggin::GameTime::GetInstance() }
 {
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
@@ -53,7 +55,7 @@ void MapLoader::Start()
 	if (spawnerGo != nullptr)
 	{
 		m_EnemySpawnerRef = spawnerGo->GetComponent<EnemySpawner>();
-		if (m_CurrentLevelIdx < m_EnemySettingsPerLevel.size())
+		if (m_CurrentLevelIdx < static_cast<int>(m_EnemySettingsPerLevel.size()))
 			m_EnemySpawnerRef->SetMaxEnemies(m_EnemySettingsPerLevel[m_CurrentLevelIdx]);
 	}
 
@@ -149,9 +151,9 @@ void MapLoader::ResetLevel()
 void MapLoader::LoadNext()
 {
 	++m_CurrentLevelIdx;
-	if (m_CurrentLevelIdx < m_LevelPaths.size())
+	if (m_CurrentLevelIdx < static_cast<int>(m_LevelPaths.size()))
 	{
-		if (m_CurrentLevelIdx < m_EnemySettingsPerLevel.size())
+		if (m_CurrentLevelIdx < static_cast<int>(m_EnemySettingsPerLevel.size()))
 			m_EnemySpawnerRef->SetMaxEnemies(m_EnemySettingsPerLevel[m_CurrentLevelIdx]);
 		LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
 	}
@@ -390,7 +392,7 @@ void MapLoader::SpawnEnemySpawner(int idx, int mapMaxWidthIdx) const
 	if (m_EnemySpawnerRef == nullptr)
 		return;
 
-	float offset = idx < (mapMaxWidthIdx / 2) ? -m_GridCellSize*2 : m_GridCellSize*2;
+	float offset = idx < (mapMaxWidthIdx / 2) ? -m_GridCellSize*2 : m_GridCellSize*3;
 	const glm::vec2 pos = glm::vec2{ m_GridCellSize * idx + offset, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
 	m_EnemySpawnerRef->AddSpawnLocation(pos);
 }
@@ -414,7 +416,7 @@ void burgerTime::BurgerPrefab(BurgerIngredients ingredient, glm::vec2 pos, const
 	filter.maskBits = 0xFFFF ^ Burger::burgerIgnoreGroup; //Ignore group 1
 	filter.categoryBits = Burger::burgerCollisionGroup; //set self to group 2
 
-	for (size_t i{ 0 }; i < Burger::GetBurgerSize(); ++i)
+	for (int i{ 0 }; i < Burger::GetBurgerSize(); ++i)
 	{
 		const auto burgerCell = std::make_shared<biggin::GameObject>(burger.get());
 		burgerCell->AddComponent(new biggin::Subject(burgerCell.get()));

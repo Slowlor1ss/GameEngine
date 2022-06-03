@@ -3,6 +3,7 @@
 #include "BoxCollider2d.h"
 #include "Burger.h"
 #include "EnemyMovement.h"
+#include "EnemySpawner.h"
 #include "GameObject.h"
 #include "Logger.h"
 #include "PeterPepper.h"
@@ -82,7 +83,11 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 	}
 	else if (event == "BurgerFalling")
 	{
-		Die();
+		if (m_BurgerGameObjectRef)
+		{
+			const auto* burger = m_BurgerGameObjectRef->GetComponent<Burger>();
+			Die(burger->GetBurgerResponsible());
+		}
 	}
 }
 
@@ -107,15 +112,18 @@ void EnemyColliderHandeler::HandleEnemyBurgerBeginContact(const biggin::BoxColli
 {
 	//the parent of the burger part were overlapping with is our actual burger game object
 	const auto overlappedBurgerGameObject = otherColider->GetOwningGameObject()->GetParent();
+	if (overlappedBurgerGameObject == nullptr)
+		return;
 
 	if (m_BurgerGameObjectRef == nullptr)
 	{
 		m_BurgerGameObjectRef = overlappedBurgerGameObject;
 	}
 
-	if(IsBurgerFalling(overlappedBurgerGameObject))
+	const auto* burger = overlappedBurgerGameObject->GetComponent<Burger>();
+	if(IsBurgerFalling(burger))
 	{
-		Die();
+		Die(burger->GetBurgerResponsible());
 		return;
 	}
 
@@ -146,27 +154,48 @@ void EnemyColliderHandeler::HandleEnemyBurgerEndContact(const biggin::BoxCollide
 	}
 }
 
-bool EnemyColliderHandeler::IsBurgerFalling(biggin::GameObject* overlappedBurgerGameObject) const
+bool EnemyColliderHandeler::IsBurgerFalling(const Burger* burger) const
 {
-	//if (overlappedBurgerGameObject != m_BurgerGameObjectRef || m_AmntColliding == 1)
-	//{
-		const auto burger = overlappedBurgerGameObject->GetComponent<Burger>();
-		if (burger == nullptr)
-			return false;
+	if (burger == nullptr)
+		return false;
 
-		return burger->IsFalling();
-	//}
-	//return false;
+	return burger->IsFalling();
 }
 
-void EnemyColliderHandeler::Die()
+void EnemyColliderHandeler::Die(const biggin::GameObject* playerGo)
 {
+	UpdateScoreOnDeath(playerGo);
+
 	if (m_BurgerGameObjectRef != nullptr)
 		GetGameObject()->RemoveComponentsPending<biggin::BoxCollider2d>();
 
 	m_pNotifier->notify(this, "EnemyDied");
 	m_IsAlive = false;
 	m_MovementRef->Die();
+}
+
+void EnemyColliderHandeler::UpdateScoreOnDeath(const biggin::GameObject* playerGo)
+{
+	if (playerGo == nullptr)
+		return;
+
+	if (auto* scoreComponent = playerGo->GetComponent<burgerTime::ScoreComponent>())
+	{
+		switch (m_EnemyType)
+		{
+		case EnemyType::HotDog:
+			scoreComponent->IncreaseScore(burgerTime::ScoreValues::hotDogDied);
+			break;
+		case EnemyType::Pickle:
+			scoreComponent->IncreaseScore(burgerTime::ScoreValues::pickleDied);
+			break;
+		case EnemyType::Egg:
+			scoreComponent->IncreaseScore(burgerTime::ScoreValues::eggDied);
+			break;
+		default:;
+		}
+
+	}
 }
 
 void EnemyColliderHandeler::Update()

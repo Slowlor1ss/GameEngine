@@ -1,8 +1,9 @@
 #include "BigginPCH.h"
 #include "ContactListener.h"
+#pragma warning(push, 0)
 #include <Box2D/Dynamics/b2World.h>
 #include <Box2D/Dynamics/Contacts/b2Contact.h>
-#include "Box2dManager.h"
+#pragma warning (pop)
 #include "BoxCollider2d.h"
 
 using namespace biggin;

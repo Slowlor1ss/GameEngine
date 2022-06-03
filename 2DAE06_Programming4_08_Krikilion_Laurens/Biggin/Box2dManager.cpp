@@ -1,6 +1,8 @@
 #include "BigginPCH.h"
 #include "Box2dManager.h"
+#pragma warning(push, 0)
 #include <Box2D/Dynamics/b2World.h>
+#pragma warning(pop)
 #include "ContactListener.h"
 #include "Box2dRenderer.h"
 #include "GameTime.h"

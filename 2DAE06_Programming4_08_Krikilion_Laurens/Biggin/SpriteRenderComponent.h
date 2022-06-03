@@ -53,6 +53,8 @@ namespace biggin
 		void SetFlip(SDL_RendererFlip flip) const;
 		void UpdateRenderVariables();
 
+		float GetDuration(int animationState);
+
 	private:
 		std::pair<unsigned int, unsigned int> GetRowCol(const unsigned int idx, const unsigned int nrOfCols);
 

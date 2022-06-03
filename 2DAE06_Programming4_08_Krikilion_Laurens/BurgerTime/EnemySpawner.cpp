@@ -1,6 +1,8 @@
 #include "EnemySpawner.h"
 #include <iostream>
+#pragma warning(push, 0)
 #include <Box2D/Dynamics/b2Body.h>
+#pragma warning(pop)
 #include "BoxCollider2d.h"
 #include "EnemyColliderHandeler.h"
 #include "EnemyMovement.h"
@@ -16,7 +18,7 @@
 EnemySpawner::EnemySpawner(biggin::GameObject* go)
 	:Component(go)
 	,m_GameObjectRef(go)
-	,m_GameTimeRef{ GameTime::GetInstance() }
+	,m_GameTimeRef{biggin::GameTime::GetInstance() }
 	,m_DelayedSpawn(3.f, {})
 	,m_DelayedSpawn2(3.f, {})
 {

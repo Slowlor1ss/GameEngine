@@ -7,10 +7,10 @@
 #include "SpriteRenderComponent.h"
 
 EnemyMovement::EnemyMovement(biggin::GameObject* go, float velocity)
-	:Component(go)
-	,m_CurrentDirection(movementDirection::none)
-	,m_GameTimeRef{ GameTime::GetInstance() }
-	,m_Velocity(velocity)
+	: Component(go)
+	, m_CurrentDirection(movementDirection::none)
+	, m_Velocity(velocity)
+	, m_GameTimeRef{biggin::GameTime::GetInstance() }
 {
 	//Interval is set in disabled function
 	m_DelayedResetDisabled = utils::DelayedCallback(0, [&] {m_Disabled = false; }, 1);
@@ -172,10 +172,6 @@ void EnemyMovement::Update()
 	if (m_CooldownCounter > 0)
 	{
 		m_CooldownCounter -= m_GameTimeRef.GetDeltaT();
-		if (m_CooldownCounter <5 && m_CooldownCounter > 4)
-		{
-			std::cout << m_CooldownCounter << '\n';
-		}
 		return;
 	}
 
@@ -222,17 +218,17 @@ void EnemyMovement::FixedUpdate()
 	switch (m_CurrentDirection)
 	{
 	case movementDirection::movingUp:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * GameTime::GetFixedTimeStep());
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * biggin::GameTime::GetFixedTimeStep());
 		break;
 	case movementDirection::movingDown:
 		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 }
-		* m_Velocity * GameTime::GetFixedTimeStep());
+		* m_Velocity * biggin::GameTime::GetFixedTimeStep());
 		break;
 	case movementDirection::movingLeft:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * biggin::GameTime::GetFixedTimeStep());
 		break;
 	case movementDirection::movingRight:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ 1,0 } * m_Velocity * GameTime::GetFixedTimeStep());
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ 1,0 } * m_Velocity * biggin::GameTime::GetFixedTimeStep());
 		break;
 	}
 }

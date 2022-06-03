@@ -1,6 +1,7 @@
 #pragma once
+#pragma warning(push, 0)
 #include <Box2D/Common/b2Math.h>
-#include "Singleton.h"
+#pragma warning(pop)
 
 class Box2dRenderer;
 class b2Draw;

@@ -31,6 +31,9 @@ For discussion please visit http://box2d.org/forum
 
 // These include files constitute the main Box2D API
 
+#pragma warning(push)
+#pragma warning (disable:26495)
+
 #include <Box2D/Common/b2Settings.h>
 #include <Box2D/Common/b2Draw.h>
 #include <Box2D/Common/b2Timer.h>
@@ -65,4 +68,5 @@ For discussion please visit http://box2d.org/forum
 #include <Box2D/Dynamics/Joints/b2WeldJoint.h>
 #include <Box2D/Dynamics/Joints/b2WheelJoint.h>
 
+#pragma warning (pop)
 #endif

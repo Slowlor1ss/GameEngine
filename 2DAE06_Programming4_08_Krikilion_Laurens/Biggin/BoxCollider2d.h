@@ -1,14 +1,13 @@
 #pragma once
-#include <Box2D/Dynamics/b2Body.h>
 #include "Component.h"
-#pragma warning(push)
-#pragma warning (disable:4201)
+#pragma warning(push, 0)
+#include <Box2D/Dynamics/b2Body.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 #include <glm/glm.hpp>
+#pragma warning(pop)
 #include "Scene.h"
 #include "Subject.h"
 #include "Utils.hpp"
-#pragma warning(pop)
 
 namespace biggin
 {
