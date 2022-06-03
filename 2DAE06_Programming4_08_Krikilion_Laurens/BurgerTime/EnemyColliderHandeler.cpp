@@ -148,20 +148,22 @@ void EnemyColliderHandeler::HandleEnemyBurgerEndContact(const biggin::BoxCollide
 
 bool EnemyColliderHandeler::IsBurgerFalling(biggin::GameObject* overlappedBurgerGameObject) const
 {
-	if (overlappedBurgerGameObject != m_BurgerGameObjectRef || m_AmntColliding == 1)
-	{
-		auto burger = overlappedBurgerGameObject->GetComponent<Burger>();
+	//if (overlappedBurgerGameObject != m_BurgerGameObjectRef || m_AmntColliding == 1)
+	//{
+		const auto burger = overlappedBurgerGameObject->GetComponent<Burger>();
 		if (burger == nullptr)
 			return false;
 
-		if (burger->IsFalling())
-			return true;
-	}
-	return false;
+		return burger->IsFalling();
+	//}
+	//return false;
 }
 
 void EnemyColliderHandeler::Die()
 {
+	if (m_BurgerGameObjectRef != nullptr)
+		GetGameObject()->RemoveComponentsPending<biggin::BoxCollider2d>();
+
 	m_pNotifier->notify(this, "EnemyDied");
 	m_IsAlive = false;
 	m_MovementRef->Die();

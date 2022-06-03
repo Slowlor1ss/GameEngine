@@ -3,25 +3,28 @@
 #include "GameObject.h"
 #include "Subject.h"
 
-biggin::ScoreComponent::ScoreComponent(GameObject* go, const std::vector<Observer*>& observers ) : Component(go)
-	, m_pNotifier(go->GetComponent<Subject>())
+using namespace burgerTime;
+
+ScoreComponent::ScoreComponent(biggin::GameObject* go, const std::vector<biggin::Observer*>& observers )
+	: Component(go)
+	, m_pNotifier(go->GetComponent<biggin::Subject>())
 {
 	for (const auto observer : observers)
 		m_pNotifier->AddObserver(observer);
 }
 
-void biggin::ScoreComponent::Start()
+void ScoreComponent::Start()
 {
 	//Updating the initial score
 	m_pNotifier->notify(this, "ScoreChanged");
 }
 
-int biggin::ScoreComponent::GetScore() const
+int ScoreComponent::GetScore() const
 {
 	return m_Score; //TODO: change this
 }
 
-void biggin::ScoreComponent::IncreaseScore(int amount)
+void ScoreComponent::IncreaseScore(int amount)
 {
 	m_Score += amount;
 	m_pNotifier->notify(this, "ScoreChanged");

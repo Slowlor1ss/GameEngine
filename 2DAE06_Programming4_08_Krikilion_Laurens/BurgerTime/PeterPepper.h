@@ -16,11 +16,16 @@ namespace character
 	enum class AnimationState { Idle, RunHorizontal, RunVertical, PepperHorizontal, PepperVertical, Die };
 	class PeterPepper final : public biggin::Component, public biggin::Observer
 	{
-		//TODO: use state pattern
 		enum class MoveDirection { Left, Right, Up, Down, None};
 
 	public:
 		PeterPepper(biggin::GameObject* go, float movementSpeed = 1);
+		~PeterPepper() override = default;
+
+		PeterPepper(const PeterPepper& other) = delete;
+		PeterPepper(PeterPepper&& other) noexcept = delete;
+		PeterPepper& operator=(const PeterPepper& other) = delete;
+		PeterPepper& operator=(PeterPepper&& other) noexcept = delete;
 
 		void Initialize(biggin::GameObject* go) override;
 		void Update() override;
@@ -29,11 +34,14 @@ namespace character
 		void AddVelocity(const glm::vec2& velocity) { m_Velocity += velocity; }
 		void SetVelocity(const glm::vec2& velocity) { m_Velocity = velocity; }
 		void SetPosition(const glm::vec2& pos) const;
+		void RespawnPlayer(const glm::vec2& pos);
 		void Damage();
 		bool IsDead() const { return m_IsDead; }
 		float GetSpeed() const { return m_Speed; }
+		int GetHealth() const;
 
 		void OnNotify(Component* entity, const std::string& event) override;
+
 
 	private:
 		void UpdateAnimationState();
@@ -52,6 +60,8 @@ namespace character
 
 		biggin::HealthComponent* m_pHealthComp;
 		biggin::SpriteRenderComponent* m_pSpriteComp;
+
+		biggin::Subject* m_pNotifier{ nullptr };
 
 	public:
 		enum PlayerCollisionGroup : unsigned short

@@ -12,6 +12,7 @@
 #include <document.h>
 #include <istreamwrapper.h>
 #include "EnemySpawner.h"
+#include "GameTime.h"
 #include "RemoveOnEvent.h"
 #include "RenderComponent.h"
 
@@ -23,6 +24,7 @@ MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& obser
 	, m_CurrentLevelIdx(0)
 	, m_GameObjectRef(go)
 	, m_pNotifier(go->GetComponent<biggin::Subject>())
+	, m_GameTimeRef{ GameTime::GetInstance() }
 {
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
@@ -31,6 +33,14 @@ MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& obser
 		m_pNotifier->AddObserver(observer);
 
 	ReadJsonLevelFile("../Data/Levels.json");
+}
+
+burgerTime::MapLoader::~MapLoader()
+{
+	for (const auto& playerObject : m_PlayerRef)
+	{
+		playerObject->RemoveObserver(this);
+	}
 }
 
 void MapLoader::Initialize(biggin::GameObject*)
@@ -56,11 +66,21 @@ void MapLoader::Start()
 	m_PlayerRef = m_GameObjectRef->GetSceneRef()->FindGameObjectsWithName("Player");
 	if (m_PlayerRef.empty())
 		Logger::GetInstance().LogWarning("No player found");
+	else
+	{
+		//every player needs a respawner in case they would die at the same time
+		for (size_t i{0}; i < m_PlayerRef.size(); ++i)
+		{
+			m_PlayerRef[i]->AddObserver(this);
+			m_DelayedRespawns.emplace_back(utils::DelayedCallback(2.f, {}));
+			m_DelayedRespawns.back().finished = true;
+		}
+	}
 
 	LoadMap(m_LevelPaths[m_CurrentLevelIdx]);
 }
 
-void MapLoader::OnNotify(Component* /*entity*/, const std::string& event)
+void MapLoader::OnNotify(Component* entity, const std::string& event)
 {
 	if (event == "BurgerReachedEnd")
 	{
@@ -68,23 +88,54 @@ void MapLoader::OnNotify(Component* /*entity*/, const std::string& event)
 		if (m_AmntLandedParts == m_AmntBurgerParts)
 		{
 			//player finished level
-			m_pNotifier->notify(this, "FinishedLevel");
-			ResetLevel();
-			LoadNext();
-			m_LoadNextLevel = false;
+			m_LoadNextLevel = true;
+		}
+	}
+	else if (event  == "PlayerDied")
+	{
+		for (auto& delayedCallback : m_DelayedRespawns)
+		{
+			if (!delayedCallback.finished)
+				continue;
+
+			delayedCallback.func = [this, entity]{
+				auto player = static_cast<character::PeterPepper*>(entity);
+				if (player->GetHealth() > 0)
+				{
+					player->RespawnPlayer(m_PlayerSpawnLocation);
+				}
+				else
+				{
+					m_pNotifier->notify(this, "GameOver");
+				}
+
+				auto* scene = m_GameObjectRef->GetSceneRef();
+				for (auto& enemy : scene->FindGameObjectsWithName("Enemy"))
+				{
+					scene->Remove(enemy.get());
+				}
+
+				m_EnemySpawnerRef->ResetEnemyData();
+			};
+			delayedCallback.Reset();
+			break;
 		}
 	}
 }
 
 void MapLoader::Update()
 {
-	//if (m_LoadNextLevel) //TODO: check this
-	//{
-	//	m_pNotifier->notify(this, "FinishedLevel");
-	//	ResetLevel();
-	//	LoadNext();
-	//	m_LoadNextLevel = false;
-	//}
+	const auto deltaT = m_GameTimeRef.GetDeltaT();
+	for (auto& delayedCallback : m_DelayedRespawns)
+		delayedCallback.Update(deltaT);
+
+	if (m_LoadNextLevel) //TODO: check this
+	{
+		m_pNotifier->notify(this, "FinishedLevel");
+		ResetLevel();
+		LoadNext();
+		m_LoadNextLevel = false;
+	}
 }
 
 void MapLoader::ResetLevel()
@@ -92,7 +143,7 @@ void MapLoader::ResetLevel()
 	m_GameObjectRef->RemoveComponentsPending<biggin::BoxCollider2d>();
 	m_AmntBurgerParts = 0;
 	m_AmntLandedParts = 0;
-	m_EnemySpawnerRef->Reset();
+	m_EnemySpawnerRef->FullReset();
 }
 
 void MapLoader::LoadNext()
@@ -107,6 +158,7 @@ void MapLoader::LoadNext()
 	else
 	{
 		//end of game
+		m_pNotifier->notify(this, "GameOver");
 	}
 }
 
@@ -265,7 +317,8 @@ void MapLoader::ProcessLineMapFile(const std::string& line)
 			SpawnEnemySpawner(i, lineWidth-1);
 			break;
 		case MapValues::Player:
-			m_PlayerRef[0]->SetLocalPosition(glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition());
+			m_PlayerSpawnLocation = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
+			m_PlayerRef[0]->SetLocalPosition(m_PlayerSpawnLocation);
 			break;
         default: ;
 		}

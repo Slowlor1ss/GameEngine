@@ -5,7 +5,9 @@
 #include "GameTime.h"
 #include "Logger.h"
 #include "MapLoader.h"
+#include "PeterPepper.h"
 #include "RenderComponent.h"
+#include "ScoreComponent.h"
 #include "SpriteRenderComponent.h"
 #include "Subject.h"
 
@@ -31,7 +33,7 @@ Burger::Burger(biggin::GameObject* go, BurgerIngredients ingredient, const std::
 
 Burger::~Burger()
 {
-	for (auto child : m_Childeren)
+	for (auto child : m_pChilderen)
 	{
 		child->RemoveObserver(this);
 	}
@@ -54,7 +56,8 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 	if (event == "BeginContact")
 	{
-		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetTag();
+		const auto overlappingCollider = static_cast<const biggin::BoxCollider2d*>(entity);
+		const auto tag = overlappingCollider->GetTag();
 		if (tag == "Platform")
 		{
 			Logger::GetInstance().LogDebug("ovelap started with platform and burger");
@@ -67,11 +70,7 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 				m_FallDelayed.Reset();
 			}
 
-			std::fill(std::begin(m_Touched), std::end(m_Touched), false);
-			//for (size_t i{ 0 }; i < m_BurgerSize; ++i)
-			//{
-			//	m_Touched[i] = false;
-			//}
+			std::ranges::fill(m_Touched, false);
 
 			m_AmntTouchedParts = 0;
 			m_IsFalling = false;
@@ -81,13 +80,13 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 			if (m_IsFalling) return;
 			Logger::GetInstance().LogDebug("ovelap started with player and burger");
 
-			//the gameobject of the collider that we are subscribed to and just hit the player
-			const auto owner = static_cast<biggin::BoxCollider2d*>(entity)->GetOther()->GetOwningGameObject();
+			//the gameobject of the collider of one of our children and just hit the player
+			const auto burgerPartGo = overlappingCollider->GetOther()->GetOwningGameObject();
 
-			const auto it = std::find(m_Childeren.begin(), m_Childeren.end(), owner);
-			if (it != m_Childeren.end())
+			const auto it = std::find(m_pChilderen.begin(), m_pChilderen.end(), burgerPartGo);
+			if (it != m_pChilderen.end())
 			{
-				const __int64 index = std::distance(m_Childeren.begin(), it);
+				const __int64 index = std::distance(m_pChilderen.begin(), it);
 				if (m_Touched[index]) return;
 
 				m_Touched[index] = true;
@@ -101,18 +100,31 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 			++m_AmntTouchedParts;
 			if (m_AmntTouchedParts == m_BurgerSize)
 			{
-				m_IsFalling = true;
-				m_pNotifier->notify(this, "BurgerFalling");
+				m_pPlayerGo = overlappingCollider->GetOwningGameObject();
+				int score{ burgerTime::ScoreValues::burgerDropped };
+				if (m_EnemiesOnBurger > 0)
+					score = burgerTime::ScoreValues::burgerDroppedWithEnemy * static_cast<int>(pow(2, (m_EnemiesOnBurger - 1)));
+
+				DropBurger(score);
 			}
 		}
 		else if (tag == "Burger")
 		{
+			if(m_IsFalling)
+				return;
+
+			if (const auto* otherBurgerGo = overlappingCollider->GetOwningGameObject()->GetParent())
+			{
+				if (const auto* otherBurger = otherBurgerGo->GetComponent<Burger>())
+					m_pPlayerGo = otherBurger->m_pPlayerGo;
+			}
+
 			DropBurger();
 		}
 		else if (tag == "Catcher")
 		{
 			//set the tag of our burger to catcher so other burgers land on top of it
-			static_cast<biggin::BoxCollider2d*>(entity)->GetOther()->SetTag("Catcher");
+			overlappingCollider->GetOther()->SetTag("Catcher");
 			m_ReachedBottom = true;
 			m_pNotifier->notify(this, "BurgerReachedEnd");
 		}
@@ -133,17 +145,26 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 	}
 }
 
-void Burger::DropBurger()
+void Burger::DropBurger(int score)
 {
+	if (m_pPlayerGo == nullptr)
+		return;
+
+	if (auto* scoreComponent = m_pPlayerGo->GetComponent<burgerTime::ScoreComponent>())
+		scoreComponent->IncreaseScore(score);
+
 	m_IsFalling = true;
 	m_pNotifier->notify(this, "BurgerFalling");
+
+	if (m_AmntTouchedParts == m_BurgerSize)
+		return;
 
 	for (size_t i{ 0 }; i < m_BurgerSize; ++i)
 	{
 		if (m_Touched[i]) continue;;
 
 		m_Touched[i] = true;
-		m_Childeren[i]->TranslateLocalPosition({ 0, static_cast<int>(burgerTime::MapLoader::GetGridSize() / 2.f) });
+		m_pChilderen[i]->TranslateLocalPosition({ 0, static_cast<int>(burgerTime::MapLoader::GetGridSize() / 2.f) });
 	}
 }
 
@@ -170,11 +191,11 @@ void Burger::Update()
 
 void Burger::InitializeBurger()
 {
-	m_Childeren = GetGameObject()->GetAllChilderen();
+	m_pChilderen = GetGameObject()->GetAllChilderen();
 
-	if (m_Childeren.size() != m_BurgerSize)
+	if (m_pChilderen.size() != m_BurgerSize)
 	{
-		Logger::GetInstance().LogWarning("Expected " + std::to_string(m_BurgerSize) + "burger but got " + std::to_string(m_Childeren.size()));
+		Logger::GetInstance().LogWarning("Expected " + std::to_string(m_BurgerSize) + "burger but got " + std::to_string(m_pChilderen.size()));
 	}
 
 	switch (m_Ingredient)
@@ -206,13 +227,13 @@ void Burger::InitializeBurger()
 void Burger::InitRenderComp(int collumnIdx) const
 {
 	constexpr auto tileSize = burgerTime::MapLoader::GetGridSize();
-	for (int i{ 0 }; i < m_Childeren.size(); ++i)
+	for (int i{ 0 }; i < m_pChilderen.size(); ++i)
 	{
-		biggin::RenderComponent* renderComponent = m_Childeren[i]->GetComponent<biggin::RenderComponent>();
+		biggin::RenderComponent* renderComponent = m_pChilderen[i]->GetComponent<biggin::RenderComponent>();
 		renderComponent->SetTexture("BurgerTimeSpriteSheet.png");
 		renderComponent->SetSourceRect({ (14 + i) * static_cast<int>(tileSize), collumnIdx * static_cast<int>(tileSize), static_cast<int>(tileSize),static_cast<int>(tileSize) });
 
 		glm::vec2 localPos = glm::vec2{ tileSize * i, -tileSize };
-		m_Childeren[i]->SetLocalPosition(localPos);
+		m_pChilderen[i]->SetLocalPosition(localPos);
 	}
 }

@@ -65,7 +65,7 @@ namespace burgerTime
 
 	public:
 		MapLoader(biggin::GameObject* go, const std::vector<Observer*>& observers = {});
-		~MapLoader() override = default;
+		~MapLoader() override;
 
 		MapLoader(const MapLoader& other) = delete;
 		MapLoader(MapLoader&& other) noexcept = delete;
@@ -111,7 +111,12 @@ namespace burgerTime
 		bool m_LoadNextLevel;
 
 		biggin::GameObject* m_GameObjectRef{ nullptr };
-		std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
+
+		std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{};
+		glm::vec2 m_PlayerSpawnLocation{};
+		std::vector<utils::DelayedCallback> m_DelayedRespawns{};
+		GameTime& m_GameTimeRef;
+
 		EnemySpawner* m_EnemySpawnerRef{ nullptr };
 		biggin::RenderComponent* m_BackgroundImgRef{ nullptr };
 		biggin::Subject* m_pNotifier;

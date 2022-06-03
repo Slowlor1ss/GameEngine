@@ -167,7 +167,7 @@ void MainMenuState::LoadSinglePlayer()
 	b2Filter filterPlayer{};
 	filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
 	filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
-	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {30, 30}, false, b2_dynamicBody, {peterPepper},
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {16, 30}, false, b2_dynamicBody, {peterPepper},
 	                                             "Player", {}, true, filterPlayer));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });

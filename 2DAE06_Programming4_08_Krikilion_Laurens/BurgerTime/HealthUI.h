@@ -6,17 +6,20 @@ namespace biggin
 {
 	class TextComponent;
 	class RenderComponent;
+}
 
-	class HealthUI final : public Component, public Observer
+namespace burgerTime
+{
+	class HealthUI final : public biggin::Component, public biggin::Observer
 	{
 	public:
-		HealthUI(GameObject* go);
-		void Initialize(GameObject* go) override;
+		HealthUI(biggin::GameObject* go);
+		void Initialize(biggin::GameObject* go) override;
 
 		void OnNotify(Component* entity, const std::string& event) override;
 
 	private:
-		TextComponent* m_pLivesText;
+		biggin::TextComponent* m_pLivesText;
 	};
 }
 

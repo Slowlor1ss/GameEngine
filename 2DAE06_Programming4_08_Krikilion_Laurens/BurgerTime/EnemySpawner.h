@@ -42,8 +42,9 @@ public:
 	void Update() override; 
 	void OnNotify(Component* entity, const std::string& event) override;
 	void RenderDebug() override;
+	void ResetEnemyData();
 
-	void Reset();
+	void FullReset();
 	void SpawnEnemyAtRandLocDelayed(EnemyType type);
 	void AddSpawnLocation(const glm::vec2& pos) { m_SpawnPositions.emplace_back(pos); m_FreeSpawnPositions.emplace_back(pos); }
 

@@ -34,7 +34,7 @@ namespace biggin
 
 		//partly based on https://stackoverflow.com/questions/44105058/implementing-component-system-from-unity-in-c
 		template<typename ComponentType>
-		ComponentType*								GetComponent();
+		ComponentType*								GetComponent() const;
 		template<typename ComponentType>
 		std::vector<ComponentType*>					GetComponents();
 
@@ -110,7 +110,7 @@ namespace biggin
 	 * \return shared pointer to the found component of type <ComponentType>
 	 */
 	template<typename ComponentType>
-	ComponentType* GameObject::GetComponent()
+	ComponentType* GameObject::GetComponent() const
 	{
 		for (auto &component : m_Components) 
 		{

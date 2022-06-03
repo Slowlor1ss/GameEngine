@@ -2,7 +2,7 @@
 #include "BoxCollider2d.h"
 #include "Component.h"
 #include "Observer.h"
-#include "RenderComponent.h"
+#include "ScoreComponent.h"
 
 class GameTime;
 
@@ -35,7 +35,6 @@ public:
 
 	void Initialize(biggin::GameObject*) override;
 	void Start() override;
-	void DropBurger();
 	void OnNotify(Component* entity, const std::string& event) override;
 	void FixedUpdate() override;
 	void Update() override;
@@ -48,6 +47,7 @@ public:
 
 private:
 	void InitRenderComp(int collumnIdx) const;
+	void DropBurger(int score = burgerTime::ScoreValues::burgerDropped);
 
 	bool m_Initialized{ false };
 
@@ -56,7 +56,7 @@ private:
 	bool m_ReachedBottom{ false };
 	float m_Velocity{ 100.f };
 	//std::vector<biggin::RenderComponent*> m_RenderComponents;
-	std::vector<biggin::GameObject*> m_Childeren;
+	std::vector<biggin::GameObject*> m_pChilderen;
 	//std::vector<biggin::BoxCollider2d*> m_ColliderComponents;
 	static constexpr int m_BurgerSize = 4;
 	bool m_Touched[m_BurgerSize];
@@ -68,7 +68,8 @@ private:
 	int m_EnemiesOnBurger{};
 	GameTime& m_GameTimeRef;
 
-	utils::DelayedCallback m_FallDelayed;
+	utils::DelayedCallback m_FallDelayed{};
+	const biggin::GameObject* m_pPlayerGo{nullptr};
 
 public:
 	enum BurgerCollisionGroup : unsigned short

@@ -4,19 +4,23 @@
 
 namespace biggin
 {
-	class TextComponent;
 	class RenderComponent;
+	class TextComponent;
+}
 
-	class ScoreUI final : public Component, public Observer
+namespace burgerTime
+{
+
+	class ScoreUI final : public biggin::Component, public biggin::Observer
 	{
 	public:
-		ScoreUI(GameObject* go);
-		void Initialize(GameObject*) override;
+		ScoreUI(biggin::GameObject* go);
+		void Initialize(biggin::GameObject*) override;
 
 		void OnNotify(Component* entity, const std::string& event) override;
 
 	private:
-		TextComponent* m_pScoreText;
+		biggin::TextComponent* m_pScoreText;
 	};
 }
 

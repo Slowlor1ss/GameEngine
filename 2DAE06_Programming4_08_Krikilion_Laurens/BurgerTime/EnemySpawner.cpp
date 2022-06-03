@@ -9,6 +9,7 @@
 #include "MapLoader.h"
 #include "PeterPepper.h"
 #include "RemoveOnEvent.h"
+#include "RenderComponent.h"
 #include "Renderer.h"
 #include "SpriteRenderComponent.h"
 
@@ -25,6 +26,9 @@ EnemySpawner::EnemySpawner(biggin::GameObject* go)
 
 EnemySpawner::~EnemySpawner()
 {
+	//for preventing Lapsed listener problem
+	//TODO: try to find a better solution for this
+	//for now always unregister your observers unless they are interested in receiving notifications
 	for (const auto& enemy : m_Enemies)
 		enemy->RemoveObservers({ this });
 }
@@ -74,17 +78,26 @@ void EnemySpawner::RenderDebug()
 	}
 }
 
-void EnemySpawner::Reset()
+void EnemySpawner::ResetEnemyData()
 {
 	m_AmntEggs = 0;
 	m_AmntHotDogs = 0;
 	m_AmntPickle = 0;
-	m_SpawnPositions.clear();
-	m_FreeSpawnPositions.clear();
 
 	for (const auto& enemy : m_Enemies)
 		enemy->RemoveObservers({ this });
 	m_Enemies.clear();
+}
+
+void EnemySpawner::FullReset()
+{
+	ResetEnemyData();
+
+	m_SpawnPositions.clear();
+	m_FreeSpawnPositions.clear();
+
+	m_DelayedSpawn.finished = true;
+	m_DelayedSpawn2.finished = true;
 }
 
 void EnemySpawner::SpawnEnemyAtRandLocDelayed(EnemyType type)
@@ -161,9 +174,9 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 
 	auto enemyMovComp = new EnemyMovement(enemy.get(), m_Settings.velocity);
 	enemy->AddComponent(enemyMovComp);
-	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
+	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 27, 2 }, true, b2_dynamicBody, { enemyMovComp }
 	                                              , "ColliderTop", { 0, -17 }, true, filter));
-	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 25, 2 }, true, b2_dynamicBody, { enemyMovComp }
+	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 27, 2 }, true, b2_dynamicBody, { enemyMovComp }
 	                                              , "ColliderBottom", { 0, 17 }, true, filter));
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
 	                                              , "ColliderLeft", { -33, 0 }, true, filter));
@@ -174,8 +187,8 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 	enemy->AddComponent(enemyCollisionHandeler);
 	b2Filter filterEnemyCollider{};
 	filterEnemyCollider.maskBits = Burger::BurgerCollisionGroup::burgerCollisionGroup | static_cast<int>(character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup);
-	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 25, 25 }, true, b2_dynamicBody, { enemyCollisionHandeler }
-	                                              , "Enemy", { }, true, filterEnemyCollider));
+	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 32, 16 }, true, b2_dynamicBody, { enemyCollisionHandeler }
+	                                              , "Enemy", {0, 9 }, true, filterEnemyCollider));
 
 	enemy->AddComponent(new biggin::RemoveOnEvent(enemy.get(), "FinishedLevel", "Map"));
 	enemy->AddComponent(new biggin::RemoveOnEvent(enemy.get(), "EnemyDied", enemy, 2.f));

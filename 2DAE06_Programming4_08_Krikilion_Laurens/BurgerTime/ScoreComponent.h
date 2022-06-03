@@ -5,11 +5,14 @@ namespace biggin
 {
 	class Observer;
 	class Subject;
+}
 
-	class ScoreComponent : public Component
+namespace burgerTime
+{
+	class ScoreComponent : public biggin::Component
 	{
 	public:
-		ScoreComponent(GameObject* go, const std::vector<Observer*>& observers = {});
+		ScoreComponent(biggin::GameObject* go, const std::vector<biggin::Observer*>& observers = {});
 
 		void Start() override;
 
@@ -17,9 +20,18 @@ namespace biggin
 		void IncreaseScore(int amount);
 
 	private:
-		int m_Score;
+		int m_Score{};
 
-		Subject* m_pNotifier;
+		biggin::Subject* m_pNotifier;
 	};
-}
 
+	enum ScoreValues
+	{
+		burgerDropped = 50,
+		hotDogDied = 100,
+		pickleDied = 200,
+		eggDied = 300,
+		burgerDroppedWithEnemy = 500,
+	};
+
+}

@@ -32,7 +32,7 @@ biggin::GameObject::~GameObject()
 	////	m_Childeren[i] = nullptr;
 	//}
 
-	for (auto*& pComponent : m_Components)
+	for (auto* pComponent : m_Components)
 	{
 		delete pComponent;
 		pComponent = nullptr;

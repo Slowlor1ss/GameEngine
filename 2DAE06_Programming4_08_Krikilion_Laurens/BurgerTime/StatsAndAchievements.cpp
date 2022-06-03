@@ -81,12 +81,15 @@ bool CSteamAchievements::SetAchievement(const char* ID)
 
 void CSteamAchievements::OnNotify(biggin::Component* entity, const std::string& event)
 {
-	if (event != "ScoreChanged") //early out as there's only one achievement at the moment
-		return;
+	if (event == "ScoreChanged")
+	{
+		const int& score = static_cast<const burgerTime::ScoreComponent*>(entity)->GetScore();
+		if (score >= 5000)
+			SetAchievement("ACH_TRAVEL_FAR_SINGLE");
 
-	const int& score = static_cast<const biggin::ScoreComponent*>(entity)->GetScore();
-	if (score >= 500)
-		SetAchievement("ACH_WIN_ONE_GAME");
+		if (score >= 100000)
+			SetAchievement("ACH_TRAVEL_FAR_ACCUM");
+	}
 }
 
 void CSteamAchievements::OnUserStatsReceived(UserStatsReceived_t* pCallback)

@@ -14,7 +14,10 @@ character::PeterPepper::PeterPepper(biggin::GameObject* go, float movementSpeed)
 	, m_PlayerIndex(m_AmntPlayers)
 	, m_pHealthComp(nullptr)
 	, m_pSpriteComp(nullptr)
+	, m_pNotifier(go->GetComponent<biggin::Subject>())
 {
+	if (m_pNotifier == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
 	++m_AmntPlayers;
 	m_pGameObjectRef = go;
 }
@@ -79,10 +82,7 @@ void character::PeterPepper::UpdateMovementDirectionState()
 void character::PeterPepper::FixedUpdate()
 {
 	if (m_IsDead)
-	{
-		m_CurrAnimState = AnimationState::Die;
 		return;
-	}
 
 	if (m_VerticalMovDisabled)
 		m_Velocity *= glm::vec2{1, 0};
@@ -93,12 +93,10 @@ void character::PeterPepper::FixedUpdate()
 
 	UpdateAnimationState();
 
-	//TODO: make update animation function
-	//get refernce to sprite renderer update that and hope it works goodnight
-	const bool isIdle = m_CurrAnimState == AnimationState::Idle;
 	m_pSpriteComp->SetCurrentSprite(static_cast<int>(m_CurrAnimState));
 
-	m_pSpriteComp->SetPause(isIdle);
+	const bool isIdle = m_CurrAnimState == AnimationState::Idle;
+	//m_pSpriteComp->SetPause(isIdle);
 	if (isIdle)
 		return;
 
@@ -114,10 +112,29 @@ void character::PeterPepper::SetPosition(const glm::vec2& pos) const
 	m_pGameObjectRef->SetLocalPosition(pos);
 }
 
+void character::PeterPepper::RespawnPlayer(const glm::vec2& pos)
+{
+	m_IsDead = false;
+	m_pSpriteComp->SetPause(false);
+	SetPosition(pos);
+}
+
 void character::PeterPepper::Damage()
 {
-	m_pHealthComp->Damage();
-	m_IsDead = true; //TODO: implement re-spawning and reset is dead
+	if (!m_IsDead)
+	{
+		m_pHealthComp->Damage();
+		m_IsDead = true; //TODO: implement re-spawning and reset is dead
+		m_CurrAnimState = AnimationState::Die;
+		m_pSpriteComp->SetCurrentSprite(static_cast<int>(m_CurrAnimState));
+		m_pSpriteComp->SetFinishAndPause();
+		m_pNotifier->notify(this, "PlayerDied");
+	}
+}
+
+int character::PeterPepper::GetHealth() const
+{
+	return m_pHealthComp->GetLives();
 }
 
 void character::PeterPepper::OnNotify(Component* /*entity*/, const std::string& event)
