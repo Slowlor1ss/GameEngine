@@ -7,11 +7,20 @@ biggin::Subject::Subject(GameObject* go) : Component(go)
 {
 }
 
+biggin::Subject::~Subject()
+{
+	for (auto* pObserver : m_pObservers)
+		std::erase(pObserver->m_pNotifiers, this);
+}
+
 void biggin::Subject::AddObserver(Observer* observer)
 {
 	const auto it = std::ranges::find(m_pObservers, observer);
 	if (it == m_pObservers.end())
+	{
 		m_pObservers.emplace_back(observer);
+		observer->m_pNotifiers.emplace_back(this);
+	}
 }
 
 //https://gameprogrammingpatterns.com/observer.html#the-subject

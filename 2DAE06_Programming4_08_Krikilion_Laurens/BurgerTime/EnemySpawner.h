@@ -31,7 +31,7 @@ public:
 	};
 
 	explicit EnemySpawner(biggin::GameObject* go);
-	~EnemySpawner();
+	~EnemySpawner() override = default;
 
 	EnemySpawner(const EnemySpawner& other) = delete;
 	EnemySpawner(EnemySpawner&& other) noexcept = delete;
@@ -61,7 +61,7 @@ private:
 	EnemySettings m_Settings{};
 	std::vector<glm::vec2> m_SpawnPositions{};
 	std::vector<glm::vec2> m_FreeSpawnPositions{};
-	std::vector<EnemyColliderHandeler*> m_Enemies{};
+	//std::vector<EnemyColliderHandeler*> m_Enemies{};
 
 	utils::DelayedCallback m_DelayedSpawn{};
 	utils::DelayedCallback m_DelayedSpawn2{};

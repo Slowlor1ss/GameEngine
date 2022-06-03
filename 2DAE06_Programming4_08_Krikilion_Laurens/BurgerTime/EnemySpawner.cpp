@@ -24,14 +24,13 @@ EnemySpawner::EnemySpawner(biggin::GameObject* go)
 	m_DelayedSpawn2.finished = true;
 }
 
-EnemySpawner::~EnemySpawner()
-{
-	//for preventing Lapsed listener problem
-	//TODO: try to find a better solution for this
-	//for now always unregister your observers unless they are interested in receiving notifications
-	for (const auto& enemy : m_Enemies)
-		enemy->RemoveObservers({ this });
-}
+//EnemySpawner::~EnemySpawner()
+//{
+//	//for preventing Lapsed listener problem
+//	//a way better way to prevent this problem in our case would be to implement an event queue for the collisions but i won't have enough time for it now
+//	//for (const auto& enemy : m_Enemies)
+//	//	enemy->RemoveObservers({ this });
+//}
 
 void EnemySpawner::Initialize(biggin::GameObject*)
 {
@@ -52,8 +51,8 @@ void EnemySpawner::OnNotify(Component* entity, const std::string& event)
 	{
 		const auto enemy = static_cast<EnemyColliderHandeler*>(entity);
 
-		std::erase(m_Enemies, enemy);
-		enemy->RemoveObservers({this});
+		//std::erase(m_Enemies, enemy);
+		//enemy->RemoveObservers({this});
 
 		switch(enemy->GetEnemyType())
 		{
@@ -84,9 +83,9 @@ void EnemySpawner::ResetEnemyData()
 	m_AmntHotDogs = 0;
 	m_AmntPickle = 0;
 
-	for (const auto& enemy : m_Enemies)
-		enemy->RemoveObservers({ this });
-	m_Enemies.clear();
+	//for (const auto& enemy : m_Enemies)
+	//	enemy->RemoveObservers({ this });
+	//m_Enemies.clear();
 }
 
 void EnemySpawner::FullReset()
@@ -195,5 +194,5 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 
 	m_GameObjectRef->GetSceneRef()->AddPending(enemy);
 
-	m_Enemies.emplace_back(enemyCollisionHandeler);
+	//m_Enemies.emplace_back(enemyCollisionHandeler);
 }

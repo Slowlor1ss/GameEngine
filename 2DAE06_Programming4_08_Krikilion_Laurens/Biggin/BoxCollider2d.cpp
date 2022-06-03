@@ -109,6 +109,7 @@ void BoxCollider2d::BeginContact(BoxCollider2d* other)
 	//ignores first few ovelap events when some object haven't been positioned yet
 	if (!m_EnableCollider) return;
 
+	//TODO: sadly i don't have enough time for this now but in the future i should use and event system for this!
 	other->m_pOtherCollider = this;
 	m_pNotifier->notify(other, "BeginContact");
 }

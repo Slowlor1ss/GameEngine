@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.h"
+#include <vector>
 
 namespace biggin
 {
@@ -9,6 +10,12 @@ namespace biggin
 	{
 	public:
 		Subject(GameObject* go);
+		~Subject() override;
+
+		Subject(const Subject& other) = delete;
+		Subject(Subject&& other) noexcept = delete;
+		Subject& operator=(const Subject& other) = delete;
+		Subject& operator=(Subject&& other) noexcept = delete;
 
 		void AddObserver(Observer* observer);
 		void RemoveObserver(Observer* observer);
