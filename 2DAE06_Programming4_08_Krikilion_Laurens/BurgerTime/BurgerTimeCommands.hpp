@@ -75,3 +75,20 @@ private:
 	ActionDirection m_Direction;
 	character::PeterPepper* m_Player;
 };
+
+class  ShootCommand final : public Command
+{
+public:
+	explicit ShootCommand(character::PeterPepper* player)
+		: m_Player(player)
+	{
+	}
+
+	void execute() override {
+		m_Player->ShootPepper();
+	}
+
+private:
+	character::PeterPepper* m_Player;
+};
+

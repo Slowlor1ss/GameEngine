@@ -25,6 +25,8 @@ public:
 
 	void Play(const std::string& filename, float volume, bool isSoundEffect = true) override;
 	void StopAll() override;
+	void PauseAll() override;
+	void UnpauseAll() override;
 
 private:
 	void ProcessQueue();

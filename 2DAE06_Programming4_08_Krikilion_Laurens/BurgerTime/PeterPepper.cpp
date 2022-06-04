@@ -7,20 +7,27 @@
 #include "InputManager.h"
 #include "Logger.h"
 #include "MapLoader.h"
+#include "PepperShooter.h"
+#include "SoundServiceLocator.h"
 #include "SpriteRenderComponent.h"
 
-character::PeterPepper::PeterPepper(biggin::GameObject* go, float movementSpeed) : Component(go)
+character::PeterPepper::PeterPepper(biggin::GameObject* go, float movementSpeed)
+	: Component(go)
 	, m_IsDead(false)
+	, m_IsShooting(false)
+	, m_GameTimeRef(biggin::GameTime::GetInstance())
+	, m_DelayedStopShooting(0.5f, [this] {m_IsShooting = false; }, 1, true)
 	, m_Speed(movementSpeed)
 	, m_PlayerIndex(m_AmntPlayers)
 	, m_pHealthComp(nullptr)
+	, m_pPepperShooter(nullptr)
 	, m_pSpriteComp(nullptr)
 	, m_pNotifier(go->GetComponent<biggin::Subject>())
+	, m_pGameObjectRef(go)
 {
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
 	++m_AmntPlayers;
-	m_pGameObjectRef = go;
 }
 
 void character::PeterPepper::Initialize(biggin::GameObject* go)
@@ -32,12 +39,18 @@ void character::PeterPepper::Initialize(biggin::GameObject* go)
 	m_pHealthComp = go->GetComponent<biggin::HealthComponent>();
 	if (m_pHealthComp == nullptr)
 		Logger::GetInstance().LogWarning("Missing HealthComponent");
+
+	m_pPepperShooter = go->GetComponent<burgerTime::PepperShooter>();
+	if (m_pPepperShooter == nullptr)
+		Logger::GetInstance().LogWarning("Missing PepperShooter");
 }
 
 void character::PeterPepper::Update()
 {
-	if (m_IsDead)
+	if (m_IsDead || !m_IsShooting)
 		return;
+
+	m_DelayedStopShooting.Update(m_GameTimeRef.GetDeltaT());
 
 	//negate y pos because (0,0) is at the top left
 	//const glm::vec2 velocity = biggin::InputManager::GetInstance().GetLThumb(m_PlayerIndex) * glm::vec2{1,-1};
@@ -77,19 +90,21 @@ void character::PeterPepper::UpdateMovementDirectionState()
 		return;
 	}
 
-	m_LastMovementDir = m_CurrMovementDir;
+	if (m_CurrMovementDir != MoveDirection::None)
+		m_LastMovementDir = m_CurrMovementDir;
+
 	m_CurrMovementDir = MoveDirection::None;
 }
 
 void character::PeterPepper::FixedUpdate()
 {
-	if (m_IsDead)
+	if (m_IsDead || m_IsShooting)
 		return;
 
-	if (m_VerticalMovDisabled)
-		m_Velocity *= glm::vec2{1, 0};
-	else if(m_HorizontalMovDisabled)
-		m_Velocity *= glm::vec2{ 0, 1 };
+	//if (m_VerticalMovDisabled)
+	//	m_Velocity *= glm::vec2{1, 0};
+	//else if(m_HorizontalMovDisabled)
+	//	m_Velocity *= glm::vec2{ 0, 1 };
 
 	UpdateMovementDirectionState();
 
@@ -117,6 +132,9 @@ void character::PeterPepper::SetPosition(const glm::vec2& pos) const
 void character::PeterPepper::RespawnPlayer(const glm::vec2& pos)
 {
 	m_IsDead = false;
+	m_LastMovementDir = MoveDirection::Down;
+	m_CurrAnimState = AnimationState::Idle;
+	m_pSpriteComp->SetCurrentSprite(static_cast<int>(m_CurrAnimState));
 	m_pSpriteComp->SetPause(false);
 	SetPosition(pos);
 }
@@ -125,8 +143,9 @@ void character::PeterPepper::Damage()
 {
 	if (!m_IsDead)
 	{
+		SoundServiceLocator::GetSoundSystem().Play("die.wav", 0.2f);
 		m_pHealthComp->Damage();
-		m_IsDead = true; //TODO: implement re-spawning and reset is dead
+		m_IsDead = true;
 		m_CurrAnimState = AnimationState::Die;
 		m_pSpriteComp->SetCurrentSprite(static_cast<int>(m_CurrAnimState));
 		m_pSpriteComp->SetFinishAndPause();
@@ -141,28 +160,35 @@ int character::PeterPepper::GetHealth() const
 
 void character::PeterPepper::ShootPepper()
 {
-	glm::vec2 pos{ m_pGameObjectRef->GetLocalPosition() };
+	if (m_IsDead || m_pPepperShooter == nullptr)
+		return;
 
 	const auto dir = m_CurrMovementDir == MoveDirection::None ? m_LastMovementDir : m_CurrMovementDir;
+	if(!m_pPepperShooter->Shoot(dir))
+		return;
+
+	m_IsShooting = true;
+	m_DelayedStopShooting.Reset();
 	switch (dir)
 	{
 	case MoveDirection::Left:
-		pos += glm::vec2{-burgerTime::MapLoader::GetGridSize(), 0};
+		m_CurrAnimState = AnimationState::PepperHorizontal;
+		m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
 		break;
 	case MoveDirection::Right:
-		pos += glm::vec2{ burgerTime::MapLoader::GetGridSize(), 0 };
+		m_CurrAnimState = AnimationState::PepperHorizontal;
 		break;
 	case MoveDirection::Up:
-		pos += glm::vec2{ 0, -burgerTime::MapLoader::GetGridSize() };
-		break;
 	case MoveDirection::Down:
-		pos += glm::vec2{ 0, burgerTime::MapLoader::GetGridSize()};
+		m_CurrAnimState = AnimationState::PepperVertical;
 		break;
-	}
 
-	m_pPepperShooter->Shoot(pos);
+	}
+	m_pSpriteComp->SetCurrentSprite(static_cast<int>(m_CurrAnimState));
+
 }
 
+//TODO: remove
 void character::PeterPepper::OnNotify(Component* /*entity*/, const std::string& event)
 {
 	if (event == "BeginContact")

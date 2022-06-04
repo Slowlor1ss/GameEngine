@@ -7,6 +7,7 @@ using namespace biggin;
 GameLoader::GameLoader()
 	: m_pState(BurgerTimeMenuState::GetMainMenu())
 {
+	BurgerTimeMenuState::Start(m_pState);
 }
 
 GameLoader::~GameLoader()
@@ -16,7 +17,7 @@ GameLoader::~GameLoader()
 
 void GameLoader::RenderMenu()
 {
-	m_pState->RenderMenu(this);
+	m_pState->RenderMenu(m_pState);
 
 	//ImGuiWindowFlags window_flags = 0;
 	//window_flags |= ImGuiWindowFlags_NoBackground;

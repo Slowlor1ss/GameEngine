@@ -46,7 +46,17 @@ void SimpleSDL2SoundSystem::StopAll()
 	std::queue<queuedAudio> empty;
 	std::swap(m_AudioQueue, empty);
 
-	endAudio();
+	stopMusic();
+}
+
+void SimpleSDL2SoundSystem::PauseAll()
+{
+	pauseAudio();
+}
+
+void SimpleSDL2SoundSystem::UnpauseAll()
+{
+	unpauseAudio();
 }
 
 void SimpleSDL2SoundSystem::ProcessQueue()

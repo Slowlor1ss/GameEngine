@@ -17,8 +17,10 @@ void burgerTime::PepperComponent::Initialize(biggin::GameObject* go)
 	if (m_pSpriteComp == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing SpriteRenderComponent");
 
-	m_DelayedRemove.interval = m_pSpriteComp->GetDuration(0);
-	m_DelayedRemove.func = [&go] {go->GetSceneRef()->Remove(go); };
+	m_pSpriteComp->SetFinishAndPause();
+
+	m_DelayedRemove.interval = m_pSpriteComp->GetDurationCurrentSprite();
+	m_DelayedRemove.func = [go] { go->GetSceneRef()->Remove(go); };
 }
 
 void burgerTime::PepperComponent::Update()

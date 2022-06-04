@@ -8,7 +8,6 @@ namespace biggin
 	class GameTime;
 }
 
-
 namespace burgerTime
 {
 	class PepperComponent final : public biggin::Component

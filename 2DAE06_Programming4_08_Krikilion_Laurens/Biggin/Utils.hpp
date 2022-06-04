@@ -7,7 +7,7 @@ namespace utils {
     //struct written together with ruben in prog2
     struct DelayedCallback{
         DelayedCallback() = default;
-        DelayedCallback(float interval, std::function<void()> func, int nTimes = 1);
+        DelayedCallback(float interval, std::function<void()> func, int nTimes = 1, bool startPaused = false);
 
         int nTimes{ 1 };	//If it happens once or multiple times (-1 for inf)
         bool finished{ false };
@@ -24,8 +24,8 @@ namespace utils {
         int startNTimes{ 0 };
     };
 
-    inline DelayedCallback::DelayedCallback(float interval, std::function<void()> func, int nTimes)
-        : nTimes{ nTimes }, interval{ interval }, func{ func }, startNTimes(nTimes){
+    inline DelayedCallback::DelayedCallback(float interval, std::function<void()> func, int nTimes, bool startPaused)
+        : nTimes{ nTimes }, finished(startPaused), interval{ interval }, func{ func }, startNTimes(nTimes){
 	    if (nTimes == 0)
 		    finished = true;
     }

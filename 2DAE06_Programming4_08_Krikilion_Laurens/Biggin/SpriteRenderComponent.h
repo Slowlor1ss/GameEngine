@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include "Component.h"
+#include <SDL.h>
 
 namespace biggin
 {
@@ -48,28 +49,31 @@ namespace biggin
 
 		void AddAnimation(int animationState, const SpriteInfo& spriteInfo);
 		void SetCurrentSprite(int animationState);
+		int GetCurrentSprite() const { return m_CurrentSpriteIdx; };
 		void SetPause(bool pause) { m_IsPaused = pause; } //TODO: add looping option
 		void SetFinishAndPause() { m_PausedWhenFinished = true; }
 		void SetFlip(SDL_RendererFlip flip) const;
 		void UpdateRenderVariables();
 
 		float GetDuration(int animationState);
+		float GetDurationCurrentSprite();
 
 	private:
 		std::pair<unsigned int, unsigned int> GetRowCol(const unsigned int idx, const unsigned int nrOfCols);
 
 		AtlasPart m_AtlasPart;
-		std::unordered_map<int, SpriteInfo> m_Sprites;
+		std::unordered_map<int, SpriteInfo> m_Sprites{};
 		SpriteInfo m_CurrentSprite;
 
 		RenderComponent* m_RenderComponent;
-		SDL_Rect m_SourceRect;
-		SDL_Rect m_DstRect;
+		SDL_Rect m_SourceRect{};
+		SDL_Rect m_DstRect{};
 
 		bool m_IsPaused;
-		bool m_PausedWhenFinished;
-		bool m_RenderVariablesDirty;
+		bool m_PausedWhenFinished{};
+		bool m_RenderVariablesDirty{};
 		unsigned int m_CurrentRelFrameIdx;
+		int m_CurrentSpriteIdx{};
 		float m_Speed;//TODO: maybe do speed in sprite info
 		float m_ElapsedSec;
 	};

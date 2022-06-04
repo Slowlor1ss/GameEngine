@@ -4,10 +4,17 @@
 #include "Observer.h"
 #pragma warning(push, 0)
 #include <glm/glm.hpp>
+#include "HealthComponent.h"
 #pragma warning(pop)
+
+namespace burgerTime
+{
+	class PepperShooter;
+}
 
 namespace biggin
 {
+	class GameTime;
 	class BoxCollider2d;
 	class SpriteRenderComponent;
 	class HealthComponent;
@@ -15,11 +22,10 @@ namespace biggin
 
 namespace character
 {
-	//TODO: use state pattern
 	enum class AnimationState { Idle, RunHorizontal, RunVertical, PepperHorizontal, PepperVertical, Die };
+	enum class MoveDirection { Left, Right, Up, Down, None};
 	class PeterPepper final : public biggin::Component, public biggin::Observer
 	{
-		enum class MoveDirection { Left, Right, Up, Down, None};
 
 	public:
 		PeterPepper(biggin::GameObject* go, float movementSpeed = 1);
@@ -42,16 +48,19 @@ namespace character
 		bool IsDead() const { return m_IsDead; }
 		float GetSpeed() const { return m_Speed; }
 		int GetHealth() const;
+		void IncreaseHealth() { if(m_pHealthComp) m_pHealthComp->Heal(); };
 
 		void ShootPepper();
 
 		void OnNotify(Component* entity, const std::string& event) override;
 
-
 	private:
 		void UpdateAnimationState();
 		void UpdateMovementDirectionState();
 		bool m_IsDead;
+		bool m_IsShooting;
+		utils::DelayedCallback m_DelayedStopShooting{};
+		biggin::GameTime& m_GameTimeRef;
 		float m_Speed;
 		glm::vec2 m_Velocity{};
 		inline static int m_AmntPlayers{0};
@@ -59,12 +68,13 @@ namespace character
 		MoveDirection m_CurrMovementDir{MoveDirection::None};
 		MoveDirection m_LastMovementDir{MoveDirection::Down};
 		AnimationState m_CurrAnimState{AnimationState::Idle};
-		bool m_VerticalMovDisabled{ false };
-		bool m_HorizontalMovDisabled{ false };
+		//bool m_VerticalMovDisabled{ false };
+		//bool m_HorizontalMovDisabled{ false };
 
-		biggin::GameObject* m_pGameObjectRef{ nullptr };
+		biggin::GameObject* m_pGameObjectRef;
 
 		biggin::HealthComponent* m_pHealthComp;
+		burgerTime::PepperShooter* m_pPepperShooter;
 		biggin::SpriteRenderComponent* m_pSpriteComp;
 
 		biggin::Subject* m_pNotifier{ nullptr };

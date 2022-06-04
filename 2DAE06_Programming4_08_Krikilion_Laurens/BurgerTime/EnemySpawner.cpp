@@ -85,9 +85,8 @@ void EnemySpawner::ResetEnemyData()
 	m_AmntHotDogs = 0;
 	m_AmntPickle = 0;
 
-	//for (const auto& enemy : m_Enemies)
-	//	enemy->RemoveObservers({ this });
-	//m_Enemies.clear();
+	m_DelayedSpawn.finished = true;
+	m_DelayedSpawn2.finished = true;
 }
 
 void EnemySpawner::FullReset()
@@ -96,9 +95,6 @@ void EnemySpawner::FullReset()
 
 	m_SpawnPositions.clear();
 	m_FreeSpawnPositions.clear();
-
-	m_DelayedSpawn.finished = true;
-	m_DelayedSpawn2.finished = true;
 }
 
 void EnemySpawner::SpawnEnemyAtRandLocDelayed(EnemyType type)
@@ -152,6 +148,11 @@ void EnemySpawner::PickEnemyAndLocation()
 	}
 }
 
+void EnemySpawner::PlayerControllsEnemy(bool controllable)
+{
+	m_HasPosessdHotDog = controllable;
+}
+
 void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 {
 	auto enemy = std::make_shared<biggin::GameObject>();
@@ -187,6 +188,7 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), type, {this});
 	enemy->AddComponent(enemyCollisionHandeler);
 	b2Filter filterEnemyCollider{};
+	filterEnemyCollider.categoryBits = burgerTime::MapLoader::mapCollisionGroup::mapIgnoreGroup;
 	filterEnemyCollider.maskBits = Burger::BurgerCollisionGroup::burgerCollisionGroup | static_cast<int>(character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup);
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 32, 16 }, true, b2_dynamicBody, { enemyCollisionHandeler }
 	                                              , "Enemy", {0, 9 }, true, filterEnemyCollider));

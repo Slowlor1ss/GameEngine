@@ -33,3 +33,9 @@ void HealthComponent::Damage()
 	--m_LivesLeft;
 	m_pNotifier->notify(this, "HealthChanged");
 }
+
+void biggin::HealthComponent::Heal()
+{
+	++m_LivesLeft;
+	m_pNotifier->notify(this, "HealthChanged");
+}

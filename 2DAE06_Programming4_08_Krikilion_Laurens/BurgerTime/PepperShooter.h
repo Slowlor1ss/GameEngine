@@ -3,33 +3,38 @@
 #include <glm/glm.hpp>
 #pragma warning(pop)
 #include "Component.h"
+#include "Subject.h"
 
 //add pepper shooter to player game object
 //implement the shoot function just spawn a pepperComponent (make sure the collider has a correct name see enemy for correct name)
 //test the pepper duh...
 //add a pepper ui element and visualize the pepper count (also add a pepper changed function when the value gets updated)
+//set correct anaimation when throwing pepper
+//add a pepper command and bind it to the correct buttons
+
+namespace character
+{
+	enum class MoveDirection;
+}
 
 namespace burgerTime
 {
 	class PepperShooter final : public biggin::Component
 	{
 	public:
-		PepperShooter(biggin::GameObject* go, int amntPepper = 5);
-		~PepperShooter() override = default;
+		PepperShooter(biggin::GameObject* go, const std::vector<biggin::Observer*>& observers, int amntPepper = 5);
 
-		PepperShooter(const PepperShooter& other) = delete;
-		PepperShooter(PepperShooter&& other) noexcept = delete;
-		PepperShooter& operator=(const PepperShooter& other) = delete;
-		PepperShooter& operator=(PepperShooter&& other) noexcept = delete;
+		void Start() override;
 
-		void SetAmntPepper(int amntPepper) { m_AmntPepper = amntPepper; }
-		void IncreasePepper(int amnt = 1) { m_AmntPepper += amnt; }
-		void DecreasePepper(int amnt = 1) { m_AmntPepper -= amnt; }
+		void SetAmntPepper(int amntPepper) { m_AmntPepper = amntPepper; m_pNotifier->notify(this, "PepperChanged"); }
+		int GetAmntPepper() const { return m_AmntPepper; }
+		void IncreasePepper(int amnt = 1) { m_AmntPepper += amnt; m_pNotifier->notify(this, "PepperChanged"); }
 
-		bool Shoot(glm::vec2 pos);
+		bool Shoot(character::MoveDirection dir);
 
 	private:
 		int m_AmntPepper;
+		biggin::Subject* m_pNotifier;
 	};
 }
 

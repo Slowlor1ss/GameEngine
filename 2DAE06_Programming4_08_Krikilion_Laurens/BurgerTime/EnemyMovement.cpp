@@ -5,6 +5,9 @@
 #include "GameTime.h"
 #include "Logger.h"
 #include "SpriteRenderComponent.h"
+#pragma warning(push, 0)
+#include <glm/glm.hpp>
+#pragma warning (pop)
 
 EnemyMovement::EnemyMovement(biggin::GameObject* go, float velocity)
 	: Component(go)
@@ -12,14 +15,16 @@ EnemyMovement::EnemyMovement(biggin::GameObject* go, float velocity)
 	, m_Velocity(velocity)
 	, m_GameTimeRef{biggin::GameTime::GetInstance() }
 {
-	//Interval is set in disabled function
-	m_DelayedResetDisabled = utils::DelayedCallback(0, [&] {m_Disabled = false; }, 1);
 	m_CooldownCounter = m_Cooldown;
 }
 
 void EnemyMovement::Initialize(biggin::GameObject* go)
 {
-	m_PlayerRef = go->GetSceneRef()->FindGameObjectWithName("Player");
+	auto players = go->GetSceneRef()->FindGameObjectsWithName("Player");
+	if (players.empty())
+		Logger::GetInstance().LogErrorAndBreak("No Players Found!");
+
+	m_PlayerRef = players[utils::randomInt(static_cast<int>(players.size()))];
 
 	m_pSpriteComp = go->GetComponent<biggin::SpriteRenderComponent>();
 	if (m_pSpriteComp == nullptr)
@@ -221,8 +226,7 @@ void EnemyMovement::FixedUpdate()
 		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,-1 } * m_Velocity * biggin::GameTime::GetFixedTimeStep());
 		break;
 	case movementDirection::movingDown:
-		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 }
-		* m_Velocity * biggin::GameTime::GetFixedTimeStep());
+		GetGameObject()->TranslateLocalPosition(glm::vec2{ 0,1 } * m_Velocity * biggin::GameTime::GetFixedTimeStep());
 		break;
 	case movementDirection::movingLeft:
 		GetGameObject()->TranslateLocalPosition(glm::vec2{ -1,0 } * m_Velocity * biggin::GameTime::GetFixedTimeStep());
@@ -241,6 +245,8 @@ void EnemyMovement::FixedUpdate()
 
 void EnemyMovement::Peppered(float time)
 {
+	auto oldSprite = m_pSpriteComp->GetCurrentSprite();
+	m_DelayedResetDisabled.func =  [this, oldSprite] {m_Disabled = false; m_pSpriteComp->SetCurrentSprite(oldSprite); };
 	m_DelayedResetDisabled.interval = time;
 	m_DelayedResetDisabled.Reset();
 	m_Disabled = true;

@@ -78,6 +78,9 @@
     <ClCompile Include="PepperShooter.cpp">
       <Filter>Characters</Filter>
     </ClCompile>
+    <ClCompile Include="PepperUI.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PeterPepper.h">
@@ -130,6 +133,9 @@
     </ClInclude>
     <ClInclude Include="PepperShooter.h">
       <Filter>Characters\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="PepperUI.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

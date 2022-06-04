@@ -239,6 +239,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll" "$(Out
     <ClCompile Include="BurgerTimeMenuState.cpp" />
     <ClCompile Include="PepperComponent.cpp" />
     <ClCompile Include="PepperShooter.cpp" />
+    <ClCompile Include="PepperUI.cpp" />
     <ClCompile Include="PeterPepper.cpp" />
     <ClCompile Include="ScoreComponent.cpp" />
     <ClCompile Include="ScoreUI.cpp" />
@@ -258,6 +259,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll" "$(Out
     <ClInclude Include="BurgerTimeMenuState.h" />
     <ClInclude Include="PepperComponent.h" />
     <ClInclude Include="PepperShooter.h" />
+    <ClInclude Include="PepperUI.h" />
     <ClInclude Include="PeterPepper.h" />
     <ClInclude Include="ScoreComponent.h" />
     <ClInclude Include="ScoreUI.h" />

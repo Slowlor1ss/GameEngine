@@ -35,7 +35,7 @@ namespace biggin
 		float m_TotalGameTime{};
 		float m_DeltaTime{};
 
-		static constexpr float m_FixedTimeStep{ 0.02f }; //20ms
+		static constexpr float m_FixedTimeStep{ 0.02f }; //20ms //0.016 for 60 fps, 0.033 for 30 fps //TODO: test 0.016
 
 		std::chrono::high_resolution_clock::time_point m_BaseTime{};
 		std::chrono::high_resolution_clock::time_point m_StopTime{};

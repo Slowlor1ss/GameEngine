@@ -26,5 +26,18 @@ void LogSoundSystem::Play(const std::string& filename, float volume, bool isSoun
 
 void LogSoundSystem::StopAll()
 {
+	m_System->StopAll();
 	std::cout << "Stopped all sound\n";
+}
+
+void LogSoundSystem::PauseAll()
+{
+	m_System->PauseAll();
+	std::cout << "Paused all sound\n";
+}
+
+void LogSoundSystem::UnpauseAll()
+{
+	m_System->UnpauseAll();
+	std::cout << "Unpaused all sound\n";
 }

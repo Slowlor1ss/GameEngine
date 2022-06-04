@@ -15,6 +15,7 @@ namespace biggin
 
 		int GetLives() const;
 		void Damage();
+		void Heal();
 
 	private:
 		int m_LivesLeft;

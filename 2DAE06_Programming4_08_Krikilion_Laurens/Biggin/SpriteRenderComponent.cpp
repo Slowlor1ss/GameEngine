@@ -47,6 +47,8 @@ void biggin::SpriteRenderComponent::SetCurrentSprite(int animationState)
 	if (m_CurrentSprite == nextSprite)
 		return;
 
+	m_PausedWhenFinished = false;
+	m_CurrentSpriteIdx = animationState;
 	m_CurrentSprite = nextSprite;
 	m_CurrentRelFrameIdx = 0;
 	m_ElapsedSec = 0;
@@ -55,7 +57,10 @@ void biggin::SpriteRenderComponent::SetCurrentSprite(int animationState)
 
 void biggin::SpriteRenderComponent::SetFlip(SDL_RendererFlip flip) const
 {
-	m_RenderComponent->SetFlip(flip);
+	if (m_RenderComponent == nullptr)
+		Logger::GetInstance().LogWarning("Render component has not been set yet when set flip was called");
+	else
+		m_RenderComponent->SetFlip(flip);
 }
 
 void biggin::SpriteRenderComponent::UpdateRenderVariables()
@@ -88,6 +93,11 @@ float biggin::SpriteRenderComponent::GetDuration(int animationState)
 
 	const auto& animation = m_Sprites[animationState];
 	return animation.frameCount * m_Speed;
+}
+
+float biggin::SpriteRenderComponent::GetDurationCurrentSprite()
+{
+	return GetDuration(m_CurrentSpriteIdx);
 }
 
 void biggin::SpriteRenderComponent::Update()

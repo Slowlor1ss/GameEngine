@@ -91,6 +91,12 @@ void playSound(const char * filename, int volume);
  */
 void playMusic(const char * filename, int volume);
 
+/**
+* \brief Self made function
+* stops all music
+*/
+void stopMusic();
+
 /*
  * Plays a sound from a createAudio object (clones), only 1 at a time plays
  * Advantage to this method is no more disk reads, only once, data is stored and constantly reused

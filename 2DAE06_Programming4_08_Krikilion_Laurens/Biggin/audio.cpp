@@ -128,6 +128,35 @@ void playMusic(const char * filename, int volume)
     playAudio(filename, NULL, 1, volume);
 }
 
+void stopMusic()
+{
+    uint8_t musicFound = 0;
+    Audio* rootNext = ((Audio*)(gDevice->want).userdata)->next;
+
+    /* Find any existing musics, 0, 1 or 2 and fade them out */
+    while (rootNext != NULL)
+    {
+        /* Phase out any current music */
+        if (rootNext->loop == 1 && rootNext->fade == 0)
+        {
+            if (musicFound)
+            {
+                rootNext->length = 0;
+                rootNext->volume = 0;
+            }
+
+            rootNext->fade = 1;
+        }
+        /* Set flag to remove any queued up music in favour of new music */
+        else if (rootNext->loop == 1 && rootNext->fade == 1)
+        {
+            musicFound = 1;
+        }
+
+        rootNext = rootNext->next;
+    }
+}
+
 void playSoundFromMemory(Audio * audio, int volume)
 {
     playAudio(NULL, audio, 0, volume);

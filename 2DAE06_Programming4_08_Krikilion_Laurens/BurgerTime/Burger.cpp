@@ -8,6 +8,7 @@
 #include "PeterPepper.h"
 #include "RenderComponent.h"
 #include "ScoreComponent.h"
+#include "SoundServiceLocator.h"
 #include "SpriteRenderComponent.h"
 #include "Subject.h"
 
@@ -64,6 +65,8 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 			if (!m_IsFalling) return;
 
+			SoundServiceLocator::GetSoundSystem().Play("burger_touching_floor.wav", 0.5f);
+
 			if (m_EnemiesOnBurger > 0)
 			{
 				--m_EnemiesOnBurger;
@@ -91,6 +94,7 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 
 				m_Touched[index] = true;
 				(*it)->TranslateLocalPosition({ 0, static_cast<int>(burgerTime::MapLoader::GetGridSize() / 2.f) });
+				SoundServiceLocator::GetSoundSystem().Play("stepping_on_burger.wav", 0.2f);
 			}
 			else
 			{
@@ -123,30 +127,34 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 		}
 		else if (tag == "Catcher")
 		{
+			SoundServiceLocator::GetSoundSystem().Play("burger_touching_floor.wav", 0.2f);
+
 			//set the tag of our burger to catcher so other burgers land on top of it
 			overlappingCollider->GetOther()->SetTag("Catcher");
 			m_ReachedBottom = true;
 			m_pNotifier->notify(this, "BurgerReachedEnd");
 		}
-		else if (tag == "Enemy")
-		{
-			if (!m_IsFalling)
-				++m_EnemiesOnBurger;
-		}
+		//else if (tag == "Enemy")
+		//{
+		//	if (!m_IsFalling)
+		//		++m_EnemiesOnBurger;
+		//}
 	}
 	else if (event == "EndContact")
 	{
-		const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetTag();
-		if (tag == "Enemy")
-		{
-			if (!m_IsFalling)
-				--m_EnemiesOnBurger;
-		}
+		//const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetTag();
+		//if (tag == "Enemy")
+		//{
+		//	if (!m_IsFalling)
+		//		--m_EnemiesOnBurger;
+		//}
 	}
 }
 
 void Burger::DropBurger(int score)
 {
+	SoundServiceLocator::GetSoundSystem().Play("burger_going_down.wav", 0.2f);
+
 	if (m_pPlayerGo != nullptr)
 		if (auto* scoreComponent = m_pPlayerGo->GetComponent<burgerTime::ScoreComponent>())
 			scoreComponent->IncreaseScore(score);

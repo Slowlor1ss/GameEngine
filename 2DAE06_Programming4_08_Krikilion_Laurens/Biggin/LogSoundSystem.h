@@ -16,6 +16,8 @@ public:
 
 	void Play(const std::string& filename, float volume, bool isSoundEffect) override;
 	void StopAll() override;
+	void PauseAll() override;
+	void UnpauseAll() override;
 
 private:
 	SoundSystem* m_System;

@@ -43,6 +43,8 @@ public:
 
 	bool ReachedBottom() const { return m_ReachedBottom; }
 	bool IsFalling() const { return m_IsFalling; }
+	void IncreaseEnemyOnBurgerCounter() { ++m_EnemiesOnBurger; }
+	void DecreaseEnemyOnBurgerCounter() { --m_EnemiesOnBurger; }
 	const biggin::GameObject* GetBurgerResponsible() const { return m_pPlayerGo; } //game object responsible for dropping the burger
 	static constexpr int GetBurgerSize() { return m_BurgerSize; }
 

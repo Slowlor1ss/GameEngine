@@ -9,6 +9,7 @@ namespace biggin
 	{
 	public:
 		Scene& CreateScene(const std::string& name);
+		void RemoveScene(const std::string& name);
 
 		void Update() const;
 		void FixedUpdate() const;

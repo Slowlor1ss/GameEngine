@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Logger.h"
 #include "PeterPepper.h"
+#include "SoundServiceLocator.h"
 
 EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers)
 	:Component(go)
@@ -68,6 +69,7 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 		else if (tag == "Pepper")
 		{
 			m_Stunned = true;
+			SoundServiceLocator::GetSoundSystem().Play("peppered.wav", 0.2f);
 			m_MovementRef->Peppered();
 		}
 	}
@@ -85,6 +87,7 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 	{
 		if (m_BurgerGameObjectRef)
 		{
+			SoundServiceLocator::GetSoundSystem().Play("enemy_fall.wav", 0.2f);
 			const auto* burger = m_BurgerGameObjectRef->GetComponent<Burger>();
 			Die(burger->GetBurgerResponsible());
 		}
@@ -123,6 +126,7 @@ void EnemyColliderHandeler::HandleEnemyBurgerBeginContact(const biggin::BoxColli
 	const auto* burger = overlappedBurgerGameObject->GetComponent<Burger>();
 	if(IsBurgerFalling(burger))
 	{
+		SoundServiceLocator::GetSoundSystem().Play("enemy_crushed.wav", 0.2f);
 		Die(burger->GetBurgerResponsible());
 		return;
 	}
@@ -136,6 +140,7 @@ void EnemyColliderHandeler::HandleEnemyBurgerBeginContact(const biggin::BoxColli
 		if (m_AmntColliding == 1) //first overlap
 		{
 			m_BurgerGameObjectRef->AddObserver(this);
+			m_BurgerGameObjectRef->GetComponent<Burger>()->IncreaseEnemyOnBurgerCounter();
 		}
 	}
 }
@@ -148,6 +153,8 @@ void EnemyColliderHandeler::HandleEnemyBurgerEndContact(const biggin::BoxCollide
 
 		if (m_AmntColliding == 0)
 		{
+			if (auto burger = m_BurgerGameObjectRef->GetComponent<Burger>())
+				burger->DecreaseEnemyOnBurgerCounter();
 			m_BurgerGameObjectRef->RemoveObserver(this);
 			m_BurgerGameObjectRef = nullptr;
 		}

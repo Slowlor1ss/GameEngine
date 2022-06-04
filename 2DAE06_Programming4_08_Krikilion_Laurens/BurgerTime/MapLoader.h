@@ -127,7 +127,8 @@ namespace burgerTime
 		enum mapCollisionGroup : unsigned short
 		{
 			platformGroup = biggin::BoxCollider2d::CollisionGroup::Group3,
-			mapGroup = platformGroup | static_cast<int>(Burger::burgerIgnoreGroup) //all collision groups that get used in the map
+			mapGroup = platformGroup | static_cast<int>(Burger::burgerIgnoreGroup), //all collision groups that get used in the map
+			mapIgnoreGroup = biggin::BoxCollider2d::CollisionGroup::Group6,
 		};
 
 	};

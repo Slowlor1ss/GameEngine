@@ -15,8 +15,10 @@
 #include "Observer.h"
 #include "EnemySpawner.h"
 #include "GameTime.h"
+#include "PepperShooter.h"
 #include "RemoveOnEvent.h"
 #include "RenderComponent.h"
+#include "SoundServiceLocator.h"
 
 using namespace burgerTime;
 
@@ -91,12 +93,31 @@ void MapLoader::OnNotify(Component* entity, const std::string& event)
 		{
 			//player finished level
 			m_LoadNextLevel = true;
+			for (auto& playerGo : m_PlayerRef)
+			{
+				auto player = playerGo->GetComponent<character::PeterPepper>();
+				if (player && player->IsDead())
+				{
+					player->IncreaseHealth();
+					player->RespawnPlayer(m_PlayerSpawnLocation);
+				}
+
+				auto pepperShooter = playerGo->GetComponent<PepperShooter>();
+				if (pepperShooter != nullptr)
+					pepperShooter->IncreasePepper();
+			}
+			SoundServiceLocator::GetSoundSystem().StopAll();
+			SoundServiceLocator::GetSoundSystem().Play("win.wav", 0.2f);
 		}
 	}
 	else if (event  == "PlayerDied")
 	{
+		if (m_PlayerRef.size() == 1)
+			SoundServiceLocator::GetSoundSystem().StopAll();
+
 		for (auto& delayedCallback : m_DelayedRespawns)
 		{
+			//if callback is already re-spawning another player -> use next callback
 			if (!delayedCallback.finished)
 				continue;
 
@@ -108,7 +129,17 @@ void MapLoader::OnNotify(Component* entity, const std::string& event)
 				}
 				else
 				{
-					m_pNotifier->notify(this, "GameOver");
+					//Check if all players are dead
+					bool gameOver = true;
+					for (auto& playerGo : m_PlayerRef)
+					{
+						auto playerComponent = playerGo->GetComponent<character::PeterPepper>();
+						if (playerComponent && playerComponent->GetHealth() > 0)
+							gameOver = false;
+					}
+
+					if (gameOver)
+						m_pNotifier->notify(this, "GameOver");
 				}
 
 				auto* scene = m_GameObjectRef->GetSceneRef();
@@ -118,6 +149,10 @@ void MapLoader::OnNotify(Component* entity, const std::string& event)
 				}
 
 				m_EnemySpawnerRef->ResetEnemyData();
+
+				//we only restart the music in single player as we dont stop the music in upon death in multiplayer
+				if (m_PlayerRef.size() == 1)
+					SoundServiceLocator::GetSoundSystem().Play("main.wav", 0.2f, false);
 			};
 			delayedCallback.Reset();
 			break;
@@ -131,7 +166,7 @@ void MapLoader::Update()
 	for (auto& delayedCallback : m_DelayedRespawns)
 		delayedCallback.Update(deltaT);
 
-	if (m_LoadNextLevel) //TODO: check this
+	if (m_LoadNextLevel)
 	{
 		m_pNotifier->notify(this, "FinishedLevel");
 		ResetLevel();
@@ -219,12 +254,15 @@ void MapLoader::LoadMap(const std::string& file)
     ReadItemsFile(rawName + "items.txt");
 
 	CreateMapSideColliders();
+
+	SoundServiceLocator::GetSoundSystem().Play("main.wav", 0.2f, false);
 }
 
 void MapLoader::CreateMapSideColliders()
 {
 	b2Filter filter{};
 	filter.categoryBits = mapCollisionGroup::platformGroup;
+	filter.maskBits = 0xFFFF ^ mapCollisionGroup::mapIgnoreGroup; //Ignore group 6
 
 	//left
 	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
@@ -319,9 +357,10 @@ void MapLoader::ProcessLineMapFile(const std::string& line)
 			SpawnEnemySpawner(i, lineWidth-1);
 			break;
 		case MapValues::Player:
-			m_PlayerSpawnLocation = glm::vec2{ m_GridCellSize * i, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
-			m_PlayerRef[0]->SetLocalPosition(m_PlayerSpawnLocation);
-			break;
+			m_PlayerSpawnLocation = glm::vec2{ m_GridCellSize * i + m_GridCellSize * 0.5f, m_GridCellSize * m_LineNumber - m_GridCellSize * 0.5f } + m_GameObjectRef->GetLocalPosition();
+            for (auto& playerGo : m_PlayerRef)
+	            playerGo->SetLocalPosition(m_PlayerSpawnLocation);
+            break;
         default: ;
 		}
 	}
@@ -370,6 +409,7 @@ void MapLoader::MakeCollider(int idx, int colliderBeginPos, int sizeMultiplier, 
 
 	b2Filter filter{};
 	filter.categoryBits = collisionGroup;
+	filter.maskBits = 0xFFFF ^ mapCollisionGroup::mapIgnoreGroup; //Ignore group 6
 
 	m_GameObjectRef->AddComponentPending(new biggin::BoxCollider2d(
 		m_GameObjectRef, { colliderWidth, colliderHeight }, false, b2_staticBody,

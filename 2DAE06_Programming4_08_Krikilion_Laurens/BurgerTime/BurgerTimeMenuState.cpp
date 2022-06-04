@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "GameLoader.h"
 #include <thread>
+#include "Biggin.h"
 #include "BoxCollider2d.h"
 #include "Burger.h"
 #include "EnemySpawner.h"
@@ -28,6 +29,8 @@
 #include "StatsAndAchievements.h"
 #include "Subject.h"
 #include "InputManager.h"
+#include "PepperShooter.h"
+#include "PepperUI.h"
 
 using namespace biggin;
 using namespace burgerTime;
@@ -35,13 +38,36 @@ using namespace burgerTime;
 MainMenuState* BurgerTimeMenuState::m_pMainMenuState{ new MainMenuState() };
 RunningState* BurgerTimeMenuState::m_pRunningState{ new RunningState() };
 OptionsState* BurgerTimeMenuState::m_pOptionsState{ new OptionsState() };
+ConfirmationState* BurgerTimeMenuState::m_pConfirmationState{ new ConfirmationState() };
+BurgerTimeMenuState* BurgerTimeMenuState::m_pPrevState{ nullptr };
+
+
+
+void BurgerTimeMenuState::Cleanup()
+{
+	delete m_pMainMenuState;
+	m_pMainMenuState = nullptr;
+	delete m_pRunningState;
+	m_pRunningState = nullptr;
+	delete m_pOptionsState;
+	m_pOptionsState = nullptr;
+}
+
+void BurgerTimeMenuState::ChangeState(BurgerTimeMenuState*& currState, BurgerTimeMenuState* nextState)
+{
+	currState->Exit();
+	m_pPrevState = currState;
+	currState = nextState;
+	currState->Enter();
+}
 
 void MainMenuState::Enter()
 {
 	SceneManager::GetInstance().ChangeActiveScene("MainMenu");
+	SoundServiceLocator::GetSoundSystem().Play("burgermenu.wav", 0.2f, false);
 }
 
-void MainMenuState::RenderMenu(GameLoader* UiMenu)
+void MainMenuState::RenderMenu(BurgerTimeMenuState*& currState)
 {
 	ImGuiWindowFlags window_flags = 0;
 	window_flags |= ImGuiWindowFlags_NoBackground;
@@ -53,14 +79,13 @@ void MainMenuState::RenderMenu(GameLoader* UiMenu)
 	ImGui::SetItemDefaultFocus();
 	if (ImGui::Button("SinglePlayer", { 200,50 }))
 	{
-		if (!m_IsLoadedSinglePlayer)
-			LoadSinglePlayer();
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
+
+		LoadSinglePlayer();
 
 		SceneManager::GetInstance().ChangeActiveScene("SinglePlayer");
 
-		UiMenu->GetState()->Exit();
-		UiMenu->SetState(m_pRunningState);
-		UiMenu->GetState()->Enter();
+		ChangeState(currState, m_pRunningState);
 	}
 
 	ImGui::Spacing();
@@ -69,14 +94,32 @@ void MainMenuState::RenderMenu(GameLoader* UiMenu)
 	ImGui::Spacing();
 	ImGui::Spacing();
 
-	if (ImGui::Button("To be added", { 200,50 }))
+	if (ImGui::Button("Coop", { 200,50 }))
 	{
-		/*if (!m_IsLoadedMultiPlayer)
-			LoadMultiPlayer();
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
 
-		m_pState->Exit();
-		m_pState = m_pRunningState;
-		m_pState->Enter();*/
+		LoadCoop();
+
+		SceneManager::GetInstance().ChangeActiveScene("Coop");
+
+		ChangeState(currState, m_pRunningState);
+	}
+
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+	ImGui::Spacing();
+
+	if (ImGui::Button("Versus", { 200,50 }))
+	{
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
+
+		LoadVersus();
+
+		SceneManager::GetInstance().ChangeActiveScene("Versus");
+
+		ChangeState(currState, m_pRunningState);
 	}
 
 	ImGui::End();
@@ -84,15 +127,7 @@ void MainMenuState::RenderMenu(GameLoader* UiMenu)
 
 void MainMenuState::LoadSinglePlayer()
 {
-	//TODO: just for testing will move this to a correct location later
-	SoundServiceLocator::GetSoundSystem().Play("main.wav", 0.2f, false);
-
-	std::cout << "==============================================================================\r\n     __________  ____  ____ _________    ________  __________ _________\r\n     |   ___   \\ |  |  |  | |   ___  \\  /  ______| | _______| |   ___  \\\r\n     |   |_|    ||  |  |  | |   |_|   ||  /        | |        |   |_|   |\r\n     |         / |  |  |  | | ___  __/ | |   ____  | |__      | ___  __/\r\n     |   ___   \\ |  \\__/  | | |  \\ \\   | |  |___ | | ___|     | |  \\ \\\r\n     |   |_|    ||        | | |   \\ \\  | |_____| | | |_______ | |   \\ \\\r\n     |_________/  \\______/  |_|    \\_\\  \\_______/  |________| |_|    \\_\\ \r\n\r\n==============================================================================\r\n                __________ __________ ___    ___ __________\r\n                |___  ___| |___  ___| |  \\  /  | | _______|\r\n                   |  |       |  |    |   \\/   | | |\r\n                   |  |       |  |    |        | | |__\r\n                   |  |       |  |    |  \\  /  | | ___|\r\n                   |  |    ___|  |___ |  |\\/|  | | |_______\r\n                   |__|    |________| |__|  |__| |________|\r\n\r\n==============================================================================\r\n\t\t\t+=+=+=+=+=+=+=+=+=+=+=+=+=+=+\r\n==============================================================================\n";
-	std::cout << "\nPress [c] for controls\n";
-	std::cout << "\nPeter Piper picked a peck of pickled peppers.\n"
-		<< "Did Peter Piper pick a peck of pickled peppers?\n"
-		<< "If Peter Piper picked a peck of pickled peppers,\n"
-		<< "where's the peck of pickled peppers Peter Piper picked? \n\n";
+	SoundServiceLocator::GetSoundSystem().Play("level_intro.wav", 0.2f, false);
 
 	auto& sceneManager = SceneManager::GetInstance();
 	auto& scene = sceneManager.CreateScene("SinglePlayer");
@@ -110,6 +145,8 @@ void MainMenuState::LoadSinglePlayer()
 	map->AddComponent(new MapLoader(map.get(), { m_pRunningState }));
 
 	scene.Add(map);
+
+#ifdef _DEBUG
 	//Add Fps
 	auto fpsObject = std::make_shared<GameObject>();
 
@@ -120,6 +157,7 @@ void MainMenuState::LoadSinglePlayer()
 	fpsObject->AddComponent(new FpsCounter(fpsObject.get()));
 	fpsObject->SetLocalPosition(10, 10);
 	scene.Add(fpsObject);
+#endif
 
 	//Add HealthUI
 	auto HealthVisualsObject = std::make_shared<GameObject>();
@@ -138,21 +176,33 @@ void MainMenuState::LoadSinglePlayer()
 
 	ScoreVisualsObject->AddComponent(new RenderComponent(ScoreVisualsObject.get()));
 	const auto ScoreText = new TextComponent(ScoreVisualsObject.get());
-	ScoreText->SetColor({ 0, 255, 0, 1 });
+	ScoreText->SetColor({ 255, 0, 0, 1 });
 	ScoreVisualsObject->AddComponent(ScoreText);
 	const auto scoreUI = new ScoreUI(ScoreVisualsObject.get());
 	ScoreVisualsObject->AddComponent(scoreUI);
 	ScoreVisualsObject->SetLocalPosition({ 10, 550 });
 	scene.Add(ScoreVisualsObject);
 
+	//Add PepperUI
+	auto PepperVisualsObject = std::make_shared<GameObject>();
+
+	PepperVisualsObject->AddComponent(new RenderComponent(PepperVisualsObject.get()));
+	const auto PepperText = new TextComponent(PepperVisualsObject.get());
+	PepperText->SetColor({ 0, 255, 0, 1 });
+	PepperVisualsObject->AddComponent(PepperText);
+	const auto pepperUI = new PepperUI(PepperVisualsObject.get());
+	PepperVisualsObject->AddComponent(pepperUI);
+	PepperVisualsObject->SetLocalPosition({ Biggin::GetWindowWidth() - 125, 10 });
+	scene.Add(PepperVisualsObject);
+
 	//Add Player
 	auto playerObject = std::make_shared<GameObject>();
 	playerObject->Setname("Player");
 
-
 	playerObject->AddComponent(new Subject(playerObject.get()));
-	playerObject->AddComponent(new HealthComponent(playerObject.get(), 4, { healthUI }));
+	playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
+	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
 	auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
 	playerObject->AddComponent(peterPepper);
 	b2Filter filterPlayer{};
@@ -173,11 +223,6 @@ void MainMenuState::LoadSinglePlayer()
 
 	scene.Add(playerObject);
 
-	//InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonA, 0, SDLK_e },
-	//	std::make_unique<DamagePlayer>(peterPepper));
-	//InputManager::GetInstance().MapActionKey({ ActionState::Up, ControllerButton::ButtonX },
-	//	std::make_unique<IncreaseScore>(playerObject.get()));
-
 	//Movement bindings
 	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_w },
 		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Up));
@@ -190,6 +235,227 @@ void MainMenuState::LoadSinglePlayer()
 
 	InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
 		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
+
+	InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 0, SDLK_SPACE },
+		std::make_unique<ShootCommand>(peterPepper));
+
+	InputManager::GetInstance().MapActionKey({biggin::ActionState::Up, biggin::ControllerButton::Start, 0, SDLK_c },
+		std::make_unique<PrintControls>());
+
+
+	auto enemySpawner = std::make_shared<GameObject>();
+	enemySpawner->Setname("EnemySpawner");
+	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get()));
+	scene.Add(enemySpawner);
+
+	scene.Start();
+}
+
+void MainMenuState::LoadCoop()
+{
+	SoundServiceLocator::GetSoundSystem().Play("level_intro.wav", 0.2f, false);
+
+	auto& sceneManager = SceneManager::GetInstance();
+	auto& scene = sceneManager.CreateScene("Coop");
+	sceneManager.ChangeActiveScene("Coop");
+	const auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
+
+	//Load map
+	auto map = std::make_shared<GameObject>();
+	map->Setname("Map");
+	map->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
+	map->AddComponent(new Subject(map.get()));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39 * MapLoader::GetGridSize(), 1000 }, false));
+	map->AddComponent(new RenderComponent(map.get()));
+	map->AddComponent(new MapLoader(map.get(), { m_pRunningState }));
+
+	scene.Add(map);
+
+#ifdef _DEBUG
+	//Add Fps
+	auto fpsObject = std::make_shared<GameObject>();
+
+	fpsObject->AddComponent(new RenderComponent(fpsObject.get()));
+	auto fpsText = new TextComponent(fpsObject.get());
+	fpsText->SetColor({ 0, 255, 0, 1 });
+	fpsObject->AddComponent(fpsText);
+	fpsObject->AddComponent(new FpsCounter(fpsObject.get()));
+	fpsObject->SetLocalPosition(10, 10);
+	scene.Add(fpsObject);
+#endif
+
+#pragma region Player1
+	{
+		//Add HealthUI
+		auto HealthVisualsObject = std::make_shared<GameObject>();
+
+		HealthVisualsObject->AddComponent(new RenderComponent(HealthVisualsObject.get()));
+		const auto healthText = new TextComponent(HealthVisualsObject.get());
+		healthText->SetColor({ 0, 255, 0, 1 });
+		HealthVisualsObject->AddComponent(healthText);
+		const auto healthUI = new HealthUI(HealthVisualsObject.get());
+		HealthVisualsObject->AddComponent(healthUI);
+		HealthVisualsObject->SetLocalPosition({ 10, 500 });
+		scene.Add(HealthVisualsObject);
+
+		//Add ScoreUI
+		auto ScoreVisualsObject = std::make_shared<GameObject>();
+
+		ScoreVisualsObject->AddComponent(new RenderComponent(ScoreVisualsObject.get()));
+		const auto ScoreText = new TextComponent(ScoreVisualsObject.get());
+		ScoreText->SetColor({ 255, 0, 0, 1 });
+		ScoreVisualsObject->AddComponent(ScoreText);
+		const auto scoreUI = new ScoreUI(ScoreVisualsObject.get());
+		ScoreVisualsObject->AddComponent(scoreUI);
+		ScoreVisualsObject->SetLocalPosition({ 10, 550 });
+		scene.Add(ScoreVisualsObject);
+
+		//Add PepperUI
+		auto PepperVisualsObject = std::make_shared<GameObject>();
+
+		PepperVisualsObject->AddComponent(new RenderComponent(PepperVisualsObject.get()));
+		const auto PepperText = new TextComponent(PepperVisualsObject.get());
+		PepperText->SetColor({ 0, 255, 0, 1 });
+		PepperVisualsObject->AddComponent(PepperText);
+		const auto pepperUI = new PepperUI(PepperVisualsObject.get());
+		PepperVisualsObject->AddComponent(pepperUI);
+		PepperVisualsObject->SetLocalPosition({ 10, 10 });
+		scene.Add(PepperVisualsObject);
+
+		//Add Player
+		auto playerObject = std::make_shared<GameObject>();
+		playerObject->Setname("Player");
+
+		playerObject->AddComponent(new Subject(playerObject.get()));
+		playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
+		playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
+		playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+		auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+		playerObject->AddComponent(peterPepper);
+		b2Filter filterPlayer{};
+		filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
+		filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
+		filterPlayer.groupIndex = -1; //ignore everything on index -1 this is to make sure players don't collide with each other
+		playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { peterPepper },
+			"Player", {}, true, filterPlayer));
+		playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
+		auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::PepperHorizontal), { 1, 10 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::PepperVertical), { 1, 11 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Die), { 6, 12 });
+		playerSprite->SetCurrentSprite(1);
+		playerObject->AddComponent(playerSprite);
+
+		scene.Add(playerObject);
+
+		//Movement bindings
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_w },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Up));
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_a },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Left));
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_s },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Down));
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_d },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Right));
+
+		InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
+
+		InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 0, SDLK_SPACE },
+			std::make_unique<ShootCommand>(peterPepper));
+	}
+#pragma endregion
+
+
+#pragma region Player2
+	{
+		//Add HealthUI
+		auto HealthVisualsObject = std::make_shared<GameObject>();
+
+		HealthVisualsObject->AddComponent(new RenderComponent(HealthVisualsObject.get()));
+		const auto healthText = new TextComponent(HealthVisualsObject.get());
+		healthText->SetColor({ 0, 255, 0, 1 });
+		HealthVisualsObject->AddComponent(healthText);
+		const auto healthUI = new HealthUI(HealthVisualsObject.get());
+		HealthVisualsObject->AddComponent(healthUI);
+		HealthVisualsObject->SetLocalPosition({ Biggin::GetWindowWidth() - 125, 500 });
+		scene.Add(HealthVisualsObject);
+
+		//Add ScoreUI
+		auto ScoreVisualsObject = std::make_shared<GameObject>();
+
+		ScoreVisualsObject->AddComponent(new RenderComponent(ScoreVisualsObject.get()));
+		const auto ScoreText = new TextComponent(ScoreVisualsObject.get());
+		ScoreText->SetColor({ 255, 0, 0, 1 });
+		ScoreVisualsObject->AddComponent(ScoreText);
+		const auto scoreUI = new ScoreUI(ScoreVisualsObject.get());
+		ScoreVisualsObject->AddComponent(scoreUI);
+		ScoreVisualsObject->SetLocalPosition({ Biggin::GetWindowWidth() - 125, 550 });
+		scene.Add(ScoreVisualsObject);
+
+		//Add PepperUI
+		auto PepperVisualsObject = std::make_shared<GameObject>();
+
+		PepperVisualsObject->AddComponent(new RenderComponent(PepperVisualsObject.get()));
+		const auto PepperText = new TextComponent(PepperVisualsObject.get());
+		PepperText->SetColor({ 0, 255, 0, 1 });
+		PepperVisualsObject->AddComponent(PepperText);
+		const auto pepperUI = new PepperUI(PepperVisualsObject.get());
+		PepperVisualsObject->AddComponent(pepperUI);
+		PepperVisualsObject->SetLocalPosition({ Biggin::GetWindowWidth() - 125, 10 });
+		scene.Add(PepperVisualsObject);
+
+		//Add Player
+		auto playerObject = std::make_shared<GameObject>();
+		playerObject->Setname("Player");
+
+		playerObject->AddComponent(new Subject(playerObject.get()));
+		playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
+		playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
+		playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+		auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+		playerObject->AddComponent(peterPepper);
+		b2Filter filterPlayer{};
+		filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
+		filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
+		filterPlayer.groupIndex = -1; //ignore everything on index -1 this is to make sure players don't collide with each other
+		playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { peterPepper },
+			"Player", {}, true, filterPlayer));
+		playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
+		auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::PepperHorizontal), { 1, 10 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::PepperVertical), { 1, 11 });
+		playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Die), { 6, 12 });
+		playerSprite->SetCurrentSprite(1);
+		playerObject->AddComponent(playerSprite);
+
+		scene.Add(playerObject);
+
+		//Movement bindings
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_UP },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Up));
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_LEFT },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Left));
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_DOWN },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Down));
+		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_RIGHT },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Right));
+
+		InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 1 },
+			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
+
+		InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 1, SDLK_RSHIFT },
+			std::make_unique<ShootCommand>(peterPepper));
+	}
+#pragma endregion
+
 
 	////Add HealthUI P2
 	//auto HealthVisualsObject2 = std::make_shared<GameObject>();
@@ -214,13 +480,13 @@ void MainMenuState::LoadSinglePlayer()
 	//ScoreVisualsObject2->AddComponent(scoreUI2);
 	//ScoreVisualsObject2->SetLocalPosition({ 890, 550 });
 	//scene.Add(ScoreVisualsObject2);
-
+	//
 	//auto test = std::make_shared<GameObject>();
 	//test->AddComponent(new Subject(test.get()));
 	//test->AddComponent(new BoxCollider2d(test.get(), { 30, 30 }, false, b2_staticBody, { }, "", {}, false));
 	//test->AddComponent(new RenderComponent(test.get(), "test.png"));
 	//scene.Add(test);
-
+	//
 	//Add Player2
 	//auto playerObject2 = std::make_shared<GameObject>();
 	//playerObject2->SetLocalPosition(300, 100);
@@ -275,7 +541,7 @@ void MainMenuState::LoadSinglePlayer()
 	//InputManager::GetInstance().MapActionKey({ ActionState::TriggerL, ControllerButton::None, 0 },
 	//	std::make_unique<DebugFloatCTXCommand>());
 
-	InputManager::GetInstance().MapActionKey({biggin::ActionState::Up, biggin::ControllerButton::Start, 0, SDLK_c },
+	InputManager::GetInstance().MapActionKey({ biggin::ActionState::Up, biggin::ControllerButton::Start, 0, SDLK_c },
 		std::make_unique<PrintControls>());
 
 
@@ -284,67 +550,70 @@ void MainMenuState::LoadSinglePlayer()
 	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get()));
 	scene.Add(enemySpawner);
 
-
-	////Foreground
-	//auto foreground = std::make_shared<GameObject>();
-	//foreground->AddComponent(new RenderComponent(foreground.get(), "BurgerTimeStageForeground.png"));
-	//scene.Add(foreground);
-
 	scene.Start();
+}
 
-	m_IsLoadedSinglePlayer = true;
+void MainMenuState::LoadVersus()
+{
+
 }
 
 void RunningState::Enter()
 {
-
+	SceneManager::GetInstance().SetScenesPaused(false);
+	SoundServiceLocator::GetSoundSystem().UnpauseAll();
 }
 
 void RunningState::OnNotify(biggin::Component* /*entity*/, const std::string& event)
 {
 	if (event == "FinishedLevel")
 	{
-		//create new scene
-		//move player, score, and health
-		//reset/remove old scene
+
 	}
 	else if (event == "GameOver")
 	{
 		//save high-score
 		//reset all
 		//load main menu
+		m_GameOver = true;
 	}
 }
 
-void RunningState::RenderMenu(GameLoader* UiMenu)
+void RunningState::RenderMenu(BurgerTimeMenuState*& currState)
 {
 	if (InputManager::GetInstance().IsPressed(SDLK_ESCAPE, ControllerButton::Start, 0)
 		|| InputManager::GetInstance().IsPressed(SDLK_UNKNOWN, ControllerButton::Start, 1))
 	{
-		UiMenu->GetState()->Exit();
-		UiMenu->SetState(m_pOptionsState);
-		UiMenu->GetState()->Enter();
+		ChangeState(currState, m_pOptionsState);
+	}
+
+	if (m_GameOver)
+	{
+		auto& sceneManager = SceneManager::GetInstance();
+		sceneManager.RemoveScene(sceneManager.GetActiveScene().GetName());
+		ChangeState(currState, m_pMainMenuState);
+		m_GameOver = false;
 	}
 }
 
 void OptionsState::Enter()
 {
 	SceneManager::GetInstance().SetScenesPaused(true);
+	SoundServiceLocator::GetSoundSystem().PauseAll();
 }
 
 void OptionsState::Exit()
 {
 	SceneManager::GetInstance().SetScenesPaused(false);
+	SoundServiceLocator::GetSoundSystem().UnpauseAll();
 }
 
-void OptionsState::RenderMenu(GameLoader* UiMenu)
+void OptionsState::RenderMenu(BurgerTimeMenuState*& currState)
 {
 	if (InputManager::GetInstance().IsPressed(SDLK_ESCAPE ,ControllerButton::Start, 0)
 		|| InputManager::GetInstance().IsPressed(SDLK_UNKNOWN, ControllerButton::Start, 1))
 	{
-		UiMenu->GetState()->Exit();
-		UiMenu->SetState(m_pRunningState);
-		UiMenu->GetState()->Enter();
+		ChangeState(currState, m_pRunningState);
 	}
 
 	ImGuiWindowFlags window_flags = 0;
@@ -355,12 +624,11 @@ void OptionsState::RenderMenu(GameLoader* UiMenu)
 	//window_flags |= ImGuiWindowFlags_NavFlattened;
 
 	ImGui::Begin("Options", &m_IsOpen, window_flags);
-	static std::string test{ "MainMenu" };
-	if (ImGui::Button(test.c_str(), { 200,50 }))
+	if (ImGui::Button("MainMenu", { 200,50 }))
 	{
-		UiMenu->GetState()->Exit();
-		UiMenu->SetState(m_pMainMenuState);
-		UiMenu->GetState()->Enter();
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
+
+		ChangeState(currState, m_pConfirmationState);
 	}
 
 	ImGui::Spacing();
@@ -371,20 +639,66 @@ void OptionsState::RenderMenu(GameLoader* UiMenu)
 
 	if (ImGui::Button("Resume", { 200,50 }))
 	{
-		UiMenu->GetState()->Exit();
-		UiMenu->SetState(m_pRunningState);
-		UiMenu->GetState()->Enter();
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
+
+		ChangeState(currState, m_pRunningState);
 	}
 
 	ImGui::End();
 }
 
-void BurgerTimeMenuState::Cleanup()
+void ConfirmationState::RenderMenu(BurgerTimeMenuState*& currState)
 {
-	delete m_pMainMenuState;
-	m_pMainMenuState = nullptr;
-	delete m_pRunningState;
-	m_pRunningState = nullptr;
-	delete m_pOptionsState;
-	m_pOptionsState = nullptr;
+	ImGuiWindowFlags window_flags = 0;
+	//window_flags |= ImGuiWindowFlags_NoBackground;
+	window_flags |= ImGuiWindowFlags_NoTitleBar;
+	window_flags |= ImGuiWindowFlags_NoResize;
+	window_flags |= ImGuiWindowFlags_AlwaysAutoResize;
+	//window_flags |= ImGuiWindowFlags_NavFlattened;
+
+	ImGui::Begin("Confirmation", &m_IsOpen, window_flags);
+
+	std::string text = "Are you sure you want to go to main menu?\nYou will lose all progress";
+	auto windowWidth = ImGui::GetWindowSize().x;
+	auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+	ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+	ImGui::Text(text.c_str());
+
+	ImGui::Spacing();
+	ImGui::Separator();
+	ImGui::Spacing();
+
+	if (ImGui::Button("Yes", { 200,50 }))
+	{
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
+
+		auto& sceneManager = SceneManager::GetInstance();
+		sceneManager.RemoveScene(sceneManager.GetActiveScene().GetName());
+
+		ChangeState(currState, m_pMainMenuState);
+	}
+
+	ImGui::SameLine(250);
+
+	if (ImGui::Button("No", { 200,50 }))
+	{
+		SoundServiceLocator::GetSoundSystem().Play("menu_select.wav", 0.2f);
+
+		ChangeState(currState, m_pPrevState);
+	}
+
+	ImGui::End();
+}
+
+void ConfirmationState::Enter()
+{
+	SceneManager::GetInstance().SetScenesPaused(true);
+	SoundServiceLocator::GetSoundSystem().PauseAll();
+}
+
+void ConfirmationState::Exit()
+{
+	SceneManager::GetInstance().SetScenesPaused(false);
+	SoundServiceLocator::GetSoundSystem().UnpauseAll();
 }

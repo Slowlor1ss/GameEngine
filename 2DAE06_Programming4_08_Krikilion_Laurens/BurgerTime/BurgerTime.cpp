@@ -33,14 +33,19 @@ int main(int /*argc*/, char* /*argv*/[])
 	else
 		std::cout << "Successfully initialized steam." << std::endl;
 
-	/*auto& scene = */biggin::SceneManager::GetInstance().CreateScene("MainMenu");
-	//auto go = std::make_shared<biggin::GameObject>();
-	//go->AddComponent(new GameLoader(go.get()));
-	//scene.Add(go);
-	biggin::MenuRenderer::GetInstance().SetMenu(new GameLoader());
+	biggin::SceneManager::GetInstance().CreateScene("MainMenu");
 
 	biggin::Biggin engine;
-	std::cout << "click play to hear the sound\n";
+	engine.Initialize();
+
+	std::cout << "==============================================================================\r\n     __________  ____  ____ _________    ________  __________ _________\r\n     |   ___   \\ |  |  |  | |   ___  \\  /  ______| | _______| |   ___  \\\r\n     |   |_|    ||  |  |  | |   |_|   ||  /        | |        |   |_|   |\r\n     |         / |  |  |  | | ___  __/ | |   ____  | |__      | ___  __/\r\n     |   ___   \\ |  \\__/  | | |  \\ \\   | |  |___ | | ___|     | |  \\ \\\r\n     |   |_|    ||        | | |   \\ \\  | |_____| | | |_______ | |   \\ \\\r\n     |_________/  \\______/  |_|    \\_\\  \\_______/  |________| |_|    \\_\\ \r\n\r\n==============================================================================\r\n                __________ __________ ___    ___ __________\r\n                |___  ___| |___  ___| |  \\  /  | | _______|\r\n                   |  |       |  |    |   \\/   | | |\r\n                   |  |       |  |    |        | | |__\r\n                   |  |       |  |    |  \\  /  | | ___|\r\n                   |  |    ___|  |___ |  |\\/|  | | |_______\r\n                   |__|    |________| |__|  |__| |________|\r\n\r\n==============================================================================\r\n\t\t\t+=+=+=+=+=+=+=+=+=+=+=+=+=+=+\r\n==============================================================================\n";
+	std::cout << "\nPress [c] for controls\n";
+	std::cout << "\nPeter Piper picked a peck of pickled peppers.\n"
+		<< "Did Peter Piper pick a peck of pickled peppers?\n"
+		<< "If Peter Piper picked a peck of pickled peppers,\n"
+		<< "where's the peck of pickled peppers Peter Piper picked? \n\n";
+
+	biggin::MenuRenderer::GetInstance().SetMenu(new GameLoader());
 	engine.Run();
 
 	SteamAPI_Shutdown();

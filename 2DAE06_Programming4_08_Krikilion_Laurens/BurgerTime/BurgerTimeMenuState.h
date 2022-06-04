@@ -4,6 +4,7 @@
 
 //https://gameprogrammingpatterns.com/state.html
 
+class ConfirmationState;
 class GameLoader;
 class RunningState;
 class OptionsState;
@@ -25,20 +26,26 @@ public:
 	BurgerTimeMenuState& operator=(const BurgerTimeMenuState& other) = delete;
 	BurgerTimeMenuState& operator=(BurgerTimeMenuState&& other) noexcept = delete;
 
-	virtual void RenderMenu(GameLoader* state) = 0;
+	virtual void RenderMenu(BurgerTimeMenuState*& currState) = 0;
 
 	virtual void Enter() = 0;
 	virtual void Exit() = 0;
 
 	static void Cleanup();
+	static void Start(BurgerTimeMenuState* startState) { startState->Enter(); m_pPrevState = startState; }
 
 	//TODO: make getter functions
 	static MainMenuState* GetMainMenu() { return m_pMainMenuState; }
 
 protected:
+	static void ChangeState(BurgerTimeMenuState*& currState, BurgerTimeMenuState* nextState);
+
 	static MainMenuState* m_pMainMenuState;
 	static RunningState* m_pRunningState;
 	static OptionsState* m_pOptionsState;
+	static ConfirmationState* m_pConfirmationState;
+
+	static BurgerTimeMenuState* m_pPrevState;
 	inline static bool m_IsOpen{true};
 };
 
@@ -47,13 +54,12 @@ class MainMenuState final : public BurgerTimeMenuState
 public:
 	~MainMenuState() override = default;
 
-	void RenderMenu(GameLoader* UiMenu) override;
+	void RenderMenu(BurgerTimeMenuState*& currState) override;
 
 private:
 	void LoadSinglePlayer();
-
-	bool m_IsLoadedSinglePlayer{ false };
-	bool m_IsLoadedMultiPlayer{ false };
+	void LoadCoop();
+	void LoadVersus();
 
 protected:
 	void Enter() override;
@@ -68,11 +74,14 @@ public:
 
 	void OnNotify(biggin::Component* entity, const std::string& event) override;
 
-	void RenderMenu(GameLoader* UiMenu) override;
+	void RenderMenu(BurgerTimeMenuState*& currState) override;
 
 protected:
 	void Enter() override;
 	void Exit() override {}
+
+private:
+	bool m_GameOver{false};
 
 };
 
@@ -81,7 +90,20 @@ class OptionsState final : public BurgerTimeMenuState
 public:
 	~OptionsState() override = default;
 
-	void RenderMenu(GameLoader* UiMenu) override;
+	void RenderMenu(BurgerTimeMenuState*& currState) override;
+
+protected:
+	void Enter() override;
+	void Exit() override;
+
+};
+
+class ConfirmationState final : public BurgerTimeMenuState
+{
+public:
+	~ConfirmationState() override = default;
+
+	void RenderMenu(BurgerTimeMenuState*& currState) override;
 
 protected:
 	void Enter() override;

@@ -1,5 +1,6 @@
 #include "BigginPCH.h"
 #include "Biggin.h"
+#include <SDL_image.h>
 #include <steam_api.h>
 #include <steam_api_common.h>
 #include <thread>
@@ -72,12 +73,16 @@ void biggin::Biggin::Initialize()
 		"BurgerTime",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
-		912, //640
-		700, //480
+		m_WindowWidth, //640
+		m_WindowHeight, //480
 		SDL_WINDOW_OPENGL
 	);
 	if (m_Window == nullptr)
 		throw std::runtime_error(std::string("SDL_CreateWindow Error: ") + SDL_GetError());
+
+	SDL_Surface* icon = IMG_Load("../Data/icon.png");
+	if (icon != nullptr)
+		SDL_SetWindowIcon(m_Window, icon);
 
 	Renderer::GetInstance().Init(m_Window);
 	Logger::GetInstance().Initialize();
@@ -290,7 +295,6 @@ void biggin::Biggin::Cleanup()
 
 void biggin::Biggin::Run()
 {
-	Initialize();
 
 	//LoadGame();
 

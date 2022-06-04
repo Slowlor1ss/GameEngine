@@ -11,8 +11,12 @@ namespace biggin
 		void Cleanup();
 		void Run();
 
+		static constexpr int GetWindowWidth() { return m_WindowWidth; }
+		static constexpr int GetWindowHeight() { return m_WindowHeight; }
+
 	private:
-		static constexpr int MsPerFrame = 16; //16 for 60 fps, 33 for 30 fps //TODO: check if this is used
 		SDL_Window* m_Window{};
+		static constexpr int m_WindowWidth{ 912 };
+		static constexpr int m_WindowHeight{ 700 };
 	};
 }

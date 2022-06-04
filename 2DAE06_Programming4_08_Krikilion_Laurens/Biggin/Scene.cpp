@@ -21,7 +21,7 @@ void Scene::AddPending(const std::shared_ptr<GameObject>& object)
 {
 	object->SetSceneRef(this);
 	m_pPendingAdd.emplace_back(object);
-	object->Initialize(object.get());
+	object->Initialize(object.get()); //TODO: maybe this should be called when it is actually added
 }
 
 //Removed is always delayed till after the update as it would be dangerous to instantly remove an object from the scene

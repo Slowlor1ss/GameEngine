@@ -54,6 +54,8 @@ public:
 
 	void SetMaxEnemies(EnemySettings settings) { m_Settings = settings; }
 
+	void PlayerControllsEnemy(bool controllable) {}
+
 private:
 	void SpawnEnemy(EnemyType type, glm::vec2 pos);
 	void PickEnemyAndLocation();
@@ -62,6 +64,7 @@ private:
 	int m_AmntHotDogs{};
 	int m_AmntEggs{};
 	int m_AmntPickle{};
+	bool m_HasPosessdHotDog{ false };
 	EnemySettings m_Settings{};
 	std::vector<glm::vec2> m_SpawnPositions{};
 	std::vector<glm::vec2> m_FreeSpawnPositions{};
