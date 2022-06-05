@@ -202,7 +202,7 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->AddComponent(new Subject(playerObject.get()));
 	playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
-	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 99));
 	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
 	playerObject->AddComponent(movementCompoent);
 	auto peterPepper = new character::PeterPepper(playerObject.get());

@@ -351,7 +351,7 @@ void MapLoader::ProcessLineMapFile(const std::string& line)
 			colliderBeginPos = i;
 			break;
 		case MapValues::CatcherEnd:
-			MakeCollider(i, colliderBeginPos, 1, mapCollisionGroup::platformGroup, "Catcher");
+			MakeCollider(i, colliderBeginPos, 2, mapCollisionGroup::platformGroup, "Catcher");
 			break;
 		case MapValues::EnemySpawner:
 			SpawnEnemySpawner(i, lineWidth-1);

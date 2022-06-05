@@ -1,7 +1,7 @@
 from PIL import Image
 
 f = open("output2.txt", "w")
-im = Image.open('convert2Items.png')
+im = Image.open('Convert2Items.png')
 imgData = im.getdata()
 
 white = (255,255,255,255)
@@ -12,7 +12,7 @@ darkBrown = (217, 109, 36, 255)
 yellow = (255, 255, 69, 255)
 red = (254, 22, 29, 255)
 green = (34, 254, 64, 255)
-meatColor = (217, 109, 36, 255)
+meatColor = (140, 70, 23, 255)
 
 count = 0
 
