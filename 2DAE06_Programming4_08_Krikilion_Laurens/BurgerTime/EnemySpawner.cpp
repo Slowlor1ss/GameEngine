@@ -4,25 +4,63 @@
 #include <Box2D/Dynamics/b2Body.h>
 #pragma warning(pop)
 #include "BoxCollider2d.h"
+#include "BurgerTimeCommands.hpp"
 #include "EnemyColliderHandeler.h"
 #include "EnemyMovement.h"
 #include "GameObject.h"
 #include "GameTime.h"
 #include "MapLoader.h"
 #include "PeterPepper.h"
+#include "PossessGameObjectComponent.h"
 #include "RemoveOnEvent.h"
 #include "RenderComponent.h"
 #include "Renderer.h"
 #include "SpriteRenderComponent.h"
+#include <vector>
 
-EnemySpawner::EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy)
+#include "BurgerTimeMenuState.h"
+#include <SDL_keycode.h>
+#include "BurgerTimeCommands.hpp"
+#include "imgui.h"
+#include "GameLoader.h"
+#include <thread>
+#include "Biggin.h"
+#include "BoxCollider2d.h"
+#include "Burger.h"
+#include "EnemySpawner.h"
+#include "FpsCounter.h"
+#include "SceneManager.h"
+#include "Renderer.h"
+#include "ResourceManager.h"
+#include "TextComponent.h"
+#include "GameObject.h"
+#include "GameTime.h"
+#include "Logger.h"
+#include "Scene.h"
+#include "HealthComponent.h"
+#include "HealthUI.h"
+#include "MapLoader.h"
+#include "PeterPepper.h"
+#include "RenderComponent.h"
+#include "ScoreComponent.h"
+#include "ScoreUI.h"
+#include "SoundServiceLocator.h"
+#include "SpriteRenderComponent.h"
+#include "StatsAndAchievements.h"
+#include "Subject.h"
+#include "InputManager.h"
+
+
+using namespace enemy;
+
+enemy::EnemySpawner::EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy)
 	:Component(go)
-	,m_GameObjectRef(go)
-	,m_GameTimeRef{biggin::GameTime::GetInstance() }
-	,m_DelayedSpawn(3.f, {})
-	,m_DelayedSpawn2(3.f, {})
-	,m_HasPossessedHotDog(hasPossessedEnemy)
-	,m_SpawnPossessedHotDog(hasPossessedEnemy)
+	, m_GameObjectRef(go)
+	, m_HasPossessedHotDog(hasPossessedEnemy)
+	, m_SpawnPossessedHotDog(hasPossessedEnemy)
+	, m_DelayedSpawn(3.f, {})
+	, m_DelayedSpawn2(3.f, {})
+	, m_GameTimeRef{ biggin::GameTime::GetInstance() }
 {
 	m_DelayedSpawn.finished = true;
 	m_DelayedSpawn2.finished = true;
@@ -36,11 +74,11 @@ EnemySpawner::EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy)
 //	//	enemy->RemoveObservers({ this });
 //}
 
-void EnemySpawner::Initialize(biggin::GameObject*)
+void enemy::EnemySpawner::Initialize(biggin::GameObject*)
 {
 }
 
-void EnemySpawner::Update()
+void enemy::EnemySpawner::Update()
 {
 	const auto deltaT = m_GameTimeRef.GetDeltaT();
 	m_DelayedSpawn.Update(deltaT);
@@ -49,16 +87,21 @@ void EnemySpawner::Update()
 	PickEnemyAndLocation();
 }
 
-void EnemySpawner::OnNotify(Component* entity, const std::string& event)
+void enemy::EnemySpawner::OnNotify(Component* entity, const std::string& event)
 {
 	if (event == "EnemyDied")
 	{
 		const auto enemy = static_cast<EnemyColliderHandeler*>(entity);
 
+		if (enemy->GetIsPossessed())
+		{
+			m_SpawnPossessedHotDog = true;
+			return;
+		}
 		//std::erase(m_Enemies, enemy);
 		//enemy->RemoveObservers({this});
 
-		switch(enemy->GetEnemyType())
+		switch (enemy->GetEnemyType())
 		{
 		case EnemyType::HotDog:
 			--m_AmntHotDogs;
@@ -73,7 +116,7 @@ void EnemySpawner::OnNotify(Component* entity, const std::string& event)
 	}
 }
 
-void EnemySpawner::RenderDebug()
+void enemy::EnemySpawner::RenderDebug()
 {
 	for (const auto& pos : m_SpawnPositions)
 	{
@@ -81,7 +124,7 @@ void EnemySpawner::RenderDebug()
 	}
 }
 
-void EnemySpawner::ResetEnemyData()
+void enemy::EnemySpawner::ResetEnemyData()
 {
 	m_AmntEggs = 0;
 	m_AmntHotDogs = 0;
@@ -91,7 +134,7 @@ void EnemySpawner::ResetEnemyData()
 	m_DelayedSpawn2.finished = true;
 }
 
-void EnemySpawner::FullReset()
+void enemy::EnemySpawner::FullReset()
 {
 	ResetEnemyData();
 
@@ -99,7 +142,7 @@ void EnemySpawner::FullReset()
 	m_FreeSpawnPositions.clear();
 }
 
-void EnemySpawner::SpawnEnemyAtRandLocDelayed(EnemyType type)
+void enemy::EnemySpawner::SpawnEnemyAtRandLocDelayed(EnemyType type)
 {
 	switch (type)
 	{
@@ -120,16 +163,16 @@ void EnemySpawner::SpawnEnemyAtRandLocDelayed(EnemyType type)
 	if (m_DelayedSpawn.finished)
 	{
 		m_DelayedSpawn.Reset();
-		m_DelayedSpawn.func = [this, chosenPos, type]{SpawnEnemy(type, chosenPos);};
+		m_DelayedSpawn.func = [this, chosenPos, type] {SpawnEnemy(type, chosenPos); };
 	}
 	else
 	{
 		m_DelayedSpawn2.Reset();
-		m_DelayedSpawn2.func = [this, chosenPos, type]{SpawnEnemy(type, chosenPos); };
+		m_DelayedSpawn2.func = [this, chosenPos, type] {SpawnEnemy(type, chosenPos); };
 	}
 }
 
-void EnemySpawner::SpawnPossessedEnemyAtRandLocDelayed()
+void enemy::EnemySpawner::SpawnPossessedEnemyAtRandLocDelayed()
 {
 	m_SpawnPossessedHotDog = false;
 
@@ -148,7 +191,7 @@ void EnemySpawner::SpawnPossessedEnemyAtRandLocDelayed()
 	}
 }
 
-void EnemySpawner::PickEnemyAndLocation()
+void enemy::EnemySpawner::PickEnemyAndLocation()
 {
 	if (!m_DelayedSpawn.finished && !m_DelayedSpawn2.finished || m_FreeSpawnPositions.empty())
 		return;
@@ -171,7 +214,7 @@ void EnemySpawner::PickEnemyAndLocation()
 	}
 }
 
-void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
+void enemy::EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 {
 	auto enemy = std::make_shared<biggin::GameObject>();
 	enemy->Setname("Enemy");
@@ -181,10 +224,10 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 	int columns{ 9 };
 	enemy->AddComponent(new biggin::RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
 	auto enemySprite = new biggin::SpriteRenderComponent(enemy.get(), { columns,{0,0},{32,32} });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runHorizontal), { 2, 20 + (columns * 2)*static_cast<int>(type)});
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runVertical), { 2, 18 + (columns * 2) * static_cast<int>(type) });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::peppered), { 2, 31 + (columns * 2) * static_cast<int>(type) });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::die), { 4, 27 + (columns * 2) * static_cast<int>(type) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runHorizontal), { 2, 20 + (columns * 2) * static_cast<int>(type) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runVertical), { 2, 18 + (columns * 2) * static_cast<int>(type) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::peppered), { 2, 31 + (columns * 2) * static_cast<int>(type) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::die), { 4, 27 + (columns * 2) * static_cast<int>(type) });
 	enemySprite->SetCurrentSprite(0);
 	enemy->AddComponent(enemySprite);
 
@@ -195,21 +238,21 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 	auto enemyMovComp = new EnemyMovement(enemy.get(), m_Settings.velocity);
 	enemy->AddComponent(enemyMovComp);
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 27, 2 }, true, b2_dynamicBody, { enemyMovComp }
-	                                              , "ColliderTop", { 0, -17 }, true, filter));
+	, "ColliderTop", { 0, -17 }, true, filter));
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 27, 2 }, true, b2_dynamicBody, { enemyMovComp }
-	                                              , "ColliderBottom", { 0, 17 }, true, filter));
+	, "ColliderBottom", { 0, 17 }, true, filter));
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
-	                                              , "ColliderLeft", { -33, 0 }, true, filter));
+	, "ColliderLeft", { -33, 0 }, true, filter));
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 2, 25 }, true, b2_dynamicBody, { enemyMovComp }
-	                                              , "ColliderRight", { 33, 0 }, true, filter));
+	, "ColliderRight", { 33, 0 }, true, filter));
 
-	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), type, {this});
+	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), type, { this });
 	enemy->AddComponent(enemyCollisionHandeler);
 	b2Filter filterEnemyCollider{};
 	filterEnemyCollider.categoryBits = burgerTime::MapLoader::mapCollisionGroup::mapIgnoreGroup;
 	filterEnemyCollider.maskBits = Burger::BurgerCollisionGroup::burgerCollisionGroup | static_cast<int>(character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup);
 	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 32, 16 }, true, b2_dynamicBody, { enemyCollisionHandeler }
-	                                              , "Enemy", {0, 9 }, true, filterEnemyCollider));
+	, "Enemy", { 0, 9 }, true, filterEnemyCollider));
 
 	enemy->AddComponent(new biggin::RemoveOnEvent(enemy.get(), "FinishedLevel", "Map"));
 	enemy->AddComponent(new biggin::RemoveOnEvent(enemy.get(), "EnemyDied", enemy, 2.f));
@@ -219,7 +262,7 @@ void EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 	//m_Enemies.emplace_back(enemyCollisionHandeler);
 }
 
-void EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
+void enemy::EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 {
 	auto enemy = std::make_shared<biggin::GameObject>();
 	enemy->Setname("Enemy");
@@ -229,10 +272,10 @@ void EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 	int columns{ 9 };
 	enemy->AddComponent(new biggin::RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
 	auto enemySprite = new biggin::SpriteRenderComponent(enemy.get(), { columns,{0,0},{32,32} });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runHorizontal), { 2, 20 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::runVertical), { 2, 18 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::peppered), { 2, 31 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
-	enemySprite->AddAnimation(static_cast<int>(EnemyMovement::AnimationState::die), { 4, 27 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runHorizontal), { 2, 20 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runVertical), { 2, 18 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::peppered), { 2, 31 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
+	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::die), { 4, 27 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
 	enemySprite->SetCurrentSprite(0);
 	enemy->AddComponent(enemySprite);
 
@@ -240,7 +283,8 @@ void EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 	b2Filter filter{};
 	filter.maskBits = burgerTime::MapLoader::mapGroup; //ignore everything except for mapCollisionsGroup
 
-
+	auto movementCompoent = new biggin::PossessGameObjectComponent(enemy.get(), 100);
+	enemy->AddComponent(movementCompoent);
 
 	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), EnemyType::HotDog, { this });
 	enemy->AddComponent(enemyCollisionHandeler);
@@ -254,6 +298,21 @@ void EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 	enemy->AddComponent(new biggin::RemoveOnEvent(enemy.get(), "EnemyDied", enemy, 2.f));
 
 	m_GameObjectRef->GetSceneRef()->AddPending(enemy);
+
+	//only spawns once can keep moving
+
+	//Movement bindings
+	biggin::InputManager::GetInstance().MapActionKey({biggin::ActionState::Hold, biggin::ControllerButton::None, 1, SDLK_UP },
+	                                                 std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Up));
+	biggin::InputManager::GetInstance().MapActionKey({biggin::ActionState::Hold, biggin::ControllerButton::None, 1, SDLK_LEFT },
+	                                                 std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Left));
+	biggin::InputManager::GetInstance().MapActionKey({biggin::ActionState::Hold, biggin::ControllerButton::None, 1, SDLK_DOWN },
+	                                                 std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Down));
+	biggin::InputManager::GetInstance().MapActionKey({biggin::ActionState::Hold, biggin::ControllerButton::None, 1, SDLK_RIGHT },
+	                                                 std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Right));
+
+	biggin::InputManager::GetInstance().MapActionKey({biggin::ActionState::ThumbL, biggin::ControllerButton::None, 1 },
+	                                                 std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::All));
 
 	//m_Enemies.emplace_back(enemyCollisionHandeler);
 }

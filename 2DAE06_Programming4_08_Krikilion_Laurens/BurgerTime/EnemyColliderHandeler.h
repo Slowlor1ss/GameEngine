@@ -4,6 +4,7 @@
 #include <vector>
 #include "Component.h"
 #include "Observer.h"
+#include "Utils.hpp"
 
 //will catch overlapping events with player and burger
 //if pepper -> get stunned, call stunned on movement comp
@@ -33,55 +34,66 @@
 //use more namespaces
 
 class Burger;
-enum class EnemyType;
 
 namespace biggin
 {
+	class PossessGameObjectComponent;
+	class GameTime;
+	class SpriteRenderComponent;
 	class Subject;
 	class BoxCollider2d;
 }
 
-class EnemyMovement;
 
-class EnemyColliderHandeler final : public biggin::Component, public biggin::Observer
+namespace enemy
 {
-public:
-	EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers, bool isPossessed = false);
-	~EnemyColliderHandeler();
+	enum class EnemyType;
+	class EnemyMovement;
 
-	EnemyColliderHandeler(const EnemyColliderHandeler& other) = delete;
-	EnemyColliderHandeler(EnemyColliderHandeler&& other) noexcept = delete;
-	EnemyColliderHandeler& operator=(const EnemyColliderHandeler& other) = delete;
-	EnemyColliderHandeler& operator=(EnemyColliderHandeler&& other) noexcept = delete;
+	class EnemyColliderHandeler final : public biggin::Component, public biggin::Observer
+	{
+	public:
+		EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers, bool isPossessed = false);
+		~EnemyColliderHandeler();
 
-	void Initialize(biggin::GameObject*) override;
-	void AddObservers(const std::vector<Observer*>& observers) const;
-	void RemoveObservers(const std::vector<Observer*>& observers) const;
-	void OnNotify(Component* entity, const std::string& event) override;
+		EnemyColliderHandeler(const EnemyColliderHandeler& other) = delete;
+		EnemyColliderHandeler(EnemyColliderHandeler&& other) noexcept = delete;
+		EnemyColliderHandeler& operator=(const EnemyColliderHandeler& other) = delete;
+		EnemyColliderHandeler& operator=(EnemyColliderHandeler&& other) noexcept = delete;
 
-	bool GetIsPossessed() const { return m_IsPossessed; }
-	bool IsStunned() const { return m_Stunned; }
-	EnemyType GetEnemyType() const { return m_EnemyType; }
+		void Initialize(biggin::GameObject*) override;
+		void Update() override;
+		void OnNotify(Component* entity, const std::string& event) override;
 
-private:
-	void Die(const biggin::GameObject* playerGo);
-	void UpdateScoreOnDeath(const biggin::GameObject* playerGo) const;
-	void HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider);
-	void HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider);
-	void HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider);
-	bool IsBurgerFalling(const Burger* burger) const;
+		bool GetIsPossessed() const { return m_IsPossessed; }
+		bool IsStunned() const { return m_Stunned; }
+		EnemyType GetEnemyType() const { return m_EnemyType; }
 
-	EnemyType m_EnemyType{};
-	bool m_Stunned{false};
-	bool m_IsAlive{true};
-	std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
-	EnemyMovement* m_MovementRef{nullptr};
-	biggin::GameObject* m_BurgerGameObjectRef{nullptr};
+	private:
+		void Die(const biggin::GameObject* playerGo);
+		void UpdateScoreOnDeath(const biggin::GameObject* playerGo) const;
+		void HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider);
+		void HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider);
+		void HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider);
+		bool IsBurgerFalling(const Burger* burger) const;
 
-	int m_AmntColliding{};
+		EnemyType m_EnemyType{};
+		bool m_Stunned{false};
+		bool m_IsAlive{true};
+		std::vector<std::shared_ptr<biggin::GameObject>> m_PlayerRef{ nullptr };
+		EnemyMovement* m_MovementRef{nullptr};
+		biggin::GameObject* m_BurgerGameObjectRef{nullptr};
 
-	bool m_IsPossessed;
+		biggin::SpriteRenderComponent* m_pSpriteComp{ nullptr };
+		utils::DelayedCallback m_DelayedResetStunned{};
+		biggin::GameTime& m_GameTimeRef;
 
-	biggin::Subject* m_pNotifier{ nullptr };
-};
+		int m_AmntColliding{};
+
+		bool m_IsPossessed;
+		biggin::PossessGameObjectComponent* m_pMovementComp{nullptr	};
+
+		biggin::Subject* m_pNotifier{ nullptr };
+	};
+}
 

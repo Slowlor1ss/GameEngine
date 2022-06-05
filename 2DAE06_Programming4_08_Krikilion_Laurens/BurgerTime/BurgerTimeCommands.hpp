@@ -6,8 +6,6 @@
 #pragma warning(pop)
 #include <iostream>
 #include "Command.h"
-#include "ScoreComponent.h"
-#include "GameObject.h"
 #include "PossessGameObjectComponent.h"
 
 class PrintControls final : public Command
@@ -28,7 +26,7 @@ public:
 	}
 };
 
-class  MoveCommand final : public Command
+class MoveCommand final : public Command
 {
 public:
 	enum class ActionDirection { Left, Right, Up, Down, All };

@@ -9,7 +9,10 @@
 #include "Observer.h"
 #include "Subject.h"
 
-class EnemySpawner;
+namespace enemy
+{
+	class EnemySpawner;
+}
 enum class BurgerIngredients;
 
 namespace character
@@ -100,7 +103,7 @@ namespace burgerTime
 		std::vector<std::string> m_ImagePaths;
 
 
-		std::vector<EnemySpawner::EnemySettings> m_EnemySettingsPerLevel{};
+		std::vector<enemy::EnemySpawner::EnemySettings> m_EnemySettingsPerLevel{};
 		int m_LineNumber{0};
 		int m_MapMaxWidthIdx{0};
 
@@ -116,7 +119,7 @@ namespace burgerTime
 		std::vector<utils::DelayedCallback> m_DelayedRespawns{};
 		biggin::GameTime& m_GameTimeRef;
 
-		EnemySpawner* m_EnemySpawnerRef{ nullptr };
+		enemy::EnemySpawner* m_EnemySpawnerRef{ nullptr };
 		biggin::RenderComponent* m_BackgroundImgRef{ nullptr };
 		biggin::Subject* m_pNotifier;
 

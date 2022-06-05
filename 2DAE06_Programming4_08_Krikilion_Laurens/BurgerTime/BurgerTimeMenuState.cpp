@@ -247,7 +247,7 @@ void MainMenuState::LoadSinglePlayer()
 
 	auto enemySpawner = std::make_shared<GameObject>();
 	enemySpawner->Setname("EnemySpawner");
-	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get()));
+	enemySpawner->AddComponent(new enemy::EnemySpawner(enemySpawner.get()));
 	scene.Add(enemySpawner);
 
 	scene.Start();
@@ -553,7 +553,7 @@ void MainMenuState::LoadCoop()
 
 	auto enemySpawner = std::make_shared<GameObject>();
 	enemySpawner->Setname("EnemySpawner");
-	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get()));
+	enemySpawner->AddComponent(new enemy::EnemySpawner(enemySpawner.get()));
 	scene.Add(enemySpawner);
 
 	scene.Start();
@@ -681,7 +681,7 @@ void MainMenuState::LoadVersus()
 
 	auto enemySpawner = std::make_shared<GameObject>();
 	enemySpawner->Setname("EnemySpawner");
-	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get(), true));
+	enemySpawner->AddComponent(new enemy::EnemySpawner(enemySpawner.get(), true));
 	scene.Add(enemySpawner);
 
 	scene.Start();

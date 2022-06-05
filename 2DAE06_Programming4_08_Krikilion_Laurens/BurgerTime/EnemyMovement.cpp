@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #pragma warning (pop)
 
+using namespace enemy;
+
 EnemyMovement::EnemyMovement(biggin::GameObject* go, float velocity)
 	: Component(go)
 	, m_CurrentDirection(movementDirection::none)
@@ -236,20 +238,15 @@ void EnemyMovement::FixedUpdate()
 
 void EnemyMovement::Peppered(float time)
 {
-	auto oldSprite = m_pSpriteComp->GetCurrentSprite();
-	m_DelayedResetDisabled.func =  [this, oldSprite] {m_Disabled = false; m_pSpriteComp->SetCurrentSprite(oldSprite); };
+	m_DelayedResetDisabled.func = [this] {m_Disabled = false;};
 	m_DelayedResetDisabled.interval = time;
 	m_DelayedResetDisabled.Reset();
 	m_Disabled = true;
-	m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::peppered));
-	m_pSpriteComp->SetFinishAndPause();
 }
 
 void EnemyMovement::Die()
 {
 	m_Dead = true;
-	m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::die));
-	m_pSpriteComp->SetFinishAndPause();
 }
 
 bool EnemyMovement::CheckAndFixStuck()

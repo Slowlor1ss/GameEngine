@@ -8,10 +8,16 @@
 #include "Logger.h"
 #include "PeterPepper.h"
 #include "SoundServiceLocator.h"
+#include "SpriteRenderComponent.h"
+#include "GameTime.h"
+#include "PossessGameObjectComponent.h"
+
+using namespace enemy;
 
 EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers, bool isPossessed)
 	:Component(go)
 	,m_EnemyType(type)
+	,m_GameTimeRef{ biggin::GameTime::GetInstance() }
 	,m_IsPossessed(isPossessed)
 	,m_pNotifier(go->GetComponent<biggin::Subject>())
 {
@@ -36,18 +42,30 @@ void EnemyColliderHandeler::Initialize(biggin::GameObject* go)
 	m_PlayerRef = go->GetSceneRef()->FindGameObjectsWithName("Player");
 	if (!m_IsPossessed)
 		m_MovementRef = go->GetComponent<EnemyMovement>();
+	else
+	{
+		m_pMovementComp = go->GetComponent<biggin::PossessGameObjectComponent>();
+		if (m_pMovementComp == nullptr)
+			Logger::GetInstance().LogErrorAndBreak("Enemy is possessed but theres no PossessGameObjectComponent");
+
+		m_pMovementComp->MapAnimToDir(biggin::PossessGameObjectComponent::MoveDirection::Down, static_cast<int>(AnimationState::runVertical));
+		m_pMovementComp->MapAnimToDir(biggin::PossessGameObjectComponent::MoveDirection::Up, static_cast<int>(AnimationState::runVertical));
+		m_pMovementComp->MapAnimToDir(biggin::PossessGameObjectComponent::MoveDirection::Left, static_cast<int>(AnimationState::runHorizontal));
+		m_pMovementComp->MapAnimToDir(biggin::PossessGameObjectComponent::MoveDirection::Right, static_cast<int>(AnimationState::runHorizontal));
+	}
+
+	m_pSpriteComp = go->GetComponent<biggin::SpriteRenderComponent>();
+	if (m_pSpriteComp == nullptr)
+		Logger::GetInstance().LogErrorAndBreak("Missing SpriteRenderComponent");
 }
 
-void EnemyColliderHandeler::AddObservers(const std::vector<Observer*>& observers) const
+void EnemyColliderHandeler::Update()
 {
-	for (const auto observer : observers)
-		m_pNotifier->AddObserver(observer);
-}
-
-void EnemyColliderHandeler::RemoveObservers(const std::vector<Observer*>& observers) const
-{
-	for (const auto observer : observers)
-		m_pNotifier->RemoveObserver(observer);
+	if (m_Stunned)
+	{
+		m_DelayedResetStunned.Update(m_GameTimeRef.GetDeltaT());
+		return;
+	}
 }
 
 void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event)
@@ -71,9 +89,23 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 		else if (tag == "Pepper")
 		{
 			m_Stunned = true;
+
+			constexpr float time = 3.f;
+
+			auto oldSprite = m_pSpriteComp->GetCurrentSprite();
+			m_DelayedResetStunned.func = [this, oldSprite] {m_Stunned = false; m_pSpriteComp->SetCurrentSprite(oldSprite); if (m_pMovementComp) m_pMovementComp->SetDisable(false); };
+			m_DelayedResetStunned.interval = time;
+			m_DelayedResetStunned.Reset();
+			m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::peppered));
+			m_pSpriteComp->SetFinishAndPause();
+
 			SoundServiceLocator::GetSoundSystem().Play("peppered.wav", 0.2f);
+
+			if (m_pMovementComp) 
+				m_pMovementComp->SetDisable(true);
+
 			if (m_MovementRef)
-				m_MovementRef->Peppered();
+				m_MovementRef->Peppered(time);
 		}
 	}
 	else if (event == "EndContact")
@@ -180,7 +212,15 @@ void EnemyColliderHandeler::Die(const biggin::GameObject* playerGo)
 		GetGameObject()->RemoveComponentsPending<biggin::BoxCollider2d>();
 
 	m_pNotifier->notify(this, "EnemyDied");
+
 	m_IsAlive = false;
+
+	m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::die));
+	m_pSpriteComp->SetFinishAndPause();
+
+	if (m_pMovementComp)
+		m_pMovementComp->SetDisable(true);
+
 	if (m_MovementRef)
 		m_MovementRef->Die();
 }

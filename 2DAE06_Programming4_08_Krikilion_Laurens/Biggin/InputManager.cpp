@@ -1,4 +1,5 @@
 #include "BigginPCH.h"
+#include <vector>
 #include "InputManager.h"
 #define WIN32_LEAN_AND_MEAN
 #include <variant>
@@ -7,6 +8,7 @@
 #include "Command.h"
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
+#include <SDL_keycode.h>
 
 #pragma comment(lib, "xinput.lib")
 

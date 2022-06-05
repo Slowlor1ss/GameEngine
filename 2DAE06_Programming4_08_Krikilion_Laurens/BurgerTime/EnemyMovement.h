@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <vector>
 #include "Component.h"
 #include "Observer.h"
 #include "Utils.hpp"
@@ -13,9 +12,8 @@ namespace biggin
 	class SpriteRenderComponent;
 }
 
-class EnemyMovement final : public biggin::Component, public biggin::Observer
+namespace enemy
 {
-public:
 	enum class movementDirection
 	{
 		movingUp,
@@ -26,55 +24,59 @@ public:
 	};
 	enum class AnimationState { runHorizontal, runVertical, peppered, die };
 
-	EnemyMovement(biggin::GameObject* go, float velocity);
-	~EnemyMovement() override = default;
+	class EnemyMovement final : public biggin::Component, public biggin::Observer
+	{
+	public:
 
-	EnemyMovement(const EnemyMovement& other) = delete;
-	EnemyMovement(EnemyMovement&& other) noexcept = delete;
-	EnemyMovement& operator=(const EnemyMovement& other) = delete;
-	EnemyMovement& operator=(EnemyMovement&& other) noexcept = delete;
+		EnemyMovement(biggin::GameObject* go, float velocity);
+		~EnemyMovement() override = default;
 
-	void Initialize(biggin::GameObject*) override;
-	void OnNotify(Component* entity, const std::string& event) override;
-	void HandleHitWall(const glm::vec2& playerPos, const glm::vec2& pos, movementDirection wallDir);
-	void Update() override;
-	void FixedUpdate() override;
+		EnemyMovement(const EnemyMovement& other) = delete;
+		EnemyMovement(EnemyMovement&& other) noexcept = delete;
+		EnemyMovement& operator=(const EnemyMovement& other) = delete;
+		EnemyMovement& operator=(EnemyMovement&& other) noexcept = delete;
 
-	//void Disable();
-	void Peppered(float time = 3.f);
-	void Die();
+		void Initialize(biggin::GameObject*) override;
+		void OnNotify(Component* entity, const std::string& event) override;
+		void HandleHitWall(const glm::vec2& playerPos, const glm::vec2& pos, movementDirection wallDir);
+		void Update() override;
+		void FixedUpdate() override;
 
-private:
-	bool CheckAndFixStuck();
-	void SetDirection(movementDirection newDir);
-	//bool FixStuckMovingUp();
-	//bool FixStuckMovingDown();
-	//bool FixStuckMovingLeft();
-	//bool FixStuckMovingRight();
+		//void Disable();
+		void Peppered(float time = 3.f);
+		void Die();
 
-	bool IsMovingSideways() const { return m_CurrentDirection == movementDirection::movingLeft || m_CurrentDirection == movementDirection::movingRight; }
+	private:
+		bool CheckAndFixStuck();
+		void SetDirection(movementDirection newDir);
+		//bool FixStuckMovingUp();
+		//bool FixStuckMovingDown();
+		//bool FixStuckMovingLeft();
+		//bool FixStuckMovingRight();
 
-	std::shared_ptr<biggin::GameObject> m_PlayerRef{ nullptr };
+		bool IsMovingSideways() const { return m_CurrentDirection == movementDirection::movingLeft || m_CurrentDirection == movementDirection::movingRight; }
 
-	int m_AmntCollidingTop{ 0 };
-	int m_AmntCollidingBottom{ 0 };
-	int m_AmntCollidingLeft{ 0 };
-	int m_AmntCollidingRight{ 0 };
+		std::shared_ptr<biggin::GameObject> m_PlayerRef{ nullptr };
 
-	float m_CooldownCounter{};
-	float m_Cooldown{0.5f};
+		int m_AmntCollidingTop{ 0 };
+		int m_AmntCollidingBottom{ 0 };
+		int m_AmntCollidingLeft{ 0 };
+		int m_AmntCollidingRight{ 0 };
 
-	movementDirection m_CurrentDirection;
+		float m_CooldownCounter{};
+		float m_Cooldown{ 0.5f };
 
-	float m_Velocity{50};
-	bool m_Disabled{false};
-	bool m_Dead{false};
+		movementDirection m_CurrentDirection;
 
-	biggin::SpriteRenderComponent* m_pSpriteComp{nullptr};
+		float m_Velocity{ 50 };
+		bool m_Disabled{ false };
+		bool m_Dead{ false };
 
-	utils::DelayedCallback m_DelayedResetDisabled{};
-	biggin::GameTime& m_GameTimeRef;
+		biggin::SpriteRenderComponent* m_pSpriteComp{ nullptr };
 
-	static constexpr float m_PlayerPosMargin{ 25 };
-};
+		utils::DelayedCallback m_DelayedResetDisabled{};
+		biggin::GameTime& m_GameTimeRef;
 
+		static constexpr float m_PlayerPosMargin{ 25 };
+	};
+}

@@ -27,8 +27,8 @@ MapLoader::MapLoader(biggin::GameObject* go, const std::vector<Observer*>& obser
 	: Component(go)
 	, m_CurrentLevelIdx(0)
 	, m_GameObjectRef(go)
-	, m_pNotifier(go->GetComponent<biggin::Subject>())
 	, m_GameTimeRef{biggin::GameTime::GetInstance() }
+	, m_pNotifier(go->GetComponent<biggin::Subject>())
 {
 	if (m_pNotifier == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing Subject Component");
@@ -56,7 +56,7 @@ void MapLoader::Start()
 	const auto spawnerGo = m_GameObjectRef->GetSceneRef()->FindGameObjectWithName("EnemySpawner");
 	if (spawnerGo != nullptr)
 	{
-		m_EnemySpawnerRef = spawnerGo->GetComponent<EnemySpawner>();
+		m_EnemySpawnerRef = spawnerGo->GetComponent<enemy::EnemySpawner>();
 		if (m_CurrentLevelIdx < static_cast<int>(m_EnemySettingsPerLevel.size()))
 			m_EnemySpawnerRef->SetMaxEnemies(m_EnemySettingsPerLevel[m_CurrentLevelIdx]);
 	}
@@ -222,7 +222,7 @@ void MapLoader::ReadJsonLevelFile(const std::string& file)
 		if ((*jsonDocItr).HasMember("backgroundImage"))
 			m_ImagePaths.emplace_back((*jsonDocItr)["backgroundImage"].GetString());
 
-		EnemySpawner::EnemySettings settings{};
+		enemy::EnemySpawner::EnemySettings settings{};
 		if ((*jsonDocItr).HasMember("maxHotDogs"))
 			settings.maxHotDogs = (*jsonDocItr)["maxHotDogs"].GetInt();
 

@@ -9,70 +9,73 @@
 #include "Observer.h"
 #include "Utils.hpp"
 
-class EnemyColliderHandeler;
-
 namespace biggin
 {
 	class GameTime;
 }
 
-enum class EnemyType
+namespace enemy
 {
-	HotDog,
-	Pickle,
-	Egg
-};
+	class EnemyColliderHandeler;
 
-class EnemySpawner final : public biggin::Component, public biggin::Observer
-{
-public:
-	struct EnemySettings
+	enum class EnemyType
 	{
-		int maxHotDogs{ 0 };
-		int maxEggs{ 0 };
-		int maxPickles{ 0 };
-		float velocity{ 50 };
+		HotDog,
+		Pickle,
+		Egg
 	};
 
-	explicit EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy = false);
-	~EnemySpawner() override = default;
+	class EnemySpawner final : public biggin::Component, public biggin::Observer
+	{
+	public:
+		struct EnemySettings
+		{
+			int maxHotDogs{ 0 };
+			int maxEggs{ 0 };
+			int maxPickles{ 0 };
+			float velocity{ 50 };
+		};
 
-	EnemySpawner(const EnemySpawner& other) = delete;
-	EnemySpawner(EnemySpawner&& other) noexcept = delete;
-	EnemySpawner& operator=(const EnemySpawner& other) = delete;
-	EnemySpawner& operator=(EnemySpawner&& other) noexcept = delete;
+		explicit EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy = false);
+		~EnemySpawner() override = default;
 
-	void Initialize(biggin::GameObject*) override;
-	void Update() override; 
-	void OnNotify(Component* entity, const std::string& event) override;
-	void RenderDebug() override;
+		EnemySpawner(const EnemySpawner& other) = delete;
+		EnemySpawner(EnemySpawner&& other) noexcept = delete;
+		EnemySpawner& operator=(const EnemySpawner& other) = delete;
+		EnemySpawner& operator=(EnemySpawner&& other) noexcept = delete;
 
-	void ResetEnemyData();
-	void FullReset();
+		void Initialize(biggin::GameObject*) override;
+		void Update() override; 
+		void OnNotify(Component* entity, const std::string& event) override;
+		void RenderDebug() override;
 
-	void AddSpawnLocation(const glm::vec2& pos) { m_SpawnPositions.emplace_back(pos); m_FreeSpawnPositions.emplace_back(pos); }
-	void SetMaxEnemies(EnemySettings settings) { m_Settings = settings; }
+		void ResetEnemyData();
+		void FullReset();
 
-private:
-	void SpawnEnemy(EnemyType type, glm::vec2 pos);
-	void SpawnPossessedEnemy(glm::vec2 pos);
-	void PickEnemyAndLocation();
-	void SpawnEnemyAtRandLocDelayed(EnemyType type);
-	void SpawnPossessedEnemyAtRandLocDelayed();
+		void AddSpawnLocation(const glm::vec2& pos) { m_SpawnPositions.emplace_back(pos); m_FreeSpawnPositions.emplace_back(pos); }
+		void SetMaxEnemies(EnemySettings settings) { m_Settings = settings; }
 
-	biggin::GameObject* m_GameObjectRef{ nullptr };
-	int m_AmntHotDogs{};
-	int m_AmntEggs{};
-	int m_AmntPickle{};
-	bool m_HasPossessedHotDog{ false };
-	bool m_SpawnPossessedHotDog{ false };
-	EnemySettings m_Settings{};
-	std::vector<glm::vec2> m_SpawnPositions{};
-	std::vector<glm::vec2> m_FreeSpawnPositions{};
-	//std::vector<EnemyColliderHandeler*> m_Enemies{};
+	private:
+		void SpawnEnemy(EnemyType type, glm::vec2 pos);
+		void SpawnPossessedEnemy(glm::vec2 pos);
+		void PickEnemyAndLocation();
+		void SpawnEnemyAtRandLocDelayed(EnemyType type);
+		void SpawnPossessedEnemyAtRandLocDelayed();
 
-	utils::DelayedCallback m_DelayedSpawn{};
-	utils::DelayedCallback m_DelayedSpawn2{};
-	biggin::GameTime& m_GameTimeRef;
-};
+		biggin::GameObject* m_GameObjectRef{ nullptr };
+		int m_AmntHotDogs{};
+		int m_AmntEggs{};
+		int m_AmntPickle{};
+		bool m_HasPossessedHotDog{ false };
+		bool m_SpawnPossessedHotDog{ false };
+		EnemySettings m_Settings{};
+		std::vector<glm::vec2> m_SpawnPositions{};
+		std::vector<glm::vec2> m_FreeSpawnPositions{};
+		//std::vector<EnemyColliderHandeler*> m_Enemies{};
+
+		utils::DelayedCallback m_DelayedSpawn{};
+		utils::DelayedCallback m_DelayedSpawn2{};
+		biggin::GameTime& m_GameTimeRef;
+	};
+}
 
