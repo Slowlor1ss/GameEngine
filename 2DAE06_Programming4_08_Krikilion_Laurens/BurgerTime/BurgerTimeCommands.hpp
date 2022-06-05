@@ -8,6 +8,7 @@
 #include "Command.h"
 #include "ScoreComponent.h"
 #include "GameObject.h"
+#include "PossessGameObjectComponent.h"
 
 class PrintControls final : public Command
 {
@@ -30,35 +31,34 @@ public:
 class  MoveCommand final : public Command
 {
 public:
-
 	enum class ActionDirection { Left, Right, Up, Down, All };
 
-	MoveCommand(character::PeterPepper* player, const ActionDirection direction)
+	MoveCommand(biggin::PossessGameObjectComponent* component, const ActionDirection direction)
 		: m_Direction(direction)
-		, m_Player(player)
+		, m_MovementComponent(component)
 	{
 	}
 
 	void execute() override {
 
-		if (m_Player->IsDead())
+		if (m_MovementComponent->IsDisabled())
 			return;
 
-		const float maxSpeed = m_Player->GetSpeed();
+		const float maxSpeed = m_MovementComponent->GetSpeed();
 
 		switch (m_Direction)
 		{
 		case ActionDirection::Left:
-			m_Player->SetVelocity({ -1 * maxSpeed,0 });
+			m_MovementComponent->SetVelocity({ -1 * maxSpeed,0 });
 			break;
 		case ActionDirection::Right:
-			m_Player->SetVelocity({ 1 * maxSpeed,0 });
+			m_MovementComponent->SetVelocity({ 1 * maxSpeed,0 });
 			break;
 		case ActionDirection::Up:
-			m_Player->SetVelocity({ 0,-1 * maxSpeed });
+			m_MovementComponent->SetVelocity({ 0,-1 * maxSpeed });
 			break;
 		case ActionDirection::Down:
-			m_Player->SetVelocity({ 0,1 * maxSpeed });
+			m_MovementComponent->SetVelocity({ 0,1 * maxSpeed });
 			break;
 		case ActionDirection::All:
 			//negate y pos because (0,0) is at the top left
@@ -66,14 +66,14 @@ public:
 				* glm::vec2{ 1,-1 };
 			velocity = abs(velocity.x) > abs(velocity.y) ? glm::vec2{ velocity.x, 0 } : glm::vec2{ 0, velocity.y };
 
-			m_Player->SetVelocity(velocity * maxSpeed);
+			m_MovementComponent->SetVelocity(velocity * maxSpeed);
 			break;
 		}
 	}
 
 private:
 	ActionDirection m_Direction;
-	character::PeterPepper* m_Player;
+	biggin::PossessGameObjectComponent* m_MovementComponent;
 };
 
 class  ShootCommand final : public Command

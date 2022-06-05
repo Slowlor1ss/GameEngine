@@ -183,6 +183,9 @@
     <ClInclude Include="RemoveOnEvent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PossessGameObjectComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -306,6 +309,9 @@
       <Filter>Ui</Filter>
     </ClCompile>
     <ClCompile Include="RemoveOnEvent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PossessGameObjectComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

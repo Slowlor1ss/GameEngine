@@ -203,6 +203,8 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
+	playerObject->AddComponent(movementCompoent);
 	auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
 	playerObject->AddComponent(peterPepper);
 	b2Filter filterPlayer{};
@@ -225,16 +227,16 @@ void MainMenuState::LoadSinglePlayer()
 
 	//Movement bindings
 	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_w },
-		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Up));
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Up));
 	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_a },
-		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Left));
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Left));
 	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_s },
-		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Down));
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Down));
 	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_d },
-		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Right));
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Right));
 
 	InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
-		std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::All));
 
 	InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 0, SDLK_SPACE },
 		std::make_unique<ShootCommand>(peterPepper));
@@ -331,6 +333,8 @@ void MainMenuState::LoadCoop()
 		playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
 		playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 		playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+		auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
+		playerObject->AddComponent(movementCompoent);
 		auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
 		playerObject->AddComponent(peterPepper);
 		b2Filter filterPlayer{};
@@ -354,16 +358,16 @@ void MainMenuState::LoadCoop()
 
 		//Movement bindings
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_w },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Up));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Up));
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_a },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Left));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Left));
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_s },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Down));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Down));
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_d },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Right));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Right));
 
 		InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::All));
 
 		InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 0, SDLK_SPACE },
 			std::make_unique<ShootCommand>(peterPepper));
@@ -417,6 +421,8 @@ void MainMenuState::LoadCoop()
 		playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
 		playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 		playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+		auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
+		playerObject->AddComponent(movementCompoent);
 		auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
 		playerObject->AddComponent(peterPepper);
 		b2Filter filterPlayer{};
@@ -440,16 +446,16 @@ void MainMenuState::LoadCoop()
 
 		//Movement bindings
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_UP },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Up));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Up));
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_LEFT },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Left));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Left));
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_DOWN },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Down));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Down));
 		InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 1, SDLK_RIGHT },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::Right));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Right));
 
 		InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 1 },
-			std::make_unique<MoveCommand>(peterPepper, MoveCommand::ActionDirection::All));
+			std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::All));
 
 		InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 1, SDLK_RSHIFT },
 			std::make_unique<ShootCommand>(peterPepper));
@@ -555,7 +561,130 @@ void MainMenuState::LoadCoop()
 
 void MainMenuState::LoadVersus()
 {
+	SoundServiceLocator::GetSoundSystem().Play("level_intro.wav", 0.2f, false);
 
+	auto& sceneManager = SceneManager::GetInstance();
+	auto& scene = sceneManager.CreateScene("SinglePlayer");
+	sceneManager.ChangeActiveScene("SinglePlayer");
+	const auto font = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
+
+	//Load map
+	auto map = std::make_shared<GameObject>();
+	map->Setname("Map");
+	map->SetLocalPosition(9 * MapLoader::GetGridSize(), 0 * MapLoader::GetGridSize());
+	map->AddComponent(new Subject(map.get()));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {0,1000 }, false));
+	//map->AddComponent(new BoxCollider2d(map.get(), { 1, 1000 }, false, b2_staticBody, {}, {}, {39 * MapLoader::GetGridSize(), 1000 }, false));
+	map->AddComponent(new RenderComponent(map.get()));
+	map->AddComponent(new MapLoader(map.get(), { m_pRunningState }));
+
+	scene.Add(map);
+
+#ifdef _DEBUG
+	//Add Fps
+	auto fpsObject = std::make_shared<GameObject>();
+
+	fpsObject->AddComponent(new RenderComponent(fpsObject.get()));
+	auto fpsText = new TextComponent(fpsObject.get());
+	fpsText->SetColor({ 0, 255, 0, 1 });
+	fpsObject->AddComponent(fpsText);
+	fpsObject->AddComponent(new FpsCounter(fpsObject.get()));
+	fpsObject->SetLocalPosition(10, 10);
+	scene.Add(fpsObject);
+#endif
+
+	//Add HealthUI
+	auto HealthVisualsObject = std::make_shared<GameObject>();
+
+	HealthVisualsObject->AddComponent(new RenderComponent(HealthVisualsObject.get()));
+	const auto healthText = new TextComponent(HealthVisualsObject.get());
+	healthText->SetColor({ 0, 255, 0, 1 });
+	HealthVisualsObject->AddComponent(healthText);
+	const auto healthUI = new HealthUI(HealthVisualsObject.get());
+	HealthVisualsObject->AddComponent(healthUI);
+	HealthVisualsObject->SetLocalPosition({ 10, 500 });
+	scene.Add(HealthVisualsObject);
+
+	//Add ScoreUI
+	auto ScoreVisualsObject = std::make_shared<GameObject>();
+
+	ScoreVisualsObject->AddComponent(new RenderComponent(ScoreVisualsObject.get()));
+	const auto ScoreText = new TextComponent(ScoreVisualsObject.get());
+	ScoreText->SetColor({ 255, 0, 0, 1 });
+	ScoreVisualsObject->AddComponent(ScoreText);
+	const auto scoreUI = new ScoreUI(ScoreVisualsObject.get());
+	ScoreVisualsObject->AddComponent(scoreUI);
+	ScoreVisualsObject->SetLocalPosition({ 10, 550 });
+	scene.Add(ScoreVisualsObject);
+
+	//Add PepperUI
+	auto PepperVisualsObject = std::make_shared<GameObject>();
+
+	PepperVisualsObject->AddComponent(new RenderComponent(PepperVisualsObject.get()));
+	const auto PepperText = new TextComponent(PepperVisualsObject.get());
+	PepperText->SetColor({ 0, 255, 0, 1 });
+	PepperVisualsObject->AddComponent(PepperText);
+	const auto pepperUI = new PepperUI(PepperVisualsObject.get());
+	PepperVisualsObject->AddComponent(pepperUI);
+	PepperVisualsObject->SetLocalPosition({ Biggin::GetWindowWidth() - 125, 10 });
+	scene.Add(PepperVisualsObject);
+
+	//Add Player
+	auto playerObject = std::make_shared<GameObject>();
+	playerObject->Setname("Player");
+
+	playerObject->AddComponent(new Subject(playerObject.get()));
+	playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
+	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
+	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
+	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
+	playerObject->AddComponent(movementCompoent);
+	auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+	playerObject->AddComponent(peterPepper);
+	b2Filter filterPlayer{};
+	filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
+	filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { peterPepper },
+		"Player", {}, true, filterPlayer));
+	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
+	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
+	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
+	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
+	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });
+	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::PepperHorizontal), { 1, 10 });
+	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::PepperVertical), { 1, 11 });
+	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Die), { 6, 12 });
+	playerSprite->SetCurrentSprite(1);
+	playerObject->AddComponent(playerSprite);
+
+	scene.Add(playerObject);
+
+	//Movement bindings
+	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_w },
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Up));
+	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_a },
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Left));
+	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_s },
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Down));
+	InputManager::GetInstance().MapActionKey({ ActionState::Hold, ControllerButton::None, 0, SDLK_d },
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::Right));
+
+	InputManager::GetInstance().MapActionKey({ ActionState::ThumbL, ControllerButton::None, 0 },
+		std::make_unique<MoveCommand>(movementCompoent, MoveCommand::ActionDirection::All));
+
+	InputManager::GetInstance().MapActionKey({ ActionState::Down, ControllerButton::ButtonA, 0, SDLK_SPACE },
+		std::make_unique<ShootCommand>(peterPepper));
+
+	InputManager::GetInstance().MapActionKey({ biggin::ActionState::Up, biggin::ControllerButton::Start, 0, SDLK_c },
+		std::make_unique<PrintControls>());
+
+
+	auto enemySpawner = std::make_shared<GameObject>();
+	enemySpawner->Setname("EnemySpawner");
+	enemySpawner->AddComponent(new EnemySpawner(enemySpawner.get(), true));
+	scene.Add(enemySpawner);
+
+	scene.Start();
 }
 
 void RunningState::Enter()

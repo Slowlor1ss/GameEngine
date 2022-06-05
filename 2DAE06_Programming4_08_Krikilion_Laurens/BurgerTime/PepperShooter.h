@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #pragma warning(pop)
 #include "Component.h"
+#include "PossessGameObjectComponent.h"
 #include "Subject.h"
 
 //add pepper shooter to player game object
@@ -30,7 +31,7 @@ namespace burgerTime
 		int GetAmntPepper() const { return m_AmntPepper; }
 		void IncreasePepper(int amnt = 1) { m_AmntPepper += amnt; m_pNotifier->notify(this, "PepperChanged"); }
 
-		bool Shoot(character::MoveDirection dir);
+		bool Shoot(biggin::PossessGameObjectComponent::MoveDirection dir);
 
 	private:
 		int m_AmntPepper;

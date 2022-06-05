@@ -14,6 +14,7 @@ namespace burgerTime
 
 namespace biggin
 {
+	class PossessGameObjectComponent;
 	class GameTime;
 	class BoxCollider2d;
 	class SpriteRenderComponent;
@@ -23,7 +24,7 @@ namespace biggin
 namespace character
 {
 	enum class AnimationState { Idle, RunHorizontal, RunVertical, PepperHorizontal, PepperVertical, Die };
-	enum class MoveDirection { Left, Right, Up, Down, None};
+	//enum class MoveDirection { Left, Right, Up, Down, None};
 	class PeterPepper final : public biggin::Component, public biggin::Observer
 	{
 
@@ -40,23 +41,21 @@ namespace character
 		void Update() override;
 		void FixedUpdate() override;
 
-		void AddVelocity(const glm::vec2& velocity) { m_Velocity += velocity; }
-		void SetVelocity(const glm::vec2& velocity) { m_Velocity = velocity; }
-		void SetPosition(const glm::vec2& pos) const;
+		void SetVelocity(const glm::vec2& velocity);
 		void RespawnPlayer(const glm::vec2& pos);
 		void Damage();
 		bool IsDead() const { return m_IsDead; }
 		float GetSpeed() const { return m_Speed; }
 		int GetHealth() const;
-		void IncreaseHealth() { if(m_pHealthComp) m_pHealthComp->Heal(); };
+		void IncreaseHealth() const { if(m_pHealthComp) m_pHealthComp->Heal(); };
 
 		void ShootPepper();
 
 		void OnNotify(Component* entity, const std::string& event) override;
 
 	private:
-		void UpdateAnimationState();
-		void UpdateMovementDirectionState();
+		//void UpdateAnimationState();
+		//void UpdateMovementDirectionState();
 		bool m_IsDead;
 		bool m_IsShooting;
 		utils::DelayedCallback m_DelayedStopShooting{};
@@ -65,9 +64,9 @@ namespace character
 		glm::vec2 m_Velocity{};
 		inline static int m_AmntPlayers{0};
 		int m_PlayerIndex;
-		MoveDirection m_CurrMovementDir{MoveDirection::None};
-		MoveDirection m_LastMovementDir{MoveDirection::Down};
-		AnimationState m_CurrAnimState{AnimationState::Idle};
+		//MoveDirection m_CurrMovementDir{MoveDirection::None};
+		//MoveDirection m_LastMovementDir{MoveDirection::Down};
+		//AnimationState m_CurrAnimState{AnimationState::Idle};
 		//bool m_VerticalMovDisabled{ false };
 		//bool m_HorizontalMovDisabled{ false };
 
@@ -76,6 +75,7 @@ namespace character
 		biggin::HealthComponent* m_pHealthComp;
 		burgerTime::PepperShooter* m_pPepperShooter;
 		biggin::SpriteRenderComponent* m_pSpriteComp;
+		biggin::PossessGameObjectComponent* m_pMovementComp;
 
 		biggin::Subject* m_pNotifier{ nullptr };
 

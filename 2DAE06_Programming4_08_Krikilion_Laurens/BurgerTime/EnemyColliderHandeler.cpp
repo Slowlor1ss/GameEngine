@@ -9,9 +9,10 @@
 #include "PeterPepper.h"
 #include "SoundServiceLocator.h"
 
-EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers)
+EnemyColliderHandeler::EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers, bool isPossessed)
 	:Component(go)
 	,m_EnemyType(type)
+	,m_IsPossessed(isPossessed)
 	,m_pNotifier(go->GetComponent<biggin::Subject>())
 {
 	if (m_pNotifier == nullptr)
@@ -33,7 +34,8 @@ EnemyColliderHandeler::~EnemyColliderHandeler()
 void EnemyColliderHandeler::Initialize(biggin::GameObject* go)
 {
 	m_PlayerRef = go->GetSceneRef()->FindGameObjectsWithName("Player");
-	m_MovementRef = go->GetComponent<EnemyMovement>();
+	if (!m_IsPossessed)
+		m_MovementRef = go->GetComponent<EnemyMovement>();
 }
 
 void EnemyColliderHandeler::AddObservers(const std::vector<Observer*>& observers) const
@@ -70,7 +72,8 @@ void EnemyColliderHandeler::OnNotify(Component* entity, const std::string& event
 		{
 			m_Stunned = true;
 			SoundServiceLocator::GetSoundSystem().Play("peppered.wav", 0.2f);
-			m_MovementRef->Peppered();
+			if (m_MovementRef)
+				m_MovementRef->Peppered();
 		}
 	}
 	else if (event == "EndContact")
@@ -178,10 +181,11 @@ void EnemyColliderHandeler::Die(const biggin::GameObject* playerGo)
 
 	m_pNotifier->notify(this, "EnemyDied");
 	m_IsAlive = false;
-	m_MovementRef->Die();
+	if (m_MovementRef)
+		m_MovementRef->Die();
 }
 
-void EnemyColliderHandeler::UpdateScoreOnDeath(const biggin::GameObject* playerGo)
+void EnemyColliderHandeler::UpdateScoreOnDeath(const biggin::GameObject* playerGo) const
 {
 	if (playerGo == nullptr)
 		return;
@@ -203,12 +207,4 @@ void EnemyColliderHandeler::UpdateScoreOnDeath(const biggin::GameObject* playerG
 		}
 
 	}
-}
-
-void EnemyColliderHandeler::Update()
-{
-}
-
-void EnemyColliderHandeler::FixedUpdate()
-{
 }

@@ -30,9 +30,6 @@ void EnemyMovement::Initialize(biggin::GameObject* go)
 	if (m_pSpriteComp == nullptr)
 		Logger::GetInstance().LogErrorAndBreak("Missing SpriteRenderComponent");
 
-	//m_pSpriteComp->SetCurrentSprite(static_cast<int>(AnimationState::runHorizontal));
-	//if (m_CurrentDirection == movementDirection::movingRight)
-	//	m_pSpriteComp->SetFlip(SDL_FLIP_HORIZONTAL);
 }
 
 void EnemyMovement::OnNotify(Component* entity, const std::string& event)
@@ -237,12 +234,6 @@ void EnemyMovement::FixedUpdate()
 	}
 }
 
-//void EnemyMovement::Disable()
-//{
-//	m_Disabled = true;
-//	m_pSpriteComp->SetPause(true);
-//}
-
 void EnemyMovement::Peppered(float time)
 {
 	auto oldSprite = m_pSpriteComp->GetCurrentSprite();
@@ -304,85 +295,3 @@ bool EnemyMovement::CheckAndFixStuck()
 	}
 	return false;
 }
-
-//TODO:clean up
-
-//bool EnemyMovement::FixStuckMovingUp()
-//{
-//	if (m_AmntCollidingLeft == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingLeft;
-//		return true;
-//	}
-//	else if (m_AmntCollidingRight == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingRight;
-//		return true;
-//	}
-//	else if (m_AmntCollidingBottom == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingDown;
-//		return true;
-//	}
-//	return false; //stuck beyond repair :X
-//}
-//
-//bool EnemyMovement::FixStuckMovingDown()
-//{
-//	if (m_AmntCollidingLeft == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingLeft;
-//		return true;
-//	}
-//	else if (m_AmntCollidingRight == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingRight;
-//		return true;
-//	}
-//	else if (m_AmntCollidingTop == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingUp;
-//		return true;
-//	}
-//	return false; //stuck beyond repair :X
-//}
-//
-//bool EnemyMovement::FixStuckMovingLeft()
-//{
-//	if (m_AmntCollidingTop == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingUp;
-//		return true;
-//	}
-//	else if (m_AmntCollidingBottom == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingDown;
-//		return true;
-//	}
-//	else if (m_AmntCollidingRight == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingRight;
-//		return true;
-//	}
-//	return false; //stuck beyond repair :X
-//}
-//
-//bool EnemyMovement::FixStuckMovingRight()
-//{
-//	if (m_AmntCollidingTop == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingUp;
-//		return true;
-//	}
-//	else if (m_AmntCollidingBottom == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingDown;
-//		return true;
-//	}
-//	else if (m_AmntCollidingLeft == 0)
-//	{
-//		m_CurrentDirection = movementDirection::movingLeft;
-//		return true;
-//	}
-//	return false; //stuck beyond repair :X
-//}

@@ -46,7 +46,7 @@ class EnemyMovement;
 class EnemyColliderHandeler final : public biggin::Component, public biggin::Observer
 {
 public:
-	EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers);
+	EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers, bool isPossessed = false);
 	~EnemyColliderHandeler();
 
 	EnemyColliderHandeler(const EnemyColliderHandeler& other) = delete;
@@ -58,14 +58,14 @@ public:
 	void AddObservers(const std::vector<Observer*>& observers) const;
 	void RemoveObservers(const std::vector<Observer*>& observers) const;
 	void OnNotify(Component* entity, const std::string& event) override;
-	void Die(const biggin::GameObject* playerGo);
-	void UpdateScoreOnDeath(const biggin::GameObject* playerGo);
-	void Update() override;
-	void FixedUpdate() override;
 
+	bool GetIsPossessed() const { return m_IsPossessed; }
+	bool IsStunned() const { return m_Stunned; }
 	EnemyType GetEnemyType() const { return m_EnemyType; }
 
 private:
+	void Die(const biggin::GameObject* playerGo);
+	void UpdateScoreOnDeath(const biggin::GameObject* playerGo) const;
 	void HandleEnemyPlayerBeginContact(const biggin::BoxCollider2d* otherColider);
 	void HandleEnemyBurgerBeginContact(const biggin::BoxCollider2d* otherColider);
 	void HandleEnemyBurgerEndContact(const biggin::BoxCollider2d* otherColider);
@@ -79,6 +79,8 @@ private:
 	biggin::GameObject* m_BurgerGameObjectRef{nullptr};
 
 	int m_AmntColliding{};
+
+	bool m_IsPossessed;
 
 	biggin::Subject* m_pNotifier{ nullptr };
 };

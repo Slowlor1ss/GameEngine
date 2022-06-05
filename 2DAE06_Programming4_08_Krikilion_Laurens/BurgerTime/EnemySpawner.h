@@ -34,7 +34,7 @@ public:
 		float velocity{ 50 };
 	};
 
-	explicit EnemySpawner(biggin::GameObject* go);
+	explicit EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy = false);
 	~EnemySpawner() override = default;
 
 	EnemySpawner(const EnemySpawner& other) = delete;
@@ -46,25 +46,26 @@ public:
 	void Update() override; 
 	void OnNotify(Component* entity, const std::string& event) override;
 	void RenderDebug() override;
+
 	void ResetEnemyData();
-
 	void FullReset();
-	void SpawnEnemyAtRandLocDelayed(EnemyType type);
+
 	void AddSpawnLocation(const glm::vec2& pos) { m_SpawnPositions.emplace_back(pos); m_FreeSpawnPositions.emplace_back(pos); }
-
 	void SetMaxEnemies(EnemySettings settings) { m_Settings = settings; }
-
-	void PlayerControllsEnemy(bool controllable) {}
 
 private:
 	void SpawnEnemy(EnemyType type, glm::vec2 pos);
+	void SpawnPossessedEnemy(glm::vec2 pos);
 	void PickEnemyAndLocation();
+	void SpawnEnemyAtRandLocDelayed(EnemyType type);
+	void SpawnPossessedEnemyAtRandLocDelayed();
 
 	biggin::GameObject* m_GameObjectRef{ nullptr };
 	int m_AmntHotDogs{};
 	int m_AmntEggs{};
 	int m_AmntPickle{};
-	bool m_HasPosessdHotDog{ false };
+	bool m_HasPossessedHotDog{ false };
+	bool m_SpawnPossessedHotDog{ false };
 	EnemySettings m_Settings{};
 	std::vector<glm::vec2> m_SpawnPositions{};
 	std::vector<glm::vec2> m_FreeSpawnPositions{};

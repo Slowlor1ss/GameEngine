@@ -5,6 +5,7 @@
 #include "MapLoader.h"
 #include "PepperComponent.h"
 #include "PeterPepper.h"
+#include "PossessGameObjectComponent.h"
 #include "RenderComponent.h"
 #include "SoundServiceLocator.h"
 #include "SpriteRenderComponent.h"
@@ -27,7 +28,7 @@ void burgerTime::PepperShooter::Start()
 	m_pNotifier->notify(this, "PepperChanged");
 }
 
-bool burgerTime::PepperShooter::Shoot(character::MoveDirection dir)
+bool burgerTime::PepperShooter::Shoot(biggin::PossessGameObjectComponent::MoveDirection dir)
 {
 	if (m_AmntPepper <= 0)
 		return false;
@@ -40,16 +41,16 @@ bool burgerTime::PepperShooter::Shoot(character::MoveDirection dir)
 
 	switch (dir)
 	{
-	case character::MoveDirection::Left:
+	case biggin::PossessGameObjectComponent::MoveDirection::Left:
 		pos += glm::vec2{ -MapLoader::GetGridSize() * 2, 0 };
 		break;
-	case character::MoveDirection::Right:
+	case biggin::PossessGameObjectComponent::MoveDirection::Right:
 		pos += glm::vec2{MapLoader::GetGridSize() * 2, 0 };
 		break;
-	case character::MoveDirection::Up:
+	case biggin::PossessGameObjectComponent::MoveDirection::Up:
 		pos += glm::vec2{ 0, -MapLoader::GetGridSize() * 2 };
 		break;
-	case character::MoveDirection::Down:
+	case biggin::PossessGameObjectComponent::MoveDirection::Down:
 		pos += glm::vec2{ 0, MapLoader::GetGridSize() * 2 };
 		break;
 	}
@@ -65,21 +66,21 @@ bool burgerTime::PepperShooter::Shoot(character::MoveDirection dir)
 	constexpr int cellSize{ 32 };
 	auto renderComp = new biggin::RenderComponent(pepper.get(), "BurgerTimeSpriteSheet.png");
 	pepper->AddComponent(renderComp);
-	auto pepperSprite = new biggin::SpriteRenderComponent(pepper.get(), { columns,{12*cellSize,2*cellSize},{cellSize,cellSize} });
+	auto pepperSprite = new biggin::SpriteRenderComponent(pepper.get(), { columns,{11*cellSize,1*cellSize},{cellSize,cellSize} }, 0.2f);
 	switch (dir)
 	{
-	case character::MoveDirection::Left:
+	case biggin::PossessGameObjectComponent::MoveDirection::Left:
+		pepperSprite->AddAnimation(static_cast<int>(dir), { 4, columns * 0 });
+		break;
+	case biggin::PossessGameObjectComponent::MoveDirection::Right:
 		pepperSprite->AddAnimation(static_cast<int>(dir), { 4, columns * 0 });
 		renderComp->SetFlip(SDL_FLIP_HORIZONTAL);
 		break;
-	case character::MoveDirection::Right:
-		pepperSprite->AddAnimation(static_cast<int>(dir), { 4, columns * 0 });
-		break;
-	case character::MoveDirection::Up:
-		pepperSprite->AddAnimation(static_cast<int>(dir), { 4, columns * 1 });
-		break;
-	case character::MoveDirection::Down:
+	case biggin::PossessGameObjectComponent::MoveDirection::Up:
 		pepperSprite->AddAnimation(static_cast<int>(dir), { 4, columns * 2 });
+		break;
+	case biggin::PossessGameObjectComponent::MoveDirection::Down:
+		pepperSprite->AddAnimation(static_cast<int>(dir), { 4, columns * 1 });
 		break;
 	}
 	pepperSprite->SetCurrentSprite(static_cast<int>(dir));
