@@ -1,0 +1,42 @@
+B_____________________________________E
+
+
+
+
+                                       
+HHH_1111_HHH_1111_____1111_____1111_HHH
+HHH      HHH  HH       HH           HHH
+HHH      HHH  HH       HH           HHH
+HHH______HHH_6666_HHH_3333_HHH______HHH
+HHH      HHH      HHH      HHH      HHH
+HHH      HHH      HHH      HHH      HHH
+HHH_3333______HH__HHH      HHH_6666_HHH
+HHH           HH  HHH      HHH      HHH
+HHH           HH  HHH      HHH      HHH
+____4444_HHH_4444_HHH_4444_____4444____
+         HHH  HH  HHH  HH              
+         HHH  HH  HHH  HH              
+         HHH  HH  HHH______HHH         
+         HHH  HH  HHH      HHH         
+         HHH  HH  HHH      HHH         
+         HHH_______________HHH         
+         HHH               HHH         
+   ______HHH               HHH______   
+         HHH               HHH         
+         HHH               HHH         
+         HHH               HHH         
+HHH_1111_HHH               HHH_1111_HHH
+HHH  HH  HHH               HHH      HHH
+HHH  HH  HHH               HHH      HHH
+HHH_6666_HHH               HHH_3333_HHH
+HHH  HH  HHH               HHH  HH  HHH
+HHH  HH  HHH_______  ______HHH  HH  HHH
+____4444_HHH               HHH_4444____
+         HHH               HHH         
+         HHH               HHH         
+         HHH__HH__HHH__HH__HHH         
+         HHH  HH  HHH  HH  HHH         
+         HHH  HH  HHH  HH  HHH         
+         _____________________         
+                                       
+   ______                     ______   
