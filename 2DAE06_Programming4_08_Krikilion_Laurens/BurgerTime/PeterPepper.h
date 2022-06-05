@@ -24,51 +24,28 @@ namespace biggin
 namespace character
 {
 	enum class AnimationState { Idle, RunHorizontal, RunVertical, PepperHorizontal, PepperVertical, Die };
-	//enum class MoveDirection { Left, Right, Up, Down, None};
-	class PeterPepper final : public biggin::Component, public biggin::Observer
+
+	class PeterPepper final : public biggin::Component
 	{
-
 	public:
-		PeterPepper(biggin::GameObject* go, float movementSpeed = 1);
-		~PeterPepper() override = default;
-
-		PeterPepper(const PeterPepper& other) = delete;
-		PeterPepper(PeterPepper&& other) noexcept = delete;
-		PeterPepper& operator=(const PeterPepper& other) = delete;
-		PeterPepper& operator=(PeterPepper&& other) noexcept = delete;
+		PeterPepper(biggin::GameObject* go);
 
 		void Initialize(biggin::GameObject* go) override;
 		void Update() override;
-		void FixedUpdate() override;
 
-		void SetVelocity(const glm::vec2& velocity);
 		void RespawnPlayer(const glm::vec2& pos);
 		void Damage();
 		bool IsDead() const { return m_IsDead; }
-		float GetSpeed() const { return m_Speed; }
 		int GetHealth() const;
 		void IncreaseHealth() const { if(m_pHealthComp) m_pHealthComp->Heal(); };
 
 		void ShootPepper();
 
-		void OnNotify(Component* entity, const std::string& event) override;
-
 	private:
-		//void UpdateAnimationState();
-		//void UpdateMovementDirectionState();
 		bool m_IsDead;
 		bool m_IsShooting;
 		utils::DelayedCallback m_DelayedStopShooting{};
 		biggin::GameTime& m_GameTimeRef;
-		float m_Speed;
-		glm::vec2 m_Velocity{};
-		inline static int m_AmntPlayers{0};
-		int m_PlayerIndex;
-		//MoveDirection m_CurrMovementDir{MoveDirection::None};
-		//MoveDirection m_LastMovementDir{MoveDirection::Down};
-		//AnimationState m_CurrAnimState{AnimationState::Idle};
-		//bool m_VerticalMovDisabled{ false };
-		//bool m_HorizontalMovDisabled{ false };
 
 		biggin::GameObject* m_pGameObjectRef;
 

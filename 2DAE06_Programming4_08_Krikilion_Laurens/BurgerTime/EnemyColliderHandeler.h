@@ -54,7 +54,7 @@ namespace enemy
 	{
 	public:
 		EnemyColliderHandeler(biggin::GameObject* go, EnemyType type, const std::vector<Observer*>& observers, bool isPossessed = false);
-		~EnemyColliderHandeler();
+		~EnemyColliderHandeler() override;
 
 		EnemyColliderHandeler(const EnemyColliderHandeler& other) = delete;
 		EnemyColliderHandeler(EnemyColliderHandeler&& other) noexcept = delete;
@@ -66,7 +66,6 @@ namespace enemy
 		void OnNotify(Component* entity, const std::string& event) override;
 
 		bool GetIsPossessed() const { return m_IsPossessed; }
-		bool IsStunned() const { return m_Stunned; }
 		EnemyType GetEnemyType() const { return m_EnemyType; }
 
 	private:

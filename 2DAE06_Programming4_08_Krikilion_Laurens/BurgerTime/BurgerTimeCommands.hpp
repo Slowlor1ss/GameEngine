@@ -22,7 +22,7 @@ public:
 			<< "\tPepper:\t\t[Spacebar]\n"
 			<< "player two:\n"
 			<< "\tMovement:\t[Arrow Keys]\n"
-			<< "\tPepper:\t\t[Enter]\n\n";
+			<< "\tPepper:\t\t[RShift]\n\n";
 	}
 };
 
@@ -83,7 +83,8 @@ public:
 	}
 
 	void execute() override {
-		m_Player->ShootPepper();
+		if (!biggin::SceneManager::GetInstance().GetScenesPaused())
+			m_Player->ShootPepper();
 	}
 
 private:

@@ -205,12 +205,12 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
 	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
 	playerObject->AddComponent(movementCompoent);
-	auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+	auto peterPepper = new character::PeterPepper(playerObject.get());
 	playerObject->AddComponent(peterPepper);
 	b2Filter filterPlayer{};
 	filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
 	filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
-	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {20, 30}, false, b2_dynamicBody, {peterPepper},
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {20, 30}, false, b2_dynamicBody, {},
 	                                             "Player", {}, true, filterPlayer));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
@@ -335,13 +335,13 @@ void MainMenuState::LoadCoop()
 		playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
 		auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
 		playerObject->AddComponent(movementCompoent);
-		auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+		auto peterPepper = new character::PeterPepper(playerObject.get());
 		playerObject->AddComponent(peterPepper);
 		b2Filter filterPlayer{};
 		filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
 		filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
 		filterPlayer.groupIndex = -1; //ignore everything on index -1 this is to make sure players don't collide with each other
-		playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { peterPepper },
+		playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, {},
 			"Player", {}, true, filterPlayer));
 		playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 		auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
@@ -423,13 +423,13 @@ void MainMenuState::LoadCoop()
 		playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
 		auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
 		playerObject->AddComponent(movementCompoent);
-		auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+		auto peterPepper = new character::PeterPepper(playerObject.get());
 		playerObject->AddComponent(peterPepper);
 		b2Filter filterPlayer{};
 		filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
 		filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
 		filterPlayer.groupIndex = -1; //ignore everything on index -1 this is to make sure players don't collide with each other
-		playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { peterPepper },
+		playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { },
 			"Player", {}, true, filterPlayer));
 		playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 		auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
@@ -639,12 +639,12 @@ void MainMenuState::LoadVersus()
 	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
 	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
 	playerObject->AddComponent(movementCompoent);
-	auto peterPepper = new character::PeterPepper(playerObject.get(), 100);
+	auto peterPepper = new character::PeterPepper(playerObject.get());
 	playerObject->AddComponent(peterPepper);
 	b2Filter filterPlayer{};
 	filterPlayer.maskBits = 0xFFFF ^ character::PeterPepper::PlayerCollisionGroup::playerIgnoreGroup; //Ignore group 4
 	filterPlayer.categoryBits = character::PeterPepper::PlayerCollisionGroup::playerCollisionGroup; //set self to group 5
-	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, { peterPepper },
+	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), { 20, 30 }, false, b2_dynamicBody, {},
 		"Player", {}, true, filterPlayer));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
 	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });

@@ -194,6 +194,8 @@ bool InputManager::InputManagerImpl::DoProcessInput()
 
 		BindImguiButton(io, ControllerButton::DpadDown, SDLK_DOWN, i);
 		BindImguiButton(io, ControllerButton::DpadUp, SDLK_UP, i);
+		BindImguiButton(io, ControllerButton::DpadLeft, SDLK_LEFT, i);
+		BindImguiButton(io, ControllerButton::DpadRight, SDLK_RIGHT, i);
 		BindImguiButton(io, ControllerButton::ButtonA, SDLK_SPACE, i);
 
 		DoHandleInput(i);

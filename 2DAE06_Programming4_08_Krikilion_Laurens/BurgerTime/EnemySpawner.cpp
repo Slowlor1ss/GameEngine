@@ -96,6 +96,7 @@ void enemy::EnemySpawner::OnNotify(Component* entity, const std::string& event)
 		if (enemy->GetIsPossessed())
 		{
 			m_SpawnPossessedHotDog = true;
+			--m_AmntHotDogs;
 			return;
 		}
 		//std::erase(m_Enemies, enemy);
@@ -129,6 +130,9 @@ void enemy::EnemySpawner::ResetEnemyData()
 	m_AmntEggs = 0;
 	m_AmntHotDogs = 0;
 	m_AmntPickle = 0;
+
+	if (m_HasPossessedHotDog)
+		m_SpawnPossessedHotDog = true;
 
 	m_DelayedSpawn.finished = true;
 	m_DelayedSpawn2.finished = true;
@@ -175,6 +179,7 @@ void enemy::EnemySpawner::SpawnEnemyAtRandLocDelayed(EnemyType type)
 void enemy::EnemySpawner::SpawnPossessedEnemyAtRandLocDelayed()
 {
 	m_SpawnPossessedHotDog = false;
+	++m_AmntHotDogs;
 
 	const int randomPosIdx = rand() % m_FreeSpawnPositions.size();
 	const glm::vec2 chosenPos = m_FreeSpawnPositions[randomPosIdx];
@@ -264,10 +269,16 @@ void enemy::EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 
 void enemy::EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 {
+	m_FreeSpawnPositions.push_back(pos);
+
+	if (pos.x < biggin::Biggin::GetWindowWidth()/2.f)
+		pos.x += 32;
+	else
+		pos.x -= 32;
+
 	auto enemy = std::make_shared<biggin::GameObject>();
 	enemy->Setname("Enemy");
 	enemy->SetLocalPosition(pos);
-	m_FreeSpawnPositions.push_back(pos);
 
 	int columns{ 9 };
 	enemy->AddComponent(new biggin::RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
@@ -280,13 +291,17 @@ void enemy::EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 	enemy->AddComponent(enemySprite);
 
 	enemy->AddComponent(new biggin::Subject(enemy.get()));
+
 	b2Filter filter{};
 	filter.maskBits = burgerTime::MapLoader::mapGroup; //ignore everything except for mapCollisionsGroup
+	enemy->AddComponent(new biggin::BoxCollider2d(enemy.get(), { 30, 30 }, false, b2_dynamicBody, {}
+	, "", { 0, 0 }, true, filter));
+
 
 	auto movementCompoent = new biggin::PossessGameObjectComponent(enemy.get(), 100);
 	enemy->AddComponent(movementCompoent);
 
-	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), EnemyType::HotDog, { this });
+	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), EnemyType::HotDog, { this }, true);
 	enemy->AddComponent(enemyCollisionHandeler);
 	b2Filter filterEnemyCollider{};
 	filterEnemyCollider.categoryBits = burgerTime::MapLoader::mapCollisionGroup::mapIgnoreGroup;

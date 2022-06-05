@@ -17,6 +17,7 @@ namespace biggin
 		void RenderDebug() const;
 
 		void SetScenesPaused(bool paused) { m_Paused = paused; }
+		bool GetScenesPaused() const { return m_Paused; }
 
 		bool ChangeActiveScene(const std::string& name, bool unPause = true);
 		Scene& GetActiveScene() const;
