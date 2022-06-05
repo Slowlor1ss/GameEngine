@@ -19,6 +19,7 @@
 #include "Scene.h"
 #include "HealthComponent.h"
 #include "HealthUI.h"
+#include "HighScoreUI.h"
 #include "MapLoader.h"
 #include "PeterPepper.h"
 #include "RenderComponent.h"
@@ -39,6 +40,7 @@ MainMenuState* BurgerTimeMenuState::m_pMainMenuState{ new MainMenuState() };
 RunningState* BurgerTimeMenuState::m_pRunningState{ new RunningState() };
 OptionsState* BurgerTimeMenuState::m_pOptionsState{ new OptionsState() };
 ConfirmationState* BurgerTimeMenuState::m_pConfirmationState{ new ConfirmationState() };
+HighScoreState* BurgerTimeMenuState::m_pHighScoreState{ new HighScoreState() };
 BurgerTimeMenuState* BurgerTimeMenuState::m_pPrevState{ nullptr };
 
 
@@ -200,9 +202,9 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->Setname("Player");
 
 	playerObject->AddComponent(new Subject(playerObject.get()));
-	playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
+	playerObject->AddComponent(new HealthComponent(playerObject.get(), 1, { healthUI }));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
-	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 99));
+	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
 	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
 	playerObject->AddComponent(movementCompoent);
 	auto peterPepper = new character::PeterPepper(playerObject.get());
@@ -720,7 +722,7 @@ void RunningState::RenderMenu(BurgerTimeMenuState*& currState)
 	{
 		auto& sceneManager = SceneManager::GetInstance();
 		sceneManager.RemoveScene(sceneManager.GetActiveScene().GetName());
-		ChangeState(currState, m_pMainMenuState);
+		ChangeState(currState, m_pHighScoreState);
 		m_GameOver = false;
 	}
 }
@@ -830,4 +832,54 @@ void ConfirmationState::Exit()
 {
 	SceneManager::GetInstance().SetScenesPaused(false);
 	SoundServiceLocator::GetSoundSystem().UnpauseAll();
+}
+
+void HighScoreState::RenderMenu(BurgerTimeMenuState*& currState)
+{
+	m_ElapsedSec += GameTime::GetInstance().GetDeltaT();
+	if (m_ElapsedSec > 5)
+	{
+		m_ElapsedSec = 0;
+		ChangeState(currState, m_pMainMenuState);
+	}
+}
+
+void HighScoreState::Enter()
+{
+	LoadHighScoreScene();
+	SceneManager::GetInstance().ChangeActiveScene("HighScore");
+}
+
+void HighScoreState::Exit()
+{
+	auto& sceneManager = SceneManager::GetInstance();
+	sceneManager.RemoveScene(sceneManager.GetActiveScene().GetName());
+}
+
+void HighScoreState::LoadHighScoreScene()
+{
+	auto& sceneManager = SceneManager::GetInstance();
+	auto& scene = sceneManager.CreateScene("HighScore");
+
+	//Add HighScoreUI
+	auto ScoreVisualsObject = std::make_shared<GameObject>();
+
+	ScoreVisualsObject->AddComponent(new RenderComponent(ScoreVisualsObject.get()));
+	const auto ScoreText = new TextComponent(ScoreVisualsObject.get());
+	ScoreText->SetColor({ 255, 0, 0, 1 });
+	ScoreVisualsObject->AddComponent(ScoreText);
+	const auto scoreUI = new HighScoreUI(ScoreVisualsObject.get());
+	ScoreVisualsObject->AddComponent(scoreUI);
+	ScoreVisualsObject->SetLocalPosition({ biggin::Biggin::GetWindowWidth()/2.f - 100, biggin::Biggin::GetWindowHeight() / 2.f - 300 });
+	scene.Add(ScoreVisualsObject);
+
+	//Add Score
+	auto scoreObject = std::make_shared<GameObject>();
+
+	scoreObject->AddComponent(new Subject(scoreObject.get()));
+	scoreObject->AddComponent(new ScoreComponent(scoreObject.get(), { scoreUI }));
+	scene.Add(scoreObject);
+
+	scene.Start();
+
 }

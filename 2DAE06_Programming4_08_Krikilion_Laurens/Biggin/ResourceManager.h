@@ -11,6 +11,8 @@ namespace biggin
 		void Init(const std::string& data);
 		std::shared_ptr<Texture2D> LoadTexture(const std::string& file) const;
 		std::shared_ptr<Font> LoadFont(const std::string& file, unsigned int size) const;
+		std::string GetDataPath() { return m_DataPath; }
+
 	private:
 		friend class Singleton<ResourceManager>;
 		ResourceManager() = default;

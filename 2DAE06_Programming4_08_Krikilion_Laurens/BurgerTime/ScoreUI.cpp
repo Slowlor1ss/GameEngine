@@ -27,5 +27,5 @@ void ScoreUI::OnNotify(biggin::Component* entity, const std::string& event)
 		return;
 
 	const int& score = static_cast<const burgerTime::ScoreComponent*>(entity)->GetScore();
-	m_pScoreText->SetText("Score: " + std::to_string(score));
+	m_pScoreText->SetText("Score:\n" + std::to_string(score));
 }

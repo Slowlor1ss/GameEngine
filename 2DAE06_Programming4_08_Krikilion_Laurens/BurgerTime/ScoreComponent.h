@@ -1,5 +1,7 @@
 #pragma once
+#include <set>
 #include "Component.h"
+#include <string>
 
 namespace biggin
 {
@@ -19,8 +21,12 @@ namespace burgerTime
 		int GetScore() const;
 		void IncreaseScore(int amount);
 
+		void SaveHighScore();
+		std::multiset<int, std::greater<int>> GetHighScores() const;
+
 	private:
 		int m_Score{};
+		const std::string m_HighScoreFilePath;
 
 		biggin::Subject* m_pNotifier;
 	};

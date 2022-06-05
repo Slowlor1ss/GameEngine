@@ -81,6 +81,9 @@
     <ClCompile Include="PepperUI.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="HighScoreUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PeterPepper.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="PepperUI.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="HighScoreUI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

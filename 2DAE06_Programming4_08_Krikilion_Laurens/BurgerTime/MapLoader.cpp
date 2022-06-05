@@ -139,7 +139,13 @@ void MapLoader::OnNotify(Component* entity, const std::string& event)
 					}
 
 					if (gameOver)
+					{
+						for (auto& playerGo : m_PlayerRef)
+							if (const auto scoreComponent = playerGo->GetComponent<ScoreComponent>())
+								scoreComponent->SaveHighScore();
+
 						m_pNotifier->notify(this, "GameOver");
+					}
 				}
 
 				auto* scene = m_GameObjectRef->GetSceneRef();

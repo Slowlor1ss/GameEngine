@@ -235,6 +235,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll" "$(Out
     </ClCompile>
     <ClCompile Include="HealthComponent.cpp" />
     <ClCompile Include="HealthUI.cpp" />
+    <ClCompile Include="HighScoreUI.cpp" />
     <ClCompile Include="MapLoader.cpp" />
     <ClCompile Include="BurgerTimeMenuState.cpp" />
     <ClCompile Include="PepperComponent.cpp" />
@@ -255,6 +256,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\win64\*.dll" "$(Out
     <ClInclude Include="GameLoader.h" />
     <ClInclude Include="HealthComponent.h" />
     <ClInclude Include="HealthUI.h" />
+    <ClInclude Include="HighScoreUI.h" />
     <ClInclude Include="MapLoader.h" />
     <ClInclude Include="BurgerTimeMenuState.h" />
     <ClInclude Include="PepperComponent.h" />

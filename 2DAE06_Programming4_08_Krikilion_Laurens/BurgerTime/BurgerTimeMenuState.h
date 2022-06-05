@@ -4,6 +4,7 @@
 
 //https://gameprogrammingpatterns.com/state.html
 
+class HighScoreState;
 class ConfirmationState;
 class GameLoader;
 class RunningState;
@@ -44,6 +45,7 @@ protected:
 	static RunningState* m_pRunningState;
 	static OptionsState* m_pOptionsState;
 	static ConfirmationState* m_pConfirmationState;
+	static HighScoreState* m_pHighScoreState;
 
 	static BurgerTimeMenuState* m_pPrevState;
 	inline static bool m_IsOpen{true};
@@ -108,5 +110,23 @@ public:
 protected:
 	void Enter() override;
 	void Exit() override;
+
+};
+
+class HighScoreState final : public BurgerTimeMenuState
+{
+public:
+	~HighScoreState() override = default;
+
+	void RenderMenu(BurgerTimeMenuState*& currState) override;
+
+protected:
+	void Enter() override;
+	void Exit() override;
+
+private:
+	void LoadHighScoreScene();
+
+	float m_ElapsedSec{};
 
 };
