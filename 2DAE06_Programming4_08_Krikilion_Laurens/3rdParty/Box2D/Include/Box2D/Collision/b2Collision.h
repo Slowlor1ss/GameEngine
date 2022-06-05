@@ -22,6 +22,9 @@
 #include <Box2D/Common/b2Math.h>
 #include <limits.h>
 
+#pragma warning( push )
+#pragma warning( disable : 26495 )
+
 /// @file
 /// Structures and functions used for computing contact points, distance
 /// queries, and TOI queries.
@@ -273,5 +276,5 @@ inline bool b2TestOverlap(const b2AABB& a, const b2AABB& b)
 
 	return true;
 }
-
+#pragma warning( pop )
 #endif

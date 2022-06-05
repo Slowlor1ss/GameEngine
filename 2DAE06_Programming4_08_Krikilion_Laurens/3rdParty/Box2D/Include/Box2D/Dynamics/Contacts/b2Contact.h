@@ -24,6 +24,9 @@
 #include <Box2D/Collision/Shapes/b2Shape.h>
 #include <Box2D/Dynamics/b2Fixture.h>
 
+#pragma warning( push )
+#pragma warning( disable : 26495 )
+
 class b2Body;
 class b2Contact;
 class b2Fixture;
@@ -250,7 +253,8 @@ inline void b2Contact::SetEnabled(bool flag)
 		m_flags &= ~e_enabledFlag;
 	}
 }
-
+#pragma warning( push )
+#pragma warning( disable : 26813 )
 inline bool b2Contact::IsEnabled() const
 {
 	return (m_flags & e_enabledFlag) == e_enabledFlag;
@@ -260,6 +264,7 @@ inline bool b2Contact::IsTouching() const
 {
 	return (m_flags & e_touchingFlag) == e_touchingFlag;
 }
+#pragma warning( pop )
 
 inline b2Contact* b2Contact::GetNext()
 {
@@ -345,5 +350,5 @@ inline float32 b2Contact::GetTangentSpeed() const
 {
 	return m_tangentSpeed;
 }
-
+#pragma warning( pop )
 #endif

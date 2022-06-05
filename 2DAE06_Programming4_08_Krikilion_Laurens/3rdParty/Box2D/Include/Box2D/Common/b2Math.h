@@ -21,6 +21,9 @@
 
 #include <Box2D/Common/b2Settings.h>
 #include <math.h>
+#pragma warning( push )
+#pragma warning( disable : 26495 )
+
 
 /// This function is used to ensure that a floating point number is not a NaN or infinity.
 inline bool b2IsValid(float32 x)
@@ -722,5 +725,6 @@ inline void b2Sweep::Normalize()
 	a0 -= d;
 	a -= d;
 }
+#pragma warning( pop )
 
 #endif

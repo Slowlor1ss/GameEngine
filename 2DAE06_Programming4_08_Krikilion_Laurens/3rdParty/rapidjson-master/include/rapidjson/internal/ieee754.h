@@ -16,6 +16,8 @@
 #define RAPIDJSON_IEEE754_
 
 #include "../rapidjson.h"
+#pragma warning( push )
+#pragma warning( disable : 26495 )
 
 RAPIDJSON_NAMESPACE_BEGIN
 namespace internal {
@@ -71,7 +73,7 @@ private:
         uint64_t u_;
     };
 };
-
+#pragma warning( pop )
 } // namespace internal
 RAPIDJSON_NAMESPACE_END
 

@@ -7,6 +7,7 @@
 #include "SpriteRenderComponent.h"
 #pragma warning(push, 0)
 #include <glm/glm.hpp>
+#include "PeterPepper.h"
 #pragma warning (pop)
 
 using namespace enemy;
@@ -26,7 +27,18 @@ void EnemyMovement::Initialize(biggin::GameObject* go)
 	if (players.empty())
 		Logger::GetInstance().LogErrorAndBreak("No Players Found!");
 
-	m_PlayerRef = players[utils::randomInt(static_cast<int>(players.size()))];
+	int alivePlayerCount{};
+	for (auto playerGO : players)
+	{
+		auto peter = playerGO->GetComponent<character::PeterPepper>();
+		if (peter && !peter->IsDead())
+		{
+			++alivePlayerCount;
+		}
+	}
+
+
+	m_PlayerRef = players[alivePlayerCount == 0 ? 0 : utils::randomInt(alivePlayerCount)];
 
 	m_pSpriteComp = go->GetComponent<biggin::SpriteRenderComponent>();
 	if (m_pSpriteComp == nullptr)

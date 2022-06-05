@@ -1464,6 +1464,8 @@ private:
         RAPIDJSON_FORCEINLINE Ch Take() { return Base::TakePush(); }
     };
 
+#pragma warning( push )
+#pragma warning( disable : 26451 )
     template<unsigned parseFlags, typename InputStream, typename Handler>
     void ParseNumber(InputStream& is, Handler& handler) {
         typedef typename internal::SelectIf<internal::BoolType<(parseFlags & kParseNumbersAsStringsFlag) != 0>, typename TargetEncoding::Ch, char>::Type NumberCharacter;
@@ -1614,7 +1616,6 @@ private:
 #endif
                 useDouble = true;
             }
-
             while (RAPIDJSON_LIKELY(s.Peek() >= '0' && s.Peek() <= '9')) {
                 if (significandDigit < 17) {
                     d = d * 10.0 + (s.TakePush() - '0');
@@ -1746,6 +1747,7 @@ private:
         if (RAPIDJSON_UNLIKELY(!cont))
             RAPIDJSON_PARSE_ERROR(kParseErrorTermination, startOffset);
     }
+#pragma warning( pop )
 
     // Parse any JSON value
     template<unsigned parseFlags, typename InputStream, typename Handler>

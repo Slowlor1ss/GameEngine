@@ -118,7 +118,9 @@ struct DiyFp {
         res.e = res.e - (kDiySignificandSize - kDpSignificandSize - 2);
         return res;
     }
-
+#pragma warning( push )
+#pragma warning( disable : 26495 )
+#pragma warning( disable : 26451 )
     void NormalizedBoundaries(DiyFp* minus, DiyFp* plus) const {
         DiyFp pl = DiyFp((f << 1) + 1, e - 1).NormalizeBoundary();
         DiyFp mi = (f == kDpHiddenBit) ? DiyFp((f << 2) - 1, e - 2) : DiyFp((f << 1) - 1, e - 1);
@@ -127,6 +129,7 @@ struct DiyFp {
         *plus = pl;
         *minus = mi;
     }
+
 
     double ToDouble() const {
         union {
@@ -147,6 +150,7 @@ struct DiyFp {
         u.u64 = (f & kDpSignificandMask) | (be << kDpSignificandSize);
         return u.d;
     }
+#pragma warning( pop )
 
     static const int kDiySignificandSize = 64;
     static const int kDpSignificandSize = 52;
@@ -224,7 +228,8 @@ inline DiyFp GetCachedPowerByIndex(size_t index) {
     RAPIDJSON_ASSERT(index < 87);
     return DiyFp(kCachedPowers_F[index], kCachedPowers_E[index]);
 }
-
+#pragma warning( push )
+#pragma warning( disable : 26451 )
 inline DiyFp GetCachedPower(int e, int* K) {
 
     //int k = static_cast<int>(ceil((-61 - e) * 0.30102999566398114)) + 374;
@@ -238,7 +243,7 @@ inline DiyFp GetCachedPower(int e, int* K) {
 
     return GetCachedPowerByIndex(index);
 }
-
+#pragma warning( pop )
 inline DiyFp GetCachedPower10(int exp, int *outExp) {
     RAPIDJSON_ASSERT(exp >= -348);
     unsigned index = static_cast<unsigned>(exp + 348) / 8u;

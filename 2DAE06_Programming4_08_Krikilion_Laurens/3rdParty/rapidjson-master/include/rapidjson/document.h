@@ -717,6 +717,8 @@ public:
         \param type Type of the value.
         \note Default content for number is zero.
     */
+#pragma warning( push )
+#pragma warning( disable : 33010 )
     explicit GenericValue(Type type) RAPIDJSON_NOEXCEPT : data_() {
         static const uint16_t defaultFlags[] = {
             kNullFlag, kFalseFlag, kTrueFlag, kObjectFlag, kArrayFlag, kShortStringFlag,
@@ -729,6 +731,7 @@ public:
         if (type == kStringType)
             data_.ss.SetLength(0);
     }
+#pragma warning( pop )
 
     //! Explicit copy constructor (with allocator)
     /*! Creates a copy of a Value by using the given Allocator
@@ -2423,6 +2426,8 @@ private:
         data_.s.length = s.length;
     }
 
+#pragma warning( push )
+#pragma warning( disable : 26451 )
     //! Initialize this value as copy string with initial data, without calling destructor.
     void SetStringRaw(StringRefType s, Allocator& allocator) {
         Ch* str = 0;
@@ -2439,6 +2444,7 @@ private:
         std::memcpy(str, s, s.length * sizeof(Ch));
         str[s.length] = '\0';
     }
+#pragma warning( pop )
 
     //! Assignment without calling destructor
     void RawAssign(GenericValue& rhs) RAPIDJSON_NOEXCEPT {

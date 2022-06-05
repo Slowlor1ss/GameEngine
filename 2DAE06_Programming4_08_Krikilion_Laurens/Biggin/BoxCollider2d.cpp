@@ -64,7 +64,7 @@ BoxCollider2d::BoxCollider2d(GameObject* go, const glm::vec2& size, bool isTrigg
 	const auto fixture = m_pBody->CreateFixture(&fd);
 	fixture->SetUserData(this);
 
-	m_DelayedEnableCallback = utils::DelayedCallback(GameTime::GetFixedTimeStep()*2, [&] {m_EnableCollider = true; }, 1);
+	m_DelayedEnableCallback = utils::DelayedCallback(GameTime::GetFixedTimeStep()*4, [&] {m_EnableCollider = true; }, 1);
 }
 
 BoxCollider2d::~BoxCollider2d()

@@ -294,7 +294,7 @@ bool InputManager::InputManagerImpl::DoIsPressed(SDL_Keycode key) const
 		throw std::runtime_error("KeyState accessing array out of bounds");
 #endif
 
-	return m_CurrentkeyState[static_cast<int>(scancodeKey)] && !m_PreviousKeyState[scancodeKey];
+	return m_CurrentkeyState[static_cast<UINT8>(scancodeKey)] && !m_PreviousKeyState[scancodeKey];
 }
 
 bool InputManager::InputManagerImpl::DoIsReleased(SDL_Keycode key) const
@@ -305,7 +305,7 @@ bool InputManager::InputManagerImpl::DoIsReleased(SDL_Keycode key) const
 		throw std::runtime_error("KeyState accessing array out of bounds");
 #endif
 
-	return m_PreviousKeyState[static_cast<int>(scancodeKey)] && !m_CurrentkeyState[scancodeKey];
+	return m_PreviousKeyState[static_cast<UINT8>(scancodeKey)] && !m_CurrentkeyState[scancodeKey];
 }
 
 bool InputManager::InputManagerImpl::DoIsHeld(SDL_Keycode key) const

@@ -126,7 +126,8 @@ inline bool StrtodFast(double d, int p, double* result) {
     else
         return false;
 }
-
+#pragma warning( push )
+#pragma warning( disable : 26495 )
 // Compute an approximation and see if it is within 1/2 ULP
 template<typename Ch>
 inline bool StrtodDiyFp(const Ch* decimals, int dLen, int dExp, double* result) {
@@ -205,6 +206,7 @@ inline bool StrtodDiyFp(const Ch* decimals, int dLen, int dExp, double* result) 
 
     return halfWay - static_cast<unsigned>(error) >= precisionBits || precisionBits >= halfWay + static_cast<unsigned>(error);
 }
+#pragma warning( pop )
 
 template<typename Ch>
 inline double StrtodBigInteger(double approx, const Ch* decimals, int dLen, int dExp) {
