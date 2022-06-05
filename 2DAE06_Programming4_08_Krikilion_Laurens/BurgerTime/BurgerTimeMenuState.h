@@ -35,7 +35,6 @@ public:
 	static void Cleanup();
 	static void Start(BurgerTimeMenuState* startState) { startState->Enter(); m_pPrevState = startState; }
 
-	//TODO: make getter functions
 	static MainMenuState* GetMainMenu() { return m_pMainMenuState; }
 
 protected:

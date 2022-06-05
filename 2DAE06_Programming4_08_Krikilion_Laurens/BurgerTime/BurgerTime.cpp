@@ -15,6 +15,7 @@
 #pragma warning(pop)
 #include "SimpleSDL2SoundSystem.h"
 #include "audio.h"
+#include "BurgerTimeCommands.hpp"
 #include "GameLoader.h"
 #include "GameObject.h"
 #include "MenuRenderer.h"
@@ -39,11 +40,13 @@ int main(int /*argc*/, char* /*argv*/[])
 	engine.Initialize();
 
 	std::cout << "==============================================================================\r\n     __________  ____  ____ _________    ________  __________ _________\r\n     |   ___   \\ |  |  |  | |   ___  \\  /  ______| | _______| |   ___  \\\r\n     |   |_|    ||  |  |  | |   |_|   ||  /        | |        |   |_|   |\r\n     |         / |  |  |  | | ___  __/ | |   ____  | |__      | ___  __/\r\n     |   ___   \\ |  \\__/  | | |  \\ \\   | |  |___ | | ___|     | |  \\ \\\r\n     |   |_|    ||        | | |   \\ \\  | |_____| | | |_______ | |   \\ \\\r\n     |_________/  \\______/  |_|    \\_\\  \\_______/  |________| |_|    \\_\\ \r\n\r\n==============================================================================\r\n                __________ __________ ___    ___ __________\r\n                |___  ___| |___  ___| |  \\  /  | | _______|\r\n                   |  |       |  |    |   \\/   | | |\r\n                   |  |       |  |    |        | | |__\r\n                   |  |       |  |    |  \\  /  | | ___|\r\n                   |  |    ___|  |___ |  |\\/|  | | |_______\r\n                   |__|    |________| |__|  |__| |________|\r\n\r\n==============================================================================\r\n\t\t\t+=+=+=+=+=+=+=+=+=+=+=+=+=+=+\r\n==============================================================================\n";
-	std::cout << "\nPress [c] for controls\n";
+	std::cout << "\nPress [c] or [Back(gamepad)] for controls\n";
 	std::cout << "\nPeter Piper picked a peck of pickled peppers.\n"
 		<< "Did Peter Piper pick a peck of pickled peppers?\n"
 		<< "If Peter Piper picked a peck of pickled peppers,\n"
 		<< "where's the peck of pickled peppers Peter Piper picked? \n\n";
+	biggin::InputManager::GetInstance().MapActionKey({ biggin::ActionState::Up, biggin::ControllerButton::Back, 0, SDLK_c },
+		std::make_unique<PrintControls>());
 
 	biggin::MenuRenderer::GetInstance().SetMenu(new GameLoader());
 	engine.Run();

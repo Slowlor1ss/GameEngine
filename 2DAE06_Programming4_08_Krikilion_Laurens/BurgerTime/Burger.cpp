@@ -61,8 +61,6 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 		const auto tag = overlappingCollider->GetTag();
 		if (tag == "Platform")
 		{
-			Logger::GetInstance().LogDebug("ovelap started with platform and burger");
-
 			if (!m_IsFalling) return;
 
 			SoundServiceLocator::GetSoundSystem().Play("burger_touching_floor.wav", 0.5f);
@@ -81,7 +79,6 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 		else if(tag == "Player")
 		{
 			if (m_IsFalling) return;
-			Logger::GetInstance().LogDebug("ovelap started with player and burger");
 
 			//the gameobject of the collider of one of our children and just hit the player
 			const auto burgerPartGo = overlappingCollider->GetOther()->GetOwningGameObject();
@@ -134,20 +131,6 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 			m_ReachedBottom = true;
 			m_pNotifier->notify(this, "BurgerReachedEnd");
 		}
-		//else if (tag == "Enemy")
-		//{
-		//	if (!m_IsFalling)
-		//		++m_EnemiesOnBurger;
-		//}
-	}
-	else if (event == "EndContact")
-	{
-		//const auto tag = static_cast<const biggin::BoxCollider2d*>(entity)->GetTag();
-		//if (tag == "Enemy")
-		//{
-		//	if (!m_IsFalling)
-		//		--m_EnemiesOnBurger;
-		//}
 	}
 }
 

@@ -37,12 +37,6 @@ namespace enemy
 		};
 
 		explicit EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy = false);
-		~EnemySpawner() override = default;
-
-		EnemySpawner(const EnemySpawner& other) = delete;
-		EnemySpawner(EnemySpawner&& other) noexcept = delete;
-		EnemySpawner& operator=(const EnemySpawner& other) = delete;
-		EnemySpawner& operator=(EnemySpawner&& other) noexcept = delete;
 
 		void Initialize(biggin::GameObject*) override;
 		void Update() override; 

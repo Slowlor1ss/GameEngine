@@ -50,7 +50,7 @@ namespace biggin
 		void AddAnimation(int animationState, const SpriteInfo& spriteInfo);
 		void SetCurrentSprite(int animationState);
 		int GetCurrentSprite() const { return m_CurrentSpriteIdx; };
-		void SetPause(bool pause) { m_IsPaused = pause; } //TODO: add looping option
+		void SetPause(bool pause) { m_IsPaused = pause; }
 		void SetFinishAndPause() { m_PausedWhenFinished = true; }
 		void SetFlip(SDL_RendererFlip flip) const;
 		void UpdateRenderVariables();
@@ -69,12 +69,14 @@ namespace biggin
 		SDL_Rect m_SourceRect{};
 		SDL_Rect m_DstRect{};
 
+		biggin::GameObject* m_GameObjectRef{ nullptr };
+
 		bool m_IsPaused;
 		bool m_PausedWhenFinished{};
 		bool m_RenderVariablesDirty{};
 		unsigned int m_CurrentRelFrameIdx;
 		int m_CurrentSpriteIdx{};
-		float m_Speed;//TODO: maybe do speed in sprite info
+		float m_Speed; //TODO: maybe do speed in sprite info so you can set speed per anim
 		float m_ElapsedSec;
 	};
 }

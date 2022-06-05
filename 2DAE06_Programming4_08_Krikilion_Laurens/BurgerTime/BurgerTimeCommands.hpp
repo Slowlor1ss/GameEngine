@@ -13,7 +13,7 @@ class PrintControls final : public Command
 public:
 	void execute() override
 	{
-		std::cout << "Controlls:\n"
+		std::cout << "\n\nControlls:\n"
 			<< "controller:\n"
 			<< "\tMovement:\t[LThumbStick]\n"
 			<< "\tPepper:\t\t[ButtonA]\n"
@@ -22,7 +22,9 @@ public:
 			<< "\tPepper:\t\t[Spacebar]\n"
 			<< "player two:\n"
 			<< "\tMovement:\t[Arrow Keys]\n"
-			<< "\tPepper:\t\t[RShift]\n\n";
+			<< "\tPepper:\t\t[RShift]\n\n"
+			<< "\tPress escape or Start(gamepad) to pause game\n"
+			<< "\tUse arrow keys(both keyboard and gamepad) to navigate UI\n\n\n";
 	}
 };
 

@@ -82,7 +82,7 @@
       <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="HighScoreUI.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -141,7 +141,7 @@
       <Filter>UI</Filter>
     </ClInclude>
     <ClInclude Include="HighScoreUI.h">
-      <Filter>Header Files</Filter>
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

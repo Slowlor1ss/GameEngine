@@ -17,36 +17,12 @@
 #include "Renderer.h"
 #include "SpriteRenderComponent.h"
 #include <vector>
-
-#include "BurgerTimeMenuState.h"
 #include <SDL_keycode.h>
-#include "BurgerTimeCommands.hpp"
-#include "imgui.h"
-#include "GameLoader.h"
 #include <thread>
 #include "Biggin.h"
-#include "BoxCollider2d.h"
 #include "Burger.h"
-#include "EnemySpawner.h"
-#include "FpsCounter.h"
-#include "SceneManager.h"
-#include "Renderer.h"
-#include "ResourceManager.h"
-#include "TextComponent.h"
-#include "GameObject.h"
-#include "GameTime.h"
 #include "Logger.h"
 #include "Scene.h"
-#include "HealthComponent.h"
-#include "HealthUI.h"
-#include "MapLoader.h"
-#include "PeterPepper.h"
-#include "RenderComponent.h"
-#include "ScoreComponent.h"
-#include "ScoreUI.h"
-#include "SoundServiceLocator.h"
-#include "SpriteRenderComponent.h"
-#include "StatsAndAchievements.h"
 #include "Subject.h"
 #include "InputManager.h"
 
@@ -65,14 +41,6 @@ enemy::EnemySpawner::EnemySpawner(biggin::GameObject* go, bool hasPossessedEnemy
 	m_DelayedSpawn.finished = true;
 	m_DelayedSpawn2.finished = true;
 }
-
-//EnemySpawner::~EnemySpawner()
-//{
-//	//for preventing Lapsed listener problem
-//	//a way better way to prevent this problem in our case would be to implement an event queue for the collisions but i won't have enough time for it now
-//	//for (const auto& enemy : m_Enemies)
-//	//	enemy->RemoveObservers({ this });
-//}
 
 void enemy::EnemySpawner::Initialize(biggin::GameObject*)
 {
@@ -99,8 +67,6 @@ void enemy::EnemySpawner::OnNotify(Component* entity, const std::string& event)
 			--m_AmntHotDogs;
 			return;
 		}
-		//std::erase(m_Enemies, enemy);
-		//enemy->RemoveObservers({this});
 
 		switch (enemy->GetEnemyType())
 		{
@@ -228,7 +194,7 @@ void enemy::EnemySpawner::SpawnEnemy(EnemyType type, glm::vec2 pos)
 
 	int columns{ 9 };
 	enemy->AddComponent(new biggin::RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
-	auto enemySprite = new biggin::SpriteRenderComponent(enemy.get(), { columns,{0,0},{32,32} });
+	auto enemySprite = new biggin::SpriteRenderComponent(enemy.get(), { columns,{0,0},{32,32} }, 0.3f);
 	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runHorizontal), { 2, 20 + (columns * 2) * static_cast<int>(type) });
 	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runVertical), { 2, 18 + (columns * 2) * static_cast<int>(type) });
 	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::peppered), { 2, 31 + (columns * 2) * static_cast<int>(type) });
@@ -282,7 +248,7 @@ void enemy::EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 
 	int columns{ 9 };
 	enemy->AddComponent(new biggin::RenderComponent(enemy.get(), "BurgerTimeSpriteSheet.png"));
-	auto enemySprite = new biggin::SpriteRenderComponent(enemy.get(), { columns,{0,0},{32,32} });
+	auto enemySprite = new biggin::SpriteRenderComponent(enemy.get(), { columns,{0,0},{32,32} }, 0.3f);
 	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runHorizontal), { 2, 20 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
 	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::runVertical), { 2, 18 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
 	enemySprite->AddAnimation(static_cast<int>(enemy::AnimationState::peppered), { 2, 31 + (columns * 2) * static_cast<int>(EnemyType::HotDog) });
@@ -298,7 +264,7 @@ void enemy::EnemySpawner::SpawnPossessedEnemy(glm::vec2 pos)
 	, "", { 0, 0 }, true, filter));
 
 
-	auto movementCompoent = new biggin::PossessGameObjectComponent(enemy.get(), 100);
+	auto movementCompoent = new biggin::PossessGameObjectComponent(enemy.get(), m_Settings.velocity);
 	enemy->AddComponent(movementCompoent);
 
 	auto enemyCollisionHandeler = new EnemyColliderHandeler(enemy.get(), EnemyType::HotDog, { this }, true);

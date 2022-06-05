@@ -202,10 +202,10 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->Setname("Player");
 
 	playerObject->AddComponent(new Subject(playerObject.get()));
-	playerObject->AddComponent(new HealthComponent(playerObject.get(), 1, { healthUI }));
+	playerObject->AddComponent(new HealthComponent(playerObject.get(), 3, { healthUI }));
 	playerObject->AddComponent(new ScoreComponent(playerObject.get(), { scoreUI, &CSteamAchievements::GetInstance() }));
 	playerObject->AddComponent(new PepperShooter(playerObject.get(), { pepperUI }, 5));
-	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 100);
+	auto movementCompoent = new PossessGameObjectComponent(playerObject.get(), 75);
 	playerObject->AddComponent(movementCompoent);
 	auto peterPepper = new character::PeterPepper(playerObject.get());
 	playerObject->AddComponent(peterPepper);
@@ -215,7 +215,7 @@ void MainMenuState::LoadSinglePlayer()
 	playerObject->AddComponent(new BoxCollider2d(playerObject.get(), {20, 30}, false, b2_dynamicBody, {},
 	                                             "Player", {}, true, filterPlayer));
 	playerObject->AddComponent(new RenderComponent(playerObject.get(), "BurgerTimeSpriteSheet.png"));
-	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} });
+	auto playerSprite = new SpriteRenderComponent(playerObject.get(), { 9,{0,0},{32,32} }, 0.1f);
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::Idle), { 1, 1 });
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunHorizontal), { 3, 3 });
 	playerSprite->AddAnimation(static_cast<int>(character::AnimationState::RunVertical), { 3, 6 });

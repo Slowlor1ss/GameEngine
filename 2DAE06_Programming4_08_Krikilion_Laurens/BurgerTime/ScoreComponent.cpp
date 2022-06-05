@@ -25,7 +25,7 @@ void ScoreComponent::Start()
 
 int ScoreComponent::GetScore() const
 {
-	return m_Score; //TODO: change this
+	return m_Score;
 }
 
 void ScoreComponent::IncreaseScore(int amount)

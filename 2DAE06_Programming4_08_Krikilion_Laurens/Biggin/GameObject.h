@@ -39,7 +39,7 @@ namespace biggin
 		template<typename ComponentType>
 		ComponentType*								GetComponent() const;
 		template<typename ComponentType>
-		std::vector<ComponentType*>					GetComponents();
+		std::vector<ComponentType*>					GetComponents() const;
 
 
 		template<typename ComponentType>
@@ -83,12 +83,9 @@ namespace biggin
 
 
 	private:
-		//TODO: maybe make them private
-		//TODO: remove yourself as parent, remove form childeren list update transform etc
 		bool										RemoveChild(unsigned int index);
 		bool										RemoveChild(GameObject* go);
-		//TODO: set parent, update transform rot and scale, if already parented remove that parent and change it to this parent
-		void										AddChild(GameObject* go);//TODO: first check if the child already has a parent and if it does remove that parent from the child maybe also check if child is already in there
+		void										AddChild(GameObject* go);
 
 		void										UpdateWorldPosition();
 
@@ -132,7 +129,7 @@ namespace biggin
 	 * \return A vector with shared pointers to all found components of type <ComponentType>
 	 */
 	template<typename ComponentType>
-	std::vector<ComponentType*> GameObject::GetComponents()
+	std::vector<ComponentType*> GameObject::GetComponents() const
 	{
 		std::vector<ComponentType*> componentsOfType;
 

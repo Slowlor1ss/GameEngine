@@ -27,9 +27,9 @@ void HighScoreUI::OnNotify(biggin::Component* entity, const std::string& event)
 		return;
 
 	const auto& scores = static_cast<const burgerTime::ScoreComponent*>(entity)->GetHighScores();
-	std::string highscoreText{"HIGHSCORES:\n"};
+	std::string highscoreText{"TOP 5\nHIGHSCORES:\n"};
 
-	for (int value : scores)
+	for (const int value : scores)
 	{
 		highscoreText += std::to_string(value);
 		highscoreText += '\n';

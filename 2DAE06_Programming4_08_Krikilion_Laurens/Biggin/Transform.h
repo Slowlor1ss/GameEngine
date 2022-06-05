@@ -7,7 +7,6 @@
 
 namespace biggin
 {
-	//TODO: change in to a transform component, add local and relative position and by default add it to the components of gameobject
 	class Transform final : public Component
 	{
 	public:

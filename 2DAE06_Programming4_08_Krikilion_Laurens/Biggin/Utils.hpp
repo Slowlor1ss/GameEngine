@@ -283,7 +283,6 @@ constexpr auto g_PI_4 = 0.785398163397448309616;
     //note that this is not consistent with shared_ptr::operator==
     //because that compares the object pointers,
     //and two shared pointers with the same control block can point to different objects
-    //TODO: more complex than i thought should give it a better look when i have more time
     template <typename T, typename U>
     inline bool equals(const std::weak_ptr<T>& t, const std::weak_ptr<U>& u)
     {

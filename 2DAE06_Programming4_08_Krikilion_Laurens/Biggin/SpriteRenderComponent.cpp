@@ -14,6 +14,7 @@ biggin::SpriteRenderComponent::SpriteRenderComponent(GameObject* go, const Atlas
 	, m_CurrentRelFrameIdx(0)
 	, m_Speed(speed)
 	, m_ElapsedSec(0)
+	, m_GameObjectRef(go)
 {
 	const auto& [widthCell, heightCell] = m_AtlasPart.sizeCell;
 
@@ -65,7 +66,7 @@ void biggin::SpriteRenderComponent::SetFlip(SDL_RendererFlip flip) const
 
 void biggin::SpriteRenderComponent::UpdateRenderVariables()
 {
-	const auto& gameObjectPos = GetGameObject()->GetLocalPosition();//TODO: turn get game object in to a variable
+	const auto& gameObjectPos = m_GameObjectRef->GetLocalPosition();
 	const auto& [widthCell, heightCell] = m_AtlasPart.sizeCell;
 
 	//center rect

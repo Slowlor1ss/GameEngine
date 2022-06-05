@@ -87,13 +87,6 @@ biggin::Scene& biggin::SceneManager::CreateScene(const std::string& name)
 
 void biggin::SceneManager::RemoveScene(const std::string& name)
 {
-	//TODO: change remove if to erase_if
-	//const auto sceneIt =
-	//	std::remove_if(m_Scenes.begin(), m_Scenes.end(), [&](const std::shared_ptr<Scene>& scene)
-	//		{
-	//			return (scene->GetName() == name);
-	//		});
-
 	if (name == m_ActiveScene.get()->GetName())
 		m_ActiveScene = nullptr;
 

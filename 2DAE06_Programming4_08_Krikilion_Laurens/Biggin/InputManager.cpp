@@ -57,7 +57,7 @@ private:
 };
 
 InputManager::InputManager()
-	: m_pImpl(new InputManagerImpl) //TODO: check again for the unordered map
+	: m_pImpl(new InputManagerImpl) //should check again for the unordered map since we added a keyboard
 	, m_ConsoleCommands(15, ControllerButtonHash) //bucketSize -> 14 controller keys (+1 for none), as our hash function works with the controller keys we only need 14 
 {}
 
@@ -219,15 +219,24 @@ void InputManager::InputManagerImpl::DoHandleInput(int idx)
 		{
 		case ActionState::Up:
 			if (DoIsReleased(button, idx) || DoIsReleased(key))
+			{
+				m_Context = { 1.f, ActionState::Up, idx }; //mainly for sake of completeness
 				action->execute();
+			}
 			break;
 		case ActionState::Down:
 			if (DoIsPressed(button, idx) || DoIsPressed(key))
+			{
+				m_Context = { 1.f, ActionState::Down, idx }; //mainly for sake of completeness
 				action->execute();
+			}
 			break;
 		case ActionState::Hold:
 			if (DoIsHeld(button, idx) || DoIsHeld(key))
-				action->execute(); //TODO: add context here aswell for sake of completeness
+			{
+				m_Context = { 1.f, ActionState::Hold, idx }; //mainly for sake of completeness
+				action->execute();
+			}
 			break;
 		case ActionState::ThumbL:
 			if (glm::vec2 v{ DoGetLThumb(idx) }; v != glm::vec2{0,0})
