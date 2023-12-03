@@ -61,16 +61,16 @@ void biggin::Biggin::Initialize()
 		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
 
 	// Initialize Simple-SDL2-Audio
-	initAudio();
+	//initAudio();
 
-#if _DEBUG
-	SoundServiceLocator::RegisterSoundSystem(new LogSoundSystem(new SimpleSDL2SoundSystem("../Data/Sounds/")));
-#else
-	SoundServiceLocator::RegisterSoundSystem(new SimpleSDL2SoundSystem("../Data/Sounds/"));
-#endif
+//#if _DEBUG
+//	SoundServiceLocator::RegisterSoundSystem(new LogSoundSystem(new SimpleSDL2SoundSystem("../Data/Sounds/")));
+//#else
+//	SoundServiceLocator::RegisterSoundSystem(new SimpleSDL2SoundSystem("../Data/Sounds/"));
+//#endif
 
 	m_Window = SDL_CreateWindow(
-		"BurgerTime",
+		"FmodTest",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		m_WindowWidth, //640
@@ -98,7 +98,7 @@ void biggin::Biggin::Cleanup()
 	Renderer::GetInstance().Destroy();
 	SDL_DestroyWindow(m_Window);
 	m_Window = nullptr;
-	SoundServiceLocator::Cleanup();
+	//SoundServiceLocator::Cleanup();
 	SDL_Quit();
 }
 

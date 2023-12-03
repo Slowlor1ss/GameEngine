@@ -1,6 +1,11 @@
 #pragma once
 #include "Component.h"
 #include <SDL.h>
+#include <string>
+#pragma warning(push, 0)
+#include <glm/glm.hpp>
+#pragma warning(pop)
+#include <memory>
 
 namespace biggin
 {

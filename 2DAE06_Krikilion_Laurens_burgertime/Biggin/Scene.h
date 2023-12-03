@@ -4,6 +4,7 @@
 class b2World;
 #include "Box2dManager.h"
 #include <vector>
+#include <string>
 
 namespace biggin
 {

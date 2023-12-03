@@ -23,6 +23,7 @@ public:
 	SimpleSDL2SoundSystem& operator=(const SimpleSDL2SoundSystem& other) = delete;
 	SimpleSDL2SoundSystem& operator=(SimpleSDL2SoundSystem&& other) noexcept = delete;
 
+	void Init() override {};
 	void Play(const std::string& filename, float volume, bool isSoundEffect = true) override;
 	void StopAll() override;
 	void StopMusic() override;

@@ -186,6 +186,9 @@
     <ClInclude Include="PossessGameObjectComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FModSoundSystem.h">
+      <Filter>Service Locators\Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BigginPCH.cpp">
@@ -313,6 +316,9 @@
     </ClCompile>
     <ClCompile Include="PossessGameObjectComponent.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FModSoundSystem.cpp">
+      <Filter>Service Locators\Audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
