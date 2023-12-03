@@ -2,6 +2,24 @@
 #include "FModSoundSystem.h"
 #include <ranges>
 
+
+Implementation::Implementation(): m_NextChannelid(0)
+{
+	m_StudioSystem = nullptr;
+	FmodSoundSystem::ErrorCheck(FMOD::Studio::System::create(&m_StudioSystem));
+	FmodSoundSystem::ErrorCheck(
+		m_StudioSystem->initialize(32, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, NULL));
+
+	m_System = nullptr;
+	FmodSoundSystem::ErrorCheck(m_StudioSystem->getCoreSystem(&m_System));
+}
+
+Implementation::~Implementation() {
+    FmodSoundSystem::ErrorCheck(m_StudioSystem->unloadAll());
+    FmodSoundSystem::ErrorCheck(m_StudioSystem->release());
+}
+
+
 void Implementation::Update()
 {
     std::vector<ChannelMap::iterator> stoppedChannels;
@@ -36,7 +54,7 @@ void FmodSoundSystem::Shutdown()
     delete m_SoundEngineImpl;
 }
 
-int FmodSoundSystem::ErrorCheck(FMOD_RESULT result)
+int FmodSoundSystem::ErrorCheck(FMOD_RESULT result [[maybe_unused]])
 {
 #ifdef _DEBUG
     if (result != FMOD_OK) 
@@ -61,12 +79,25 @@ void FmodSoundSystem::LoadSound(const std::string& soundName, bool isLooping, bo
     mode |= isStreaming ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE;
 
     FMOD::Sound* pSound = nullptr;
-    m_SoundEngineImpl->m_System->createSound(soundName.c_str(), mode, nullptr,
-											&pSound);
+    ErrorCheck(m_SoundEngineImpl->m_System->createSound(soundName.c_str(), mode, nullptr,
+											&pSound));
     if (pSound)
     {
         m_SoundEngineImpl->m_Sounds[soundName] = pSound;
 	}
+}
+
+bool FmodSoundSystem::IsSoundLoaded(const std::string& soundName)
+{
+    auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
+    if (foundIt == m_SoundEngineImpl->m_Sounds.end())
+        return false;
+
+    // Check if the sound is fully loaded
+    FMOD_OPENSTATE openState;
+    ErrorCheck(foundIt->second->getOpenState(&openState, nullptr, nullptr, nullptr));
+
+    return(openState == FMOD_OPENSTATE_READY);
 }
 
 void FmodSoundSystem::UnloadSound(const std::string& soundName)
@@ -78,7 +109,7 @@ void FmodSoundSystem::UnloadSound(const std::string& soundName)
     m_SoundEngineImpl->m_Sounds.erase(foundIt);
 }
 
-void FmodSoundSystem::Set2dListenerAndOrientation(const glm::vec2& pos, const glm::vec2& vLook)
+void FmodSoundSystem::Set2dListenerAndOrientation(const glm::vec2&, const glm::vec2&)
 {
     //TODO: FMOD listenener
 }
@@ -97,7 +128,7 @@ int FmodSoundSystem::PlaySound(const std::string& soundName, const glm::vec2& po
         }
     }
     FMOD::Channel* pChannel = nullptr;
-    m_SoundEngineImpl->m_System->playSound(foundIt->second, nullptr, true, &pChannel);
+    ErrorCheck(m_SoundEngineImpl->m_System->playSound(foundIt->second, nullptr, true, &pChannel));
     if(pChannel)
     {
         FMOD_VECTOR position = VectorToFmod(pos);
@@ -234,7 +265,7 @@ bool FmodSoundSystem::IsEventPlaying(const std::string& eventName) const
         return false;
 
     FMOD_STUDIO_PLAYBACK_STATE* state = nullptr;
-    if (foundIt->second->getPlaybackState(state) == FMOD_STUDIO_PLAYBACK_PLAYING) {
+    if (static_cast<FMOD_STUDIO_PLAYBACK_STATE>(foundIt->second->getPlaybackState(state)) == FMOD_STUDIO_PLAYBACK_PLAYING) {
         return true;
     }
     return false;

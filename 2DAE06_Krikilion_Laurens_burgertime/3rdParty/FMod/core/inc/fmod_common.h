@@ -319,6 +319,12 @@ typedef enum FMOD_THREAD_TYPE
     FMOD_THREAD_TYPE_FORCEINT = 65536
 } FMOD_THREAD_TYPE;
 
+
+
+
+
+
+
 typedef enum FMOD_RESULT
 {
     FMOD_OK,

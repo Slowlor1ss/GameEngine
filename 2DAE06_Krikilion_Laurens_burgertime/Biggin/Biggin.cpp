@@ -1,8 +1,8 @@
 #include "BigginPCH.h"
 #include "Biggin.h"
 #include <SDL_image.h>
-#include <steam_api.h>
-#include <steam_api_common.h>
+//#include <steam_api.h>
+//#include <steam_api_common.h>
 #include <thread>
 #include "audio.h"
 #include "Box2dManager.h"
@@ -90,7 +90,7 @@ void biggin::Biggin::Initialize()
 	ResourceManager::GetInstance().Init("../Data/");
 	//Box2dManager::GetInstance().Init();
 
-	SteamAPI_RunCallbacks();
+	//SteamAPI_RunCallbacks();
 }
 
 void biggin::Biggin::Cleanup()
@@ -119,7 +119,7 @@ void biggin::Biggin::Run()
 		float lag = 0.0f;
 		while (doContinue)
 		{
-			SteamAPI_RunCallbacks();
+			//SteamAPI_RunCallbacks();
 
 			//updates things like delta-time fps counter etc
 			//(maybe a bit of a questionable way of doing things but i found it clean to have all of this is one class)

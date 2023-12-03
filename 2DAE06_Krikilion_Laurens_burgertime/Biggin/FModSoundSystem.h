@@ -1,8 +1,8 @@
 #pragma once
-#include "SoundSystem.h"
-#include "fmod_studio.hpp"
-#include "fmod.hpp"
+
 #include <map>
+#include <fmod_studio.hpp>
+#include <fmod.hpp>
 
 struct Implementation
 {
@@ -29,7 +29,7 @@ struct Implementation
 
 class FmodSoundSystem
 {
-	static Implementation* m_SoundEngineImpl;
+	inline static Implementation* m_SoundEngineImpl {nullptr};
 
 public:
 	static void Init();
@@ -48,8 +48,9 @@ public:
 	};
 
 	void	LoadSound(const std::string& soundName, bool isLooping = false, bool isStreaming = false);
+	bool	IsSoundLoaded(const std::string& soundName);
 	void	UnloadSound(const std::string& soundName);
-	void	Set2dListenerAndOrientation(const glm::vec2& pos, const glm::vec2& vLook);
+	void	Set2dListenerAndOrientation(const glm::vec2& pos, const glm::vec2& look);
 	int		PlaySound(const std::string& soundName, const glm::vec2& pos = glm::vec2{ 0, 0 }, float volumedB = 0.0f);
 	void	StopChannel(int nChannelId);
 	void	StopAllChannels();
@@ -66,7 +67,7 @@ public:
 
 	static constexpr FMOD_VECTOR VectorToFmod(const glm::vec2& pos)
 	{
-		FMOD_VECTOR fVec;
+		FMOD_VECTOR fVec{};
 		fVec.x = pos.x;
 		fVec.y = pos.y;
 		fVec.z = 0;
