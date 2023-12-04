@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "GameObject.h"
 #include "GameTime.h"
+#include <algorithm>
 
 using namespace biggin;
 

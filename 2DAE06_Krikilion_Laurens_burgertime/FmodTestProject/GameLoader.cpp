@@ -15,17 +15,19 @@
 using namespace biggin;
 
 FmodSoundSystem fmodSound{};
-std::string path = R"(C:\School_2ndyr\Prog4\GameEngine\2DAE06_Krikilion_Laurens_burgertime\Data\Sounds\burger_going_down.wav)";
+std::string path = R"(D:\Personal\Audio\GameEngine\2DAE06_Krikilion_Laurens_burgertime\Data\Sounds\)";
 
 GameLoader::GameLoader()
 {
 	FmodSoundSystem::Init();
 	
-	fmodSound.LoadSound(path, false);
+	fmodSound.LoadSound(path + "burger_going_down.wav", false);
+	fmodSound.LoadSound(path + "main.wav", true);
 	do
 	{
-	} while (!fmodSound.IsSoundLoaded(path));
-	fmodSound.PlaySound(path, { 0,0 }, FmodSoundSystem::VolumeTodB(100.0f));
+	} while (!fmodSound.IsSoundLoaded(path + "main.wav"));
+	fmodSound.PlaySound(path+"burger_going_down.wav", {0,0}, FmodSoundSystem::VolumeTodB(1.0f));
+	fmodSound.PlaySound(path+"main.wav", {0,0}, FmodSoundSystem::VolumeTodB(1.0f));
 
 
 #pragma region EngineStuff
