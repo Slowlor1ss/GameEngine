@@ -3,9 +3,13 @@
 #include <ranges>
 #include <algorithm>
 
+AudioFader::AudioFader(Implementation::Channel* channel) : m_ChannelRef(channel)
+{
+}
+
 void AudioFader::StartFade(float toVolumedB, float fadeTimeSeconds)
 {
-	FromVolumedB = GetCurrentVolumedB();
+	FromVolumedB = GetCurrentVolume();
 	ToVolumedB = toVolumedB;
 	CurrentTime = 0.0f;
 	TimeFade = fadeTimeSeconds;
@@ -21,6 +25,7 @@ void AudioFader::StartFade(float fromVolumedB, float toVolumedB, float fadeTimeS
 
 void AudioFader::Update(float deltaTime)
 {
+	m_ChannelRef->m_VolumedB = GetCurrentVolumedB();
 	CurrentTime += deltaTime;
 }
 
@@ -49,8 +54,10 @@ Implementation::Channel::Channel(Implementation& implementation, idx soundId,
 	, m_SoundId(soundId)
 	, m_Pos(pos)
 	, m_VolumedB(volumedB)
-	, m_SoundVolume(FmodSoundSystem::dBToVolume(volumedB))
+	, m_OrigVolumedB(volumedB)
 	, m_StopRequested(false)
+	, m_VirtualizeFader(new AudioFader{ this })
+	, m_StopFader(new AudioFader{ this })
 {
 	auto soundIt = m_EngineImpl.m_Sounds.find(m_SoundId);
 	if (soundIt == m_EngineImpl.m_Sounds.end())
@@ -64,6 +71,13 @@ Implementation::Channel::Channel(Implementation& implementation, idx soundId,
 		UpdateChannelParameters();
 		m_Channel->setPaused(false);
 	}
+}
+
+Implementation::Channel::~Channel()
+{
+	delete m_VirtualizeFader;
+	delete m_StopFader;
+	//TODO: Do we have to remove channle from the channle map and realese it? see Implementation::Update
 }
 
 void Implementation::Channel::Update(float deltaTime)
@@ -108,7 +122,7 @@ void Implementation::Channel::Update(float deltaTime)
 				if (m_State == State::DEVIRTUALIZE)
 				{
 					//Fade In for Virtualize
-					m_VirtualizeFader.StartFade(SILENCE_dB, 0.0f, VIRTUALIZE_FADE_TIME);
+					m_VirtualizeFader->StartFade(SILENCE_dB, m_OrigVolumedB, VIRTUALIZE_FADE_TIME);
 				}
 				m_State = State::PLAYING;
 
@@ -136,7 +150,7 @@ void Implementation::Channel::Update(float deltaTime)
 	case State::PLAYING:
 	{
 		// Update everything, the position, the volume, everything...
-		m_VirtualizeFader.Update(deltaTime);
+		m_VirtualizeFader->Update(deltaTime);
 		UpdateChannelParameters();
 
 		if (!IsPlaying() || m_StopRequested)
@@ -147,17 +161,17 @@ void Implementation::Channel::Update(float deltaTime)
 
 		if (ShouldBeVirtual(false))
 		{
-			m_VirtualizeFader.StartFade(SILENCE_dB, VIRTUALIZE_FADE_TIME);
+			m_VirtualizeFader->StartFade(m_VolumedB, SILENCE_dB, VIRTUALIZE_FADE_TIME);
 			m_State = State::VIRTUALIZING;
 		}
 		break;
 	}
 	case State::STOPPING:
 	{
-		m_StopFader.Update(deltaTime);
+		m_StopFader->Update(deltaTime);
 		// Keep updating parameters as there could be a long fadeout or sound is still moving around etc etc...
 		UpdateChannelParameters();
-		if (m_StopFader.IsFinished())
+		if (m_StopFader->IsFinished())
 		{
 			m_Channel->stop();
 		}
@@ -174,14 +188,15 @@ void Implementation::Channel::Update(float deltaTime)
 	}
 	case State::VIRTUALIZING:
 	{
-		m_VirtualizeFader.Update(deltaTime);
+		m_VirtualizeFader->Update(deltaTime);
 		UpdateChannelParameters();
-		if (ShouldBeVirtual(false))
+		if (!ShouldBeVirtual(false))
 		{
-			m_VirtualizeFader.StartFade(0.0f, VIRTUALIZE_FADE_TIME);
+			m_VirtualizeFader->StartFade(0.0f, VIRTUALIZE_FADE_TIME);
 			m_State = State::PLAYING;
+			break;
 		}
-		if (m_VirtualizeFader.IsFinished())
+		if (m_VirtualizeFader->IsFinished())
 		{
 			m_Channel->stop();
 			m_State = State::VIRTUAL;
@@ -221,7 +236,9 @@ void Implementation::Channel::UpdateChannelParameters()
 
 	FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Pos);
 	m_Channel->set3DAttributes(&p, nullptr);
+	std::cout << FmodSoundSystem::dBToVolume(m_VolumedB) << "\n";
 	m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+	//m_Channel->setVolume(1);
 }
 
 bool Implementation::Channel::IsOneShot() const
@@ -482,7 +499,7 @@ void FmodSoundSystem::StopChannel(idx nChannelId, float fadeTimeSeconds)
 	else
 	{
 		foundIt->second->m_StopRequested = true;
-		foundIt->second->m_StopFader.StartFade(SILENCE_dB, fadeTimeSeconds);
+		foundIt->second->m_StopFader->StartFade(SILENCE_dB, fadeTimeSeconds); //TODO
 	}
 }
 

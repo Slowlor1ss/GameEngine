@@ -4,11 +4,13 @@
 #include <fmod_studio.hpp>
 #include <fmod.hpp>
 #include <memory>
+//#include "AudioFader.h"
 
 struct Implementation;
+class AudioFader;
 
 #define VIRTUALIZE_FADE_TIME 1.0f
-#define SILENCE_dB 0.0f
+#define SILENCE_dB -120.f
 // TODO: Add audio namespace
 using idx = int32_t;
 
@@ -74,6 +76,7 @@ public:
 		return vec;
 	}
 
+	// 40dB is 100 gain
 	static float dBToVolume(float dB)
 	{
 		return powf(10.0f, 0.05f * dB);
@@ -83,26 +86,6 @@ public:
 	{
 		return 20.0f * log10f(volume);
 	}
-};
-
-
-class AudioFader
-{
-private:
-	float FromVolumedB = 0.0f;
-	float ToVolumedB = 0.0f;
-	float TimeFade = 0.0f;
-	float CurrentTime = 0.0f;
-public:
-	// Fade in
-	void StartFade(float toVolumedB, float fadeTimeSeconds);
-	// Fade out
-	void StartFade(float fromVolumedB, float toVolumedB, float fadeTimeSeconds);
-	// Update fade
-	void Update(float deltaTime);
-	bool IsFinished() const;
-	float GetCurrentVolumedB() const;
-	float GetCurrentVolume() const;
 };
 
 struct Implementation
@@ -121,7 +104,7 @@ struct Implementation
 	{
 		Channel(Implementation& implementation, idx soundId, const FmodSoundSystem::SoundDefinition& soundDefinition,
 			const glm::vec2& pos, float volumedB);
-		~Channel() = default;
+		~Channel();
 
 		enum class State
 		{
@@ -133,12 +116,12 @@ struct Implementation
 		idx m_SoundId;
 		glm::vec2 m_Pos;
 		float m_VolumedB;
-		float m_SoundVolume;
+		const float m_OrigVolumedB;
 		State m_State = State::INITIALIZE;
 		bool m_StopRequested;
 
-		AudioFader m_StopFader;
-		AudioFader m_VirtualizeFader;
+		AudioFader* m_StopFader;
+		AudioFader* m_VirtualizeFader;
 
 		void Update(float deltaTime);
 		void UpdateChannelParameters();
@@ -174,4 +157,24 @@ struct Implementation
 	EventMap m_Events;
 	SoundMap m_Sounds;
 	ChannelMap m_Channels;
+};
+
+class AudioFader
+{
+public:
+	AudioFader(Implementation::Channel* channel);
+
+	void StartFade(float toVolumedB, float fadeTimeSeconds);
+	void StartFade(float fromVolumedB, float toVolumedB, float fadeTimeSeconds);
+	// Update fade
+	void Update(float deltaTime);
+	bool IsFinished() const;
+	float GetCurrentVolumedB() const;
+	float GetCurrentVolume() const;
+private:
+	Implementation::Channel* m_ChannelRef;
+	float FromVolumedB = 0.0f;
+	float ToVolumedB = 0.0f;
+	float TimeFade = 0.0f;
+	float CurrentTime = 0.0f;
 };
