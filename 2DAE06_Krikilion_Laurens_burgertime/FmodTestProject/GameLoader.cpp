@@ -11,23 +11,30 @@
 #include "Scene.h"
 #include "SceneManager.h"
 #include "SpriteRenderComponent.h"
+#include "GameTime.h"
 
 using namespace biggin;
 
 FmodSoundSystem fmodSound{};
 std::string path = R"(D:\Personal\Audio\GameEngine\2DAE06_Krikilion_Laurens_burgertime\Data\Sounds\)";
+auto& gameTime = GameTime::GetInstance();
+idx id;
+auto playerObject = std::make_shared<GameObject>();
 
 GameLoader::GameLoader()
 {
 	FmodSoundSystem::Init();
+	FmodSoundSystem::SoundDefinition sd = { path + "main.wav" , 1, 0, 50, true, true};
+	id = fmodSound.RegisterSound(sd, true);
+	fmodSound.PlaySound(id, { 100,100 }, 1);
 	
-	fmodSound.LoadSound(path + "burger_going_down.wav", false);
-	fmodSound.LoadSound(path + "main.wav", true);
-	do
-	{
-	} while (!fmodSound.IsSoundLoaded(path + "main.wav"));
-	fmodSound.PlaySound(path+"burger_going_down.wav", {0,0}, FmodSoundSystem::VolumeTodB(1.0f));
-	fmodSound.PlaySound(path+"main.wav", {0,0}, FmodSoundSystem::VolumeTodB(1.0f));
+	//fmodSound.LoadSound(path + "burger_going_down.wav", false);
+	//fmodSound.LoadSound(path + "main.wav", true);
+	//do
+	//{
+	//} while (!fmodSound.IsSoundReady(path + "main.wav"));
+	//fmodSound.PlaySound(path+"burger_going_down.wav", {0,0}, FmodSoundSystem::VolumeTodB(1.0f));
+	//fmodSound.PlaySound(path+"main.wav", {0,0}, FmodSoundSystem::VolumeTodB(1.0f));
 
 
 #pragma region EngineStuff
@@ -42,7 +49,7 @@ GameLoader::GameLoader()
 	scene.Add(audioObject);
 
 	//Add Player
-	auto playerObject = std::make_shared<GameObject>();
+	//auto playerObject = std::make_shared<GameObject>();
 	playerObject->Setname("Player");
 
 	playerObject->AddComponent(new Subject(playerObject.get()));
@@ -89,12 +96,12 @@ GameLoader::GameLoader()
 
 GameLoader::~GameLoader()
 {
-	fmodSound.UnloadSound(path);
+	fmodSound.UnloadSound(id);
 	FmodSoundSystem::Shutdown();
 }
 
 void GameLoader::RenderMenu()
 {
-	FmodSoundSystem::Update();
+	FmodSoundSystem::Update(gameTime.GetDeltaT(), playerObject.get()->GetWorldPosition());
 }
 

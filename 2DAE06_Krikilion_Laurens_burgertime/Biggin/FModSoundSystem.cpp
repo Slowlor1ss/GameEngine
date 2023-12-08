@@ -5,245 +5,268 @@
 
 void AudioFader::StartFade(float toVolumedB, float fadeTimeSeconds)
 {
-    FromVolumedB = GetCurrentVolumedB();
-    ToVolumedB = toVolumedB;
-    CurrentTime = 0.0f;
-    TimeFade = fadeTimeSeconds;
+	FromVolumedB = GetCurrentVolumedB();
+	ToVolumedB = toVolumedB;
+	CurrentTime = 0.0f;
+	TimeFade = fadeTimeSeconds;
 }
 
 void AudioFader::StartFade(float fromVolumedB, float toVolumedB, float fadeTimeSeconds)
 {
-    FromVolumedB = fromVolumedB;
-    ToVolumedB = toVolumedB;
-    CurrentTime = 0.0f;
-    TimeFade = fadeTimeSeconds;
+	FromVolumedB = fromVolumedB;
+	ToVolumedB = toVolumedB;
+	CurrentTime = 0.0f;
+	TimeFade = fadeTimeSeconds;
 }
 
 void AudioFader::Update(float deltaTime)
 {
-    CurrentTime += deltaTime;
+	CurrentTime += deltaTime;
+}
+
+bool AudioFader::IsFinished() const
+{
+	return CurrentTime >= TimeFade;
 }
 
 float AudioFader::GetCurrentVolumedB() const {
-    return std::lerp(FromVolumedB, ToVolumedB, std::clamp(CurrentTime / TimeFade, 0.0f, 1.0f));
+	return std::lerp(FromVolumedB, ToVolumedB, std::clamp(CurrentTime / TimeFade, 0.0f, 1.0f));
 }
 
 float AudioFader::GetCurrentVolume() const {
-    return FmodSoundSystem::dBToVolume(GetCurrentVolumedB());
+	return FmodSoundSystem::dBToVolume(GetCurrentVolumedB());
 }
 
-
-Channel::Channel(FmodCoreEngine& engine, TypeId soundId, const SoundDefinition& definition, const Vector3& position, float volumedB)
-    : m_Engine(engine), m_Channel(nullptr), m_SoundId(soundId), m_Position(position), m_VolumedB(volumedB), m_SoundVolume(Helper::dBToVolume(volumedB))
-{
-    auto soundIt = m_Engine.Sounds.find(m_SoundId);
-    if (soundIt == m_Engine.Sounds.end()) return;
-
-    m_Engine.System->playSound(soundIt->second->m_Sound, nullptr, true, &m_Channel);
-    if (m_Channel)
-    {
-        UpdateChannelParameters();
-        m_Channel->setPaused(false);
-    }
-}
-
-Channel::~Channel()
+Implementation::Sound::Sound(const FmodSoundSystem::SoundDefinition& soundDefinition, bool oneShot)
+	: m_Sound(nullptr), m_SoundDefinition(soundDefinition), m_OneShot(oneShot)
 {
 }
 
-void Channel::Update(float deltaTime)
+Implementation::Channel::Channel(Implementation& implementation, idx soundId, 
+	const FmodSoundSystem::SoundDefinition& soundDefinition [[maybe_unused]], const glm::vec2& pos, float volumedB)
+	: m_EngineImpl(implementation)
+	, m_Channel(nullptr)
+	, m_SoundId(soundId)
+	, m_Pos(pos)
+	, m_VolumedB(volumedB)
+	, m_SoundVolume(FmodSoundSystem::dBToVolume(volumedB))
+	, m_StopRequested(false)
 {
-    switch (m_State)
-    {
-    case State::INITIALIZE: [[fallthrough]];
-    case State::DEVIRTUALIZE:
-    case State::TOPLAY:
-    {
-        if (m_StopRequested)
-        {
-            m_State = State::STOPPING;
-            return;
-        }
+	auto soundIt = m_EngineImpl.m_Sounds.find(m_SoundId);
+	if (soundIt == m_EngineImpl.m_Sounds.end())
+		return; // Maybe notify something that creation failed?
 
-        if (ShouldBeVirtual(true))
-        {
-            if (IsOneShot())
-            {
-                m_State = State::STOPPING;
-            }
-            else
-            {
-                m_State = State::VIRTUAL;
-            }
-            return;
-        }
+	//soundIt->second->m_SoundDefinition = soundDefinition;
 
-        if (!m_Engine.SoundIsLoaded(m_SoundId))
-        {
-            m_Engine.LoadSound(m_SoundId);
-            m_State = State::LOADING;
-            return;
-        }
-
-        m_Channel = nullptr;
-        auto soundIt = m_Engine.Sounds.find(m_SoundId);
-        if (soundIt != m_Engine.Sounds.end())
-        {
-            m_Engine.System->playSound(soundIt->second->m_Sound, nullptr, true, &m_Channel);
-            if (m_Channel)
-            {
-                if (m_State == State::DEVIRTUALIZE)
-                {
-                    //Fade In for Virtualize
-                    m_VirtualizeFader.StartFade(SILENCE_dB, 0.0f, VIRTUALIZE_FADE_TIME);
-                }
-                m_State = State::PLAYING;
-
-                FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Pos);
-                m_Channel->set3DAttributes(&p, nullptr);
-                m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
-                m_Channel->setPaused(false);
-            }
-            else
-            {
-                m_State = State::STOPPING;
-            }
-        }
-
-        break;
-    }
-    case State::LOADING:
-    {
-        if (m_Engine.SoundIsLoaded(m_SoundId))
-        {
-            m_State = State::TOPLAY;
-        }
-        break;
-    }
-    case State::PLAYING:
-    {
-        m_VirtualizeFader.Update(deltaTime);
-        // Update everything, the position, the volume, everything...
-        UpdateChannelParameters();
-
-        if (!IsPlaying() || m_StopRequested)
-        {
-            m_State = State::Stopping;
-            return;
-        }
-
-        if (ShouldBeVirtual(false))
-        {
-            m_VirtualizeFader.StartFade(SILENCE_dB, VIRTUALIZE_FADE_TIME);
-            m_State = State::VIRTUALIZING;
-        }
-        break;
-    }
-    case State::STOPPING:
-    {
-        m_StopFader.Update(deltaTime);
-        UpdateChannelParameters();
-        if (m_StopFader.IsFinished())
-        {
-            m_Channel->stop();
-        }
-        if (!IsPlaying())
-        {
-            m_State = State::STOPPED;
-            return;
-        }
-        break;
-    }
-    case State::STOPPED:
-    {
-        break;
-    }
-    case State::VIRTUALIZING:
-    {
-        m_VirtualizeFader.Update(deltaTime);
-        UpdateChannelParameters();
-        if (ShouldBeVirtual(false))
-        {
-            m_VirtualizeFader.StartFade(0.0f, VIRTUALIZE_FADE_TIME);
-            m_State = State::PLAYING;
-        }
-        if (m_VirtualizeFader.IsFinished())
-        {
-            m_Channel->stop();
-            m_State = State::VIRTUAL;
-        }
-        break;
-    }
-    case State::VIRTUAL:
-    {
-        if (m_StopRequested)
-        {
-            m_State = State::STOPPING;
-        }
-        else if (!ShouldBeVirtual(false))
-        {
-            m_State = State::DEVIRTUALIZE;
-        }
-        break;
-    }
-    }
+	m_EngineImpl.m_System->playSound(soundIt->second->m_Sound, nullptr, true, &m_Channel); //TODO: do we want to play here already, I think so see play sound function
+	if (m_Channel)
+	{
+		UpdateChannelParameters();
+		m_Channel->setPaused(false);
+	}
 }
 
-float Channel::GetVolumedB() const {
-    return m_VolumedB;
-}
-
-bool Channel::IsPlaying() const {
-    bool isPlaying = false;
-    if (m_Channel == nullptr) return isPlaying;
-
-    m_Channel->isPlaying(&isPlaying);
-    return isPlaying;
-}
-
-void Channel::UpdateChannelParameters()
+void Implementation::Channel::Update(float deltaTime)
 {
-    if (m_Channel == nullptr) return;
+	switch (m_State)
+	{
+	case State::INITIALIZE: [[fallthrough]];
+	case State::DEVIRTUALIZE:
+	case State::TOPLAY:
+	{
+		// First check if we should bother playing the sound at all
+		if (m_StopRequested)
+		{
+			m_State = State::STOPPING;
+			return;
+		}
 
-    FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Position);
-    m_Channel->set3DAttributes(&p, nullptr);
-    m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+		if (ShouldBeVirtual(true))
+		{
+			if (IsOneShot())
+				m_State = State::STOPPING;
+			else
+				m_State = State::VIRTUAL;
+			return;
+		}
+
+		if (!m_EngineImpl.IsSoundLoaded(m_SoundId))
+		{
+			m_EngineImpl.LoadSound(m_SoundId);
+			m_State = State::LOADING;
+			return;
+		}
+
+		m_Channel = nullptr;
+
+		auto soundIt = m_EngineImpl.m_Sounds.find(m_SoundId);
+		if (soundIt != m_EngineImpl.m_Sounds.end())
+		{
+			m_EngineImpl.m_System->playSound(soundIt->second->m_Sound, nullptr, true, &m_Channel);
+			if (m_Channel)
+			{
+				if (m_State == State::DEVIRTUALIZE)
+				{
+					//Fade In for Virtualize
+					m_VirtualizeFader.StartFade(SILENCE_dB, 0.0f, VIRTUALIZE_FADE_TIME);
+				}
+				m_State = State::PLAYING;
+
+				FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Pos);
+				m_Channel->set3DAttributes(&p, nullptr);
+				m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+				m_Channel->setPaused(false);
+			}
+			else
+			{
+				m_State = State::STOPPING;
+			}
+		}
+
+		break;
+	}
+	case State::LOADING:
+	{
+		if (m_EngineImpl.IsSoundLoaded(m_SoundId))
+		{
+			m_State = State::TOPLAY;
+		}
+		break;
+	}
+	case State::PLAYING:
+	{
+		// Update everything, the position, the volume, everything...
+		m_VirtualizeFader.Update(deltaTime);
+		UpdateChannelParameters();
+
+		if (!IsPlaying() || m_StopRequested)
+		{
+			m_State = State::STOPPING;
+			return;
+		}
+
+		if (ShouldBeVirtual(false))
+		{
+			m_VirtualizeFader.StartFade(SILENCE_dB, VIRTUALIZE_FADE_TIME);
+			m_State = State::VIRTUALIZING;
+		}
+		break;
+	}
+	case State::STOPPING:
+	{
+		m_StopFader.Update(deltaTime);
+		// Keep updating parameters as there could be a long fadeout or sound is still moving around etc etc...
+		UpdateChannelParameters();
+		if (m_StopFader.IsFinished())
+		{
+			m_Channel->stop();
+		}
+		if (!IsPlaying())
+		{
+			m_State = State::STOPPED;
+			return;
+		}
+		break;
+	}
+	case State::STOPPED:
+	{
+		break;
+	}
+	case State::VIRTUALIZING:
+	{
+		m_VirtualizeFader.Update(deltaTime);
+		UpdateChannelParameters();
+		if (ShouldBeVirtual(false))
+		{
+			m_VirtualizeFader.StartFade(0.0f, VIRTUALIZE_FADE_TIME);
+			m_State = State::PLAYING;
+		}
+		if (m_VirtualizeFader.IsFinished())
+		{
+			m_Channel->stop();
+			m_State = State::VIRTUAL;
+		}
+		break;
+	}
+	case State::VIRTUAL:
+	{
+		if (m_StopRequested)
+		{
+			m_State = State::STOPPING;
+		}
+		else if (!ShouldBeVirtual(false))
+		{
+			m_State = State::DEVIRTUALIZE;
+		}
+		break;
+	}
+	}
 }
 
-bool Channel::IsOneShot() const
-{
-    auto soundIt = m_Engine.Sounds.find(m_SoundId);
-    if (soundIt == m_Engine.Sounds.end()) return false;
+float Implementation::Channel::GetVolumedB() const {
+	return m_VolumedB;
+}
 
-    return soundIt->second->m_OneShot;
+bool Implementation::Channel::IsPlaying() const {
+	bool isPlaying = false;
+	if (m_Channel == nullptr) return isPlaying;
+
+	m_Channel->isPlaying(&isPlaying);
+	return isPlaying;
+}
+
+void Implementation::Channel::UpdateChannelParameters()
+{
+	if (m_Channel == nullptr) return;
+
+	FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Pos);
+	m_Channel->set3DAttributes(&p, nullptr);
+	m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+}
+
+bool Implementation::Channel::IsOneShot() const
+{
+	auto soundIt = m_EngineImpl.m_Sounds.find(m_SoundId);
+	if (soundIt == m_EngineImpl.m_Sounds.end()) return false;
+
+	return soundIt->second->m_OneShot;
+}
+
+const FmodSoundSystem::SoundDefinition* Implementation::Channel::GetSoundDefinition() const
+{
+	auto soundIt = m_EngineImpl.m_Sounds.find(m_SoundId);
+	if (soundIt == m_EngineImpl.m_Sounds.end())
+		return nullptr;
+
+	return &soundIt->second->m_SoundDefinition;
 }
 
 // It should be some calculation to see if the sound is still worth playing.
 // Maybe a lookup in the sound defintion to see if the sound is worth virtualizing.
 // Most likely a check of the distance of the sound so when it's above the specified threshold we virtualize it.
 // Currently, only a distance check is done.
-bool Channel::ShouldBeVirtual(bool allowVirtualOneShot) const
+bool Implementation::Channel::ShouldBeVirtual(bool allowVirtualOneShot) const
 {
-    if (!allowVirtualOneShot && IsOneShot()) return false;
+	if (!allowVirtualOneShot && IsOneShot()) return false;
 
-    auto defPtr = GetSoundDefinition();
-    if (!defPtr) return false;
+	auto defPtr = GetSoundDefinition();
+	if (!defPtr) return false;
 
-    FMOD_VECTOR pos;
-    FMOD_VECTOR vel;
-    FMOD_VECTOR forward;
-    FMOD_VECTOR up;
-    m_Engine.System->get3DListenerAttributes(0, &pos, &vel, &forward, &up);
+	FMOD_VECTOR pos;
+	FMOD_VECTOR vel;
+	FMOD_VECTOR forward;
+	FMOD_VECTOR up;
+	m_EngineImpl.m_System->get3DListenerAttributes(0, &pos, &vel, &forward, &up);
 
-    Vector3 listenerPos = FmodHelper::FmodToVector(pos);
+	glm::vec2 listenerPos = FmodSoundSystem::FmodToVector(pos);
 
-    float distance = glm::distance(m_Position, listenerPos);
+	float distance = glm::distance(m_Pos, listenerPos);
 
-    return distance > defPtr->maxDistance;
+	return distance > defPtr->maxDistance;
 }
 
 
-Implementation::Implementation(): m_NextChannelid(0)
+Implementation::Implementation() : m_NextChannelid(0), m_NextSoundid(0)
 {
 	m_StudioSystem = nullptr;
 	FmodSoundSystem::ErrorCheck(FMOD::Studio::System::create(&m_StudioSystem));
@@ -255,261 +278,331 @@ Implementation::Implementation(): m_NextChannelid(0)
 }
 
 Implementation::~Implementation() {
-    FmodSoundSystem::ErrorCheck(m_StudioSystem->unloadAll());
-    FmodSoundSystem::ErrorCheck(m_StudioSystem->release());
+	FmodSoundSystem::ErrorCheck(m_StudioSystem->unloadAll());
+	FmodSoundSystem::ErrorCheck(m_StudioSystem->release());
 }
 
 
-void Implementation::Update()
+void Implementation::Update(float deltaTime, glm::vec2 listenerPos)
 {
-    std::vector<ChannelMap::iterator> stoppedChannels;
-    for (auto it = m_Channels.begin(), itEnd = m_Channels.end(); it != itEnd; ++it)
-    {
-        bool isPlaying = false;
-        it->second->isPlaying(&isPlaying);
-        if (!isPlaying)
-        {
-            stoppedChannels.push_back(it);
-        }
-    }
-    for (const auto& stoppedChannel : stoppedChannels)
-    {
-        m_Channels.erase(stoppedChannel);
-    }
-    m_System->update();
+	auto pos = FmodSoundSystem::VectorToFmod({ listenerPos.x, listenerPos.y });
+	m_System->set3DListenerAttributes(0, &pos, {}, {}, {}); // TODO: change how we set listener pos
+
+	std::vector<ChannelMap::iterator> stoppedChannels;
+	for (auto it = m_Channels.begin(), itEnd = m_Channels.end(); it != itEnd; ++it)
+	{
+		it->second->Update(deltaTime);
+		if (it->second->m_State == Channel::State::STOPPED)
+		{
+			stoppedChannels.push_back(it);
+		}
+	}
+
+	for (const auto& stoppedChannel : stoppedChannels)
+	{
+		m_Channels.erase(stoppedChannel);
+	}
+
+	m_System->update();
+}
+
+void Implementation::LoadSound(idx soundId)
+{
+	// seems useless unless my implementation is wrong
+	//if (IsSoundLoaded(soundId))
+	//	return;
+
+	auto foundIt = m_Sounds.find(soundId);
+	if (foundIt == m_Sounds.end())
+		return;
+
+	FMOD_MODE mode = FMOD_NONBLOCKING;
+	mode |= false ? (FMOD_3D | FMOD_3D_INVERSETAPEREDROLLOFF) : FMOD_2D; // Later add is3D?
+	mode |= foundIt->second->m_SoundDefinition.isLooping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
+	mode |= foundIt->second->m_SoundDefinition.isStreaming ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE;
+
+
+	FmodSoundSystem::ErrorCheck(m_System->createSound(foundIt->second->m_SoundDefinition.soundName.c_str(), mode, nullptr, 
+														&foundIt->second->m_Sound));
+
+	if (foundIt->second->m_Sound)
+	{
+		foundIt->second->m_Sound->set3DMinMaxDistance(foundIt->second->m_SoundDefinition.minDistance,
+														foundIt->second->m_SoundDefinition.maxDistance);
+	}
+}
+
+bool Implementation::IsSoundLoaded(idx soundId)
+{
+	auto foundIt = m_Sounds.find(soundId);
+	if (foundIt == m_Sounds.end())
+		return false;
+	
+	// Check if the sound is fully loaded
+	FMOD_OPENSTATE openState;
+	FmodSoundSystem::ErrorCheck(foundIt->second->m_Sound->getOpenState(&openState, nullptr, nullptr, nullptr));
+	
+	return(openState == FMOD_OPENSTATE_READY);
 }
 
 void FmodSoundSystem::Init()
 {
-    m_SoundEngineImpl = new Implementation;
+	if(!m_SoundEngineImpl)
+		m_SoundEngineImpl = new Implementation;
 }
 
-void FmodSoundSystem::Update()
+void FmodSoundSystem::Update(float deltaTime, glm::vec2 listenerPos)
 {
-    m_SoundEngineImpl->Update();
+	m_SoundEngineImpl->Update(deltaTime, listenerPos);
 }
 
 void FmodSoundSystem::Shutdown()
 {
-    delete m_SoundEngineImpl;
+	delete m_SoundEngineImpl;
 }
 
-int FmodSoundSystem::ErrorCheck(FMOD_RESULT result [[maybe_unused]])
+int FmodSoundSystem::ErrorCheck(FMOD_RESULT result [[maybe_unused]] )
 {
 #ifdef _DEBUG
-    if (result != FMOD_OK) 
-    {
-	    std::cout << "FMOD ERROR " << result << '\n';
-        return 1;
-    }
+	if (result != FMOD_OK)
+	{
+		std::cout << "FMOD ERROR " << result << '\n';
+		return 1;
+	}
 #endif
 
-    return 0;
+	return 0;
 }
 
-void FmodSoundSystem::LoadSound(int soundId)
+idx FmodSoundSystem::RegisterSound(const SoundDefinition& soundDef, bool load)
 {
-    if (IsSoundLoaded(soundId))
-        return;
+	idx soundId = m_SoundEngineImpl->m_NextSoundid++;
 
-    auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundId);
-    if (foundIt != m_SoundEngineImpl->m_Sounds.end())
-        return false;
+	m_SoundEngineImpl->m_Sounds[soundId] = std::make_unique<Implementation::Sound>(soundDef);
 
-    FMOD_MODE mode = FMOD_NONBLOCKING;
-    mode |= false ? (FMOD_3D | FMOD_3D_INVERSETAPEREDROLLOFF) : FMOD_2D; // Later add 3D
-    mode |= isLooping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
-    mode |= isStreaming ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE;
+	if (load)
+		LoadSound(soundId);
 
-    FMOD::Sound* pSound = nullptr;
-    ErrorCheck(m_SoundEngineImpl->m_System->createSound(soundName.c_str(), mode, nullptr,
-											&pSound));
-    if (pSound)
-    {
-        m_SoundEngineImpl->m_Sounds[soundName] = pSound;
-	}
+	return soundId;
 }
 
-bool FmodSoundSystem::IsSoundReady(const std::string& soundName)
+
+// TODO: possibly improve
+void FmodSoundSystem::UnregisterSound(idx nSoundId)
 {
-    auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
-    if (foundIt == m_SoundEngineImpl->m_Sounds.end())
-        return false;
-
-    // Check if the sound is fully loaded
-    FMOD_OPENSTATE openState;
-    ErrorCheck(foundIt->second->getOpenState(&openState, nullptr, nullptr, nullptr));
-
-    return(openState == FMOD_OPENSTATE_READY);
+	UnloadSound(nSoundId);
+	//auto soundIt = m_SoundEngineImpl->m_Sounds.find(nSoundId);
+	//if (soundIt == m_SoundEngineImpl->m_Sounds.end()) 
+	//	return;
+	//m_SoundEngineImpl->m_Sounds.erase(soundIt);
 }
 
-void FmodSoundSystem::UnloadSound(const std::string& soundName)
+void FmodSoundSystem::LoadSound(idx soundId)
 {
-	auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
+	m_SoundEngineImpl->LoadSound(soundId);
+}
+
+//bool FmodSoundSystem::IsSoundReady(const std::string& soundName)
+//{
+//	auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
+//	if (foundIt == m_SoundEngineImpl->m_Sounds.end())
+//		return false;
+//
+//	// Check if the sound is fully loaded
+//	FMOD_OPENSTATE openState;
+//	ErrorCheck(foundIt->second->getOpenState(&openState, nullptr, nullptr, nullptr));
+//
+//	return(openState == FMOD_OPENSTATE_READY);
+//}
+
+void FmodSoundSystem::UnloadSound(idx soundId)
+{
+	auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundId);
 	if (foundIt == m_SoundEngineImpl->m_Sounds.end())
 		return;
-    foundIt->second->release();
-    m_SoundEngineImpl->m_Sounds.erase(foundIt);
+	foundIt->second->m_Sound->release();
+	m_SoundEngineImpl->m_Sounds.erase(foundIt);
 }
 
 void FmodSoundSystem::Set2dListenerAndOrientation(const glm::vec2&, const glm::vec2&)
 {
-    //TODO: FMOD listenener
+	//TODO: FMOD listenener
 }
 
-int FmodSoundSystem::PlaySound(const std::string& soundName, const glm::vec2& pos, float volumedB)
+//idx FmodSoundSystem::PlaySound(const std::string& soundName, const glm::vec2& pos, float volumedB)
+//{
+//	const idx nChannelId = m_SoundEngineImpl->m_NextChannelid++;
+//    auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
+//    if (foundIt == m_SoundEngineImpl->m_Sounds.end())
+//    {
+//        LoadSound(soundName);
+//        foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
+//        if (foundIt == m_SoundEngineImpl->m_Sounds.end())
+//        {
+//            return nChannelId;
+//        }
+//    }
+//    FMOD::Channel* pChannel = nullptr;
+//    ErrorCheck(m_SoundEngineImpl->m_System->playSound(foundIt->second, nullptr, true, &pChannel));
+//    if(pChannel)
+//    {
+//        FMOD_VECTOR position = VectorToFmod(pos);
+//        pChannel->set3DAttributes(&position, nullptr);
+//        pChannel->setVolume(dBToVolume(volumedB));
+//        pChannel->setPaused(false);
+//        m_SoundEngineImpl->m_Channels[nChannelId] = pChannel;
+//    }
+//    return nChannelId;
+//}
+
+idx FmodSoundSystem::PlaySound(idx nSoundId, const glm::vec2& pos, float volumedB)
 {
-	const int nChannelId = m_SoundEngineImpl->m_NextChannelid++;
-    auto foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
-    if (foundIt == m_SoundEngineImpl->m_Sounds.end())
-    {
-        LoadSound(soundName);
-        foundIt = m_SoundEngineImpl->m_Sounds.find(soundName);
-        if (foundIt == m_SoundEngineImpl->m_Sounds.end())
-        {
-            return nChannelId;
-        }
-    }
-    FMOD::Channel* pChannel = nullptr;
-    ErrorCheck(m_SoundEngineImpl->m_System->playSound(foundIt->second, nullptr, true, &pChannel));
-    if(pChannel)
-    {
-        FMOD_VECTOR position = VectorToFmod(pos);
-        pChannel->set3DAttributes(&position, nullptr);
-        pChannel->setVolume(dBToVolume(volumedB));
-        pChannel->setPaused(false);
-        m_SoundEngineImpl->m_Channels[nChannelId] = pChannel;
-    }
-    return nChannelId;
+	const idx nChannelId = m_SoundEngineImpl->m_NextChannelid++;
+	auto soundIt = m_SoundEngineImpl->m_Sounds.find(nSoundId);
+	if (soundIt == m_SoundEngineImpl->m_Sounds.end())
+		return nChannelId;
+
+	m_SoundEngineImpl->m_Channels[nChannelId] =
+		std::make_unique<Implementation::Channel>(*m_SoundEngineImpl, nSoundId,
+			soundIt->second->m_SoundDefinition, pos, volumedB); //check if this is correct
+
+	return nChannelId;
 }
 
-void FmodSoundSystem::StopChannel(int nChannelId)
+void FmodSoundSystem::StopChannel(idx nChannelId, float fadeTimeSeconds)
 {
-    auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
-    if (foundIt == m_SoundEngineImpl->m_Channels.end())
-        return;
+	auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
+	if (foundIt == m_SoundEngineImpl->m_Channels.end())
+		return;
 
-    foundIt->second->stop();
+	if (fadeTimeSeconds <= 0)
+	{
+		foundIt->second->m_Channel->stop();
+	}
+	else
+	{
+		foundIt->second->m_StopRequested = true;
+		foundIt->second->m_StopFader.StartFade(SILENCE_dB, fadeTimeSeconds);
+	}
 }
 
 void FmodSoundSystem::StopAllChannels()
 {
-    //also works as v or just use .second 
-    //for (const auto& channel : m_SoundEngineImpl->m_Channels | std::views::values)
-    for (const auto& channel : std::views::values(m_SoundEngineImpl->m_Channels))
-    {
-        channel->stop();
-    }
+	//also works as (see below) or just use .second 
+	//for (const auto& channel : m_SoundEngineImpl->m_Channels | std::views::values)
+	for (const auto& channel : std::views::values(m_SoundEngineImpl->m_Channels))
+	{
+		channel->m_Channel->stop();
+	}
 }
 
-void FmodSoundSystem::SetChannel2dPosition(int nChannelId, const glm::vec2& pos)
+void FmodSoundSystem::SetChannel2dPosition(idx nChannelId, const glm::vec2& pos)
 {
-    auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
-    if (foundIt == m_SoundEngineImpl->m_Channels.end())
-        return;
+	auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
+	if (foundIt == m_SoundEngineImpl->m_Channels.end())
+		return;
 
-    FMOD_VECTOR position = VectorToFmod(pos);
-    foundIt->second->set3DAttributes(&position, nullptr);
+	foundIt->second->m_Pos = pos;
 }
 
-void FmodSoundSystem::SetChannelVolume(int nChannelId, float volumedB)
+void FmodSoundSystem::SetChannelVolume(idx nChannelId, float volumedB)
 {
-    auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
-    if (foundIt == m_SoundEngineImpl->m_Channels.end())
-        return;
+	auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
+	if (foundIt == m_SoundEngineImpl->m_Channels.end())
+		return;
 
-    foundIt->second->setVolume(dBToVolume(volumedB));
+	foundIt->second->m_VolumedB = volumedB;
 }
 
-bool FmodSoundSystem::IsPlaying(int nChannelId) const
+bool FmodSoundSystem::IsPlaying(idx nChannelId) const
 {
-    auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
-    if (foundIt == m_SoundEngineImpl->m_Channels.end())
-        return false;
+	auto foundIt = m_SoundEngineImpl->m_Channels.find(nChannelId);
+	if (foundIt == m_SoundEngineImpl->m_Channels.end())
+		return false;
 
-    bool retVal;
-    foundIt->second->isPlaying(&retVal);
-    return retVal;
+	bool retVal;
+	foundIt->second->m_Channel->isPlaying(&retVal);
+	return retVal;
 }
 
-void FmodSoundSystem::LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
-{
-    auto tFoundIt = m_SoundEngineImpl->m_Banks.find(strBankName);
-    if (tFoundIt != m_SoundEngineImpl->m_Banks.end())
-        return;
-    FMOD::Studio::Bank* pBank;
-    ErrorCheck(m_SoundEngineImpl->m_StudioSystem->loadBankFile(strBankName.c_str(), flags, &pBank));
-    if (pBank) 
-    {
-        m_SoundEngineImpl->m_Banks[strBankName] = pBank;
-    }
-}
-
-void FmodSoundSystem::LoadEvent(const std::string& eventName)
-{
-    auto foundit = m_SoundEngineImpl->m_Events.find(eventName);
-    if (foundit != m_SoundEngineImpl->m_Events.end())
-        return;
-    FMOD::Studio::EventDescription* pEventDescription = nullptr;
-    ErrorCheck(m_SoundEngineImpl->m_StudioSystem->getEvent(eventName.c_str(), &pEventDescription));
-    if (pEventDescription) {
-        FMOD::Studio::EventInstance* pEventInstance = nullptr;
-        ErrorCheck(pEventDescription->createInstance(&pEventInstance));
-        if (pEventInstance) {
-            m_SoundEngineImpl->m_Events[eventName] = pEventInstance;
-        }
-    }
-}
-
-void FmodSoundSystem::PlayEvent(const std::string& eventName)
-{
-    auto foundit = m_SoundEngineImpl->m_Events.find(eventName);
-    if (foundit == m_SoundEngineImpl->m_Events.end()) {
-        LoadEvent(eventName);
-        foundit = m_SoundEngineImpl->m_Events.find(eventName);
-        if (foundit == m_SoundEngineImpl->m_Events.end())
-            return;
-    }
-    foundit->second->start();
-}
-
-void FmodSoundSystem::StopEvent(const std::string& eventName, bool immediate)
-{
-	auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
-    if (foundIt == m_SoundEngineImpl->m_Events.end())
-        return;
-    FMOD_STUDIO_STOP_MODE eMode;
-    eMode = immediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT;
-    ErrorCheck(foundIt->second->stop(eMode));
-}
-
-void FmodSoundSystem::GetEventParameter(const std::string& eventName, const std::string& parameterName, float* parameter)
-{
-    auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
-    if (foundIt == m_SoundEngineImpl->m_Events.end())
-        return;
-
-    ErrorCheck(foundIt->second->getParameterByName(parameterName.c_str(), parameter));
-}
-
-void FmodSoundSystem::SetEventParameter(const std::string& eventName, const std::string& parameterName, float value)
-{
-    auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
-    if (foundIt == m_SoundEngineImpl->m_Events.end())
-        return;
-
-    ErrorCheck(foundIt->second->setParameterByName(parameterName.c_str(), value));
-}
-
-bool FmodSoundSystem::IsEventPlaying(const std::string& eventName) const
-{
-    auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
-    if (foundIt == m_SoundEngineImpl->m_Events.end())
-        return false;
-
-    FMOD_STUDIO_PLAYBACK_STATE* state = nullptr;
-    if (static_cast<FMOD_STUDIO_PLAYBACK_STATE>(foundIt->second->getPlaybackState(state)) == FMOD_STUDIO_PLAYBACK_PLAYING) {
-        return true;
-    }
-    return false;
-}
+//void FmodSoundSystem::LoadBank(const std::string& strBankName, FMOD_STUDIO_LOAD_BANK_FLAGS flags)
+//{
+//	auto tFoundIt = m_SoundEngineImpl->m_Banks.find(strBankName);
+//	if (tFoundIt != m_SoundEngineImpl->m_Banks.end())
+//		return;
+//	FMOD::Studio::Bank* pBank;
+//	ErrorCheck(m_SoundEngineImpl->m_StudioSystem->loadBankFile(strBankName.c_str(), flags, &pBank));
+//	if (pBank)
+//	{
+//		m_SoundEngineImpl->m_Banks[strBankName] = pBank;
+//	}
+//}
+//
+//void FmodSoundSystem::LoadEvent(const std::string& eventName)
+//{
+//	auto foundit = m_SoundEngineImpl->m_Events.find(eventName);
+//	if (foundit != m_SoundEngineImpl->m_Events.end())
+//		return;
+//	FMOD::Studio::EventDescription* pEventDescription = nullptr;
+//	ErrorCheck(m_SoundEngineImpl->m_StudioSystem->getEvent(eventName.c_str(), &pEventDescription));
+//	if (pEventDescription) {
+//		FMOD::Studio::EventInstance* pEventInstance = nullptr;
+//		ErrorCheck(pEventDescription->createInstance(&pEventInstance));
+//		if (pEventInstance) {
+//			m_SoundEngineImpl->m_Events[eventName] = pEventInstance;
+//		}
+//	}
+//}
+//
+//void FmodSoundSystem::PlayEvent(const std::string& eventName)
+//{
+//	auto foundit = m_SoundEngineImpl->m_Events.find(eventName);
+//	if (foundit == m_SoundEngineImpl->m_Events.end()) {
+//		LoadEvent(eventName);
+//		foundit = m_SoundEngineImpl->m_Events.find(eventName);
+//		if (foundit == m_SoundEngineImpl->m_Events.end())
+//			return;
+//	}
+//	foundit->second->start();
+//}
+//
+//void FmodSoundSystem::StopEvent(const std::string& eventName, bool immediate)
+//{
+//	auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
+//	if (foundIt == m_SoundEngineImpl->m_Events.end())
+//		return;
+//	FMOD_STUDIO_STOP_MODE eMode;
+//	eMode = immediate ? FMOD_STUDIO_STOP_IMMEDIATE : FMOD_STUDIO_STOP_ALLOWFADEOUT;
+//	ErrorCheck(foundIt->second->stop(eMode));
+//}
+//
+//void FmodSoundSystem::GetEventParameter(const std::string& eventName, const std::string& parameterName, float* parameter)
+//{
+//	auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
+//	if (foundIt == m_SoundEngineImpl->m_Events.end())
+//		return;
+//
+//	ErrorCheck(foundIt->second->getParameterByName(parameterName.c_str(), parameter));
+//}
+//
+//void FmodSoundSystem::SetEventParameter(const std::string& eventName, const std::string& parameterName, float value)
+//{
+//	auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
+//	if (foundIt == m_SoundEngineImpl->m_Events.end())
+//		return;
+//
+//	ErrorCheck(foundIt->second->setParameterByName(parameterName.c_str(), value));
+//}
+//
+//bool FmodSoundSystem::IsEventPlaying(const std::string& eventName) const
+//{
+//	auto foundIt = m_SoundEngineImpl->m_Events.find(eventName);
+//	if (foundIt == m_SoundEngineImpl->m_Events.end())
+//		return false;
+//
+//	FMOD_STUDIO_PLAYBACK_STATE* state = nullptr;
+//	if (static_cast<FMOD_STUDIO_PLAYBACK_STATE>(foundIt->second->getPlaybackState(state)) == FMOD_STUDIO_PLAYBACK_PLAYING) {
+//		return true;
+//	}
+//	return false;
+//}
