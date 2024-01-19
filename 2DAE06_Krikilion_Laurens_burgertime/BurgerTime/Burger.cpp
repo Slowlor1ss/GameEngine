@@ -70,8 +70,11 @@ void Burger::OnNotify(Component* entity, const std::string& event)
 				--m_EnemiesOnBurger;
 				m_FallDelayed.Reset();
 			}
-
-			std::ranges::fill(m_Touched, false);
+			
+			for (size_t i = 0; i < sizeof(m_Touched); i++)
+			{
+				m_Touched[i] = false;
+			}
 
 			m_AmntTouchedParts = 0;
 			m_IsFalling = false;

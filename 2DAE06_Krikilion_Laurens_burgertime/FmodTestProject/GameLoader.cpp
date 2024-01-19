@@ -24,7 +24,7 @@ auto playerObject = std::make_shared<GameObject>();
 GameLoader::GameLoader()
 {
 	FmodSoundSystem::Init();
-	FmodSoundSystem::SoundDefinition sd = { path + "main.wav" , 1, 0, 50, true, true};
+	FmodSoundSystem::SoundDefinition sd = { path + "main.wav" , 1, 50, 500, true, true};
 	id = fmodSound.RegisterSound(sd, true);
 	fmodSound.PlaySound(id, { 100,100 }, 1);
 	

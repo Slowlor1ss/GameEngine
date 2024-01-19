@@ -159,7 +159,7 @@ xcopy "$(SolutionDir)3rdParty\steamworks\redistributable_bin\*.dll" "$(OutputPat
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)Biggin;$(SolutionDir)3rdParty\FMod\core\inc;$(SolutionDir)3rdParty\FMod\fsbank\inc;$(SolutionDir)3rdParty\FMod\studio\inc;$(SolutionDir)3rdParty\steamworks\public\steam;$(SolutionDir)3rdParty\Box2D\Include;$(SolutionDir)3rdParty\rapidjson-master\include\rapidjson;$(SolutionDir)3rdParty\rapidjson-master\include\rapidjson;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>

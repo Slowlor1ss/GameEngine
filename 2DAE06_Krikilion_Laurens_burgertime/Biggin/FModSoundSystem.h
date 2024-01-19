@@ -6,6 +6,11 @@
 #include <memory>
 //#include "AudioFader.h"
 
+// TODO: Implement:
+//					Creating Submixes with ChannelGroups p108 Game Audio Programming 1
+//					
+//					
+
 struct Implementation;
 class AudioFader;
 
@@ -172,6 +177,23 @@ public:
 	float GetCurrentVolumedB() const;
 	float GetCurrentVolume() const;
 private:
+	Implementation::Channel* m_ChannelRef;
+	float FromVolumedB = 0.0f;
+	float ToVolumedB = 0.0f;
+	float TimeFade = 0.0f;
+	float CurrentTime = 0.0f;
+};
+
+class AudioDistance
+{
+public:
+	AudioDistance(const Implementation& engineImpl, const FmodSoundSystem::SoundDefinition& soundDefinition);
+
+	static float CalcualteAudiodB(const Implementation& engineImpl, const FmodSoundSystem::SoundDefinition* soundDefinition, glm::vec2 pos, float originalVolumedB);
+
+private:
+	const Implementation& m_EngineImpl;
+	const FmodSoundSystem::SoundDefinition& m_SoundDefinition;
 	Implementation::Channel* m_ChannelRef;
 	float FromVolumedB = 0.0f;
 	float ToVolumedB = 0.0f;

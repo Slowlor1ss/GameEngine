@@ -1,6 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 #include <functional>
+#include <memory>
 
 namespace utils {
 
@@ -294,10 +295,5 @@ constexpr auto g_PI_4 = 0.785398163397448309616;
     {
         return !t.owner_before(u) && !u.owner_before(t);
     }
-
-
-
-
-
 }// namespace utils
 #endif // UTILS_HPP

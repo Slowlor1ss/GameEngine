@@ -128,7 +128,7 @@ void Implementation::Channel::Update(float deltaTime)
 
 				FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Pos);
 				m_Channel->set3DAttributes(&p, nullptr);
-				m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+				//m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
 				m_Channel->setPaused(false);
 			}
 			else
@@ -236,8 +236,10 @@ void Implementation::Channel::UpdateChannelParameters()
 
 	FMOD_VECTOR p = FmodSoundSystem::VectorToFmod(m_Pos);
 	m_Channel->set3DAttributes(&p, nullptr);
-	std::cout << FmodSoundSystem::dBToVolume(m_VolumedB) << "\n";
-	m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+	//std::cout << FmodSoundSystem::dBToVolume(m_VolumedB) << "\n";
+	std::cout << AudioDistance::CalcualteAudiodB(m_EngineImpl, GetSoundDefinition(), m_Pos, m_OrigVolumedB) << "\n";
+	//m_Channel->setVolume(FmodSoundSystem::dBToVolume(m_VolumedB));
+	m_Channel->setVolume(FmodSoundSystem::dBToVolume(AudioDistance::CalcualteAudiodB(m_EngineImpl, GetSoundDefinition(), m_Pos, m_OrigVolumedB)));
 	//m_Channel->setVolume(1);
 }
 
@@ -287,8 +289,10 @@ Implementation::Implementation() : m_NextChannelid(0), m_NextSoundid(0)
 {
 	m_StudioSystem = nullptr;
 	FmodSoundSystem::ErrorCheck(FMOD::Studio::System::create(&m_StudioSystem));
+	// First param = Maximum number of Channels to create.
+	// This value is our engine’s maximum polyphony
 	FmodSoundSystem::ErrorCheck(
-		m_StudioSystem->initialize(32, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, NULL));
+		m_StudioSystem->initialize(64, FMOD_STUDIO_INIT_LIVEUPDATE, FMOD_INIT_PROFILE_ENABLE, NULL));
 
 	m_System = nullptr;
 	FmodSoundSystem::ErrorCheck(m_StudioSystem->getCoreSystem(&m_System));
@@ -336,7 +340,7 @@ void Implementation::LoadSound(idx soundId)
 	FMOD_MODE mode = FMOD_NONBLOCKING;
 	mode |= false ? (FMOD_3D | FMOD_3D_INVERSETAPEREDROLLOFF) : FMOD_2D; // Later add is3D?
 	mode |= foundIt->second->m_SoundDefinition.isLooping ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
-	mode |= foundIt->second->m_SoundDefinition.isStreaming ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE;
+	mode |= foundIt->second->m_SoundDefinition.isStreaming ? FMOD_CREATESTREAM : FMOD_CREATECOMPRESSEDSAMPLE; // Possibly add FMOD_CREATESAMPLE (decompressed load)
 
 
 	FmodSoundSystem::ErrorCheck(m_System->createSound(foundIt->second->m_SoundDefinition.soundName.c_str(), mode, nullptr, 
@@ -623,3 +627,37 @@ bool FmodSoundSystem::IsPlaying(idx nChannelId) const
 //	}
 //	return false;
 //}
+
+AudioDistance::AudioDistance(const Implementation& engineImpl, const FmodSoundSystem::SoundDefinition& soundDefinition)
+	: m_EngineImpl(engineImpl)
+	, m_SoundDefinition(soundDefinition)
+{
+}
+
+float AudioDistance::CalcualteAudiodB(const Implementation& engineImpl, const FmodSoundSystem::SoundDefinition* soundDefinition, glm::vec2 pos, float originalVolumedB)
+{
+	FMOD_VECTOR lpos;
+	FMOD_VECTOR vel;
+	FMOD_VECTOR forward;
+	FMOD_VECTOR up;
+	engineImpl.m_System->get3DListenerAttributes(0, &lpos, &vel, &forward, &up);
+
+	glm::vec2 listenerPos = FmodSoundSystem::FmodToVector(lpos);
+
+	float distance = glm::distance(pos, listenerPos);
+
+	const auto& min = soundDefinition->minDistance;
+	const auto& max = soundDefinition->maxDistance;
+
+	if (distance < min)
+	{
+		return originalVolumedB;
+	}
+	else if(distance > max)
+	{
+		return SILENCE_dB;
+	}
+
+	float multiplier = distance * (-20 / max);
+	return originalVolumedB * multiplier;
+}

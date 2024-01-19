@@ -3,6 +3,7 @@
 #include <chrono>
 #include <numeric>
 #include "imgui_plot.h"
+#include <algorithm>
 
 using namespace biggin;
 
@@ -195,7 +196,7 @@ void TrashTheCache::TrashTheCacheWInts(unsigned int sampleSize)
 		}
 		auto& vector = data[i];
 
-		std::ranges::sort(vector);
+		std::sort(vector.begin(), vector.end());
 
 		//delete first and last
 		vector.erase(vector.begin());
